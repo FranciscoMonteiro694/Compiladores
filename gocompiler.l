@@ -2,12 +2,16 @@
 ;==========================================
 ; Autor: Duarte André Teresa Guerreiro 
 ; Número: 2016231778
-; Author: Francisco Miguel Almeida Monteiro
+; Autor: Francisco Miguel Almeida Monteiro
 ; Número: 2016241480
 ;==========================================
 */
 
+alfam [a-zA-Z_ 0-9]
+
 %%
+package	{printf("PACKAGE\n");} 
+{alfam}* {printf("id(%s)",&yytext[1]);}
 
 %%
 int main()
