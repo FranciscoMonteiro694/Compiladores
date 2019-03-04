@@ -7,11 +7,12 @@
 ;==========================================
 */
 
-alfam [a-zA-Z_ 0-9]
-
+alfam [a-zA-Z_0-9]
+espaco " "
 %%
 package	{printf("PACKAGE\n");} 
-{alfam}* {printf("id(%s)",&yytext[1]);}
+{alfam}* {printf("id(%s)",&yytext[0]);}
+{espaco} ;
 
 %%
 int main()
