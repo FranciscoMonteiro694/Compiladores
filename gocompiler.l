@@ -18,8 +18,13 @@ Tanto as linhas como as colunas são numeradas a partir de 1
 %{
 	int numcolunas=1;
 	int flag_semicolon=0;
+	int flag_javarda=0;
 	int aux_erroc=-1;
 	int aux_errol=-1;
+	char s[500];
+	char erro[200];
+	int tamanho=0;
+
 %}
 %X COMENTARIO STRLITT COMENTARIO_2
 
@@ -66,7 +71,7 @@ PRINT fmt.Println
 PARSEINT strconv.Atoi
 FUNC func
 CMDARGS os.Args
-RESERVED ("break"|"case"|"chan"|"const"|"continue"|"default"|"defer"|"fallthrough"|"go"|"goto"|"import"|"interface"|"map"|"range"|"select"|"struct"|"switch"|"type"|"++"|"--")
+RESERVED ("default"|"break"|"case"|"chan"|"const"|"continue"|"default"|"defer"|"fallthrough"|"go"|"goto"|"import"|"interface"|"map"|"range"|"select"|"struct"|"switch"|"type"|"++"|"--")
 ENTER "\n"
 
 decimal_digit [0-9]
@@ -79,13 +84,15 @@ octal_lit 0{octal_digit}*
 hex_digit (([0-9]|[A-F])|([a-f]))
 hex_lit 0(x|X){hex_digit}+
 INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
+aux {INTLIT}$
 
 %%
+{RESERVED} {printf("RESERVED(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=0;}
 {ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}numcolunas=1;}
-{espaco}+ {numcolunas+=yyleng;flag_semicolon=0;};
+{espaco}+ {numcolunas+=yyleng;};
 {SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;}
 {BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;}
-{RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;flag_semicolon=0;}
+{RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;}
 {AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;}
 {ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;flag_semicolon=0;}
 {STAR} {printf("STAR\n");numcolunas+=yyleng;flag_semicolon=0;}
@@ -105,9 +112,9 @@ INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
 {NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;}
 {OR} {printf("OR\n");numcolunas+=yyleng;flag_semicolon=0;}
 {PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;}
-{RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;flag_semicolon=0;}
-{RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;flag_semicolon=0;}
-{RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;flag_semicolon=0;}
+{RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;}
+{RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;}
+{RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;}
 {ELSE} {printf("ELSE\n");numcolunas+=yyleng;flag_semicolon=0;}
 {FOR} {printf("FOR\n");numcolunas+=yyleng;flag_semicolon=0;}
 {IF} {printf("IF\n");numcolunas+=yyleng;flag_semicolon=0;}
@@ -128,10 +135,10 @@ INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
 
 
 "/*" {aux_erroc=numcolunas;aux_errol=yylineno;BEGIN COMENTARIO;}
-<COMENTARIO>.	;
 <COMENTARIO>"\n" {numcolunas=1;}
-<COMENTARIO><<EOF>> {printf("Line %d, colummn %d: unterminated comment\n",aux_errol,aux_erroc);BEGIN 0;}
+<COMENTARIO><<EOF>> {printf("Line %d, column %d: unterminated comment\n",aux_errol,aux_erroc);BEGIN 0;}
 <COMENTARIO>"*/" {BEGIN 0;}
+<COMENTARIO>.	;
 
 
 "//" {BEGIN COMENTARIO_2;}
@@ -139,11 +146,14 @@ INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
 <COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}BEGIN 0;}
 
 "\"" {aux_erroc=numcolunas;aux_errol=yylineno;BEGIN STRLITT;}
-<STRLITT>[^("|"\n")]* {printf("STRLIT(\"%s\")\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;}
-<STRLITT>"\n" {printf("Line %d, colummn %d: unterminated string literal\n",aux_errol,aux_erroc);BEGIN 0;}
-<STRLITT>"\"" {BEGIN 0;}
+<STRLITT>"\\"[^(f|r|t|n)] {numcolunas+=yyleng;flag_javarda=1;erro[0]=yytext[0];erro[1]=yytext[1];}
+<STRLITT>"\"" {if(flag_javarda==0){printf("STRLIT(\"");for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");flag_semicolon=1;}if(flag_javarda==1){printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,aux_erroc,erro);}numcolunas+=yyleng;tamanho=0;flag_javarda=0;BEGIN 0;}
+<STRLITT>. {s[tamanho]=*yytext;tamanho++;};
+<STRLITT>"\n" {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_javarda=0;BEGIN 0;};
 
-. {printf("Line %d, colummn %d: illegal character (%s)\n",yylineno,numcolunas,&yytext[0]);}
+
+
+. {printf("Line %d, column %d: illegal character (%s)\n",yylineno,numcolunas,&yytext[0]);}
 
 
 
