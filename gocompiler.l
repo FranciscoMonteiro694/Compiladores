@@ -23,6 +23,7 @@ Tanto as linhas como as colunas são numeradas a partir de 1
 
 %option yylineno
 
+tudo [!-eg-mo-qu-~A-Zs]
 alfa [a-zA-Z_]
 numero [0-9]
 espaco (" "|"\t")
@@ -136,9 +137,12 @@ INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
 <COMENTARIO_2>.	;
 <COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}BEGIN 0;}
 
+
 "\"" {BEGIN STRLITT;}
-<STRLITT>[^("|"\n")]* {printf("STRLIT(\"%s\")\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;}
 <STRLITT>"\n" {printf("Line %d, colummn %d: unterminated string literal\n",yylineno-1,numcolunas);BEGIN 0;}
+<STRLITT>.*"\\"{tudo}+.* {printf("Line %d, colummn %d: invalid escape sequence\n",yylineno-1,numcolunas);BEGIN 0;}
+
+<STRLITT>[^("|"\n")]* {printf("STRLIT(\"%s\")\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;}
 <STRLITT>"\"" {BEGIN 0;}
 
 . {printf("Line %d, colummn %d: illegal character (%s)\n",yylineno,numcolunas,&yytext[0]);}
