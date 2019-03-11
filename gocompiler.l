@@ -22,8 +22,9 @@ Tanto as linhas como as colunas são numeradas a partir de 1
 	int aux_erroc=-1;
 	int aux_errol=-1;
 	char s[500];
-	char erro[200];
 	int tamanho=0;
+	int flag_do_mal=0;
+	int mais_uma=0;
 
 %}
 %X COMENTARIO STRLITT COMENTARIO_2
@@ -84,6 +85,7 @@ octal_lit 0{octal_digit}*
 hex_digit (([0-9]|[A-F])|([a-f]))
 hex_lit 0(x|X){hex_digit}+
 INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
+teste "\\"("a"|"b"|"f"|"n"|"r"|"t"|"v"|"\\"|"\"")
 aux {INTLIT}$
 
 %%
@@ -137,8 +139,8 @@ aux {INTLIT}$
 "/*" {aux_erroc=numcolunas;aux_errol=yylineno;BEGIN COMENTARIO;}
 <COMENTARIO>"\n" {numcolunas=1;}
 <COMENTARIO><<EOF>> {printf("Line %d, column %d: unterminated comment\n",aux_errol,aux_erroc);BEGIN 0;}
-<COMENTARIO>"*/" {BEGIN 0;}
-<COMENTARIO>.	;
+<COMENTARIO>"*/" {numcolunas+=yyleng;BEGIN 0;}
+<COMENTARIO>.	{numcolunas+=yyleng;}
 
 
 "//" {BEGIN COMENTARIO_2;}
@@ -146,10 +148,13 @@ aux {INTLIT}$
 <COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}BEGIN 0;}
 
 "\"" {aux_erroc=numcolunas;aux_errol=yylineno;BEGIN STRLITT;}
-<STRLITT>"\\"[^(f|r|t|n)] {numcolunas+=yyleng;flag_javarda=1;erro[0]=yytext[0];erro[1]=yytext[1];}
-<STRLITT>"\"" {if(flag_javarda==0){printf("STRLIT(\"");for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");flag_semicolon=1;}if(flag_javarda==1){printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,aux_erroc,erro);}numcolunas+=yyleng;tamanho=0;flag_javarda=0;BEGIN 0;}
-<STRLITT>. {s[tamanho]=*yytext;tamanho++;};
-<STRLITT>"\n" {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_javarda=0;BEGIN 0;};
+<STRLITT>"\\""\\" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[0];tamanho++;numcolunas+=yyleng;}
+<STRLITT>"\\""\"" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
+<STRLITT>"\\"[^(f|r|t|n)] {numcolunas+=yyleng;printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas-1,yytext);tamanho+=yyleng;flag_do_mal=1;}
+<STRLITT>"\"" {if(flag_do_mal==0){printf("STRLIT(\"");for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");numcolunas+=yyleng;flag_semicolon=1;tamanho=0;BEGIN 0;}tamanho=0;flag_do_mal=0;BEGIN 0;}
+<STRLITT>. {s[tamanho]=*yytext;tamanho++;numcolunas+=yyleng;};
+<STRLITT>"\n" {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}
+
 
 
 
