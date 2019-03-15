@@ -13,17 +13,25 @@ onde num linha e num coluna devem ser substituidos pelos valores correspondentes
 e <c> devem ser substituidos por esse token.
 O analisador deve recuperar da ocorrência de erros lexicias a partir do fim desse token.
 Tanto as linhas como as colunas são numeradas a partir de 1
+a lara ta nos a foder e eu a ver caralho->String e comentarios do git no bueno mas o strlit test ou e do mal o que nos fode e os \| 
 ;==========================================
 */
 %{
 	int numcolunas=1;
 	int flag_semicolon=0;
+	int flag_javarda=0;
+	int aux_erroc=-1;
+	int aux_errol=-1;
+	char s[500];
+	int tamanho=0;
+	int flag_do_mal=0;
+	int mais_uma=0;
+
 %}
-%X COMENTARIO STRLITT COMENTARIO_2
+%X COMENTARIO STRLITT STRLITT2 COMENTARIO_2
 
 %option yylineno
 
-tudo [!-eg-mo-qu-~A-Zs]
 alfa [a-zA-Z_]
 numero [0-9]
 espaco (" "|"\t")
@@ -65,87 +73,99 @@ PRINT fmt.Println
 PARSEINT strconv.Atoi
 FUNC func
 CMDARGS os.Args
-RESERVED ("break"|"case"|"chan"|"const"|"continue"|"default"|"defer"|"fallthrough"|"go"|"goto"|"import"|"interface"|"map"|"range"|"select"|"struct"|"switch"|"type"|"++"|"--")
+RESERVED ("default"|"break"|"case"|"chan"|"const"|"continue"|"default"|"defer"|"fallthrough"|"go"|"goto"|"import"|"interface"|"map"|"range"|"select"|"struct"|"switch"|"type"|"++"|"--")
 ENTER "\n"
 
 decimal_digit [0-9]
 decimals {decimal_digit}+
 exponent  ((e|E)("+"|"-")?{decimals})
 REALLIT ("."{decimals}{exponent}?)|({decimals}"."{decimals}?{exponent}?)|({decimals}{exponent})
-decimal_lit [1-9]{decimal_digit}*
+decimal_lit [0-9]{decimal_digit}*
 octal_digit [0-7]
-octal_lit 0{octal_digit}*
+octal_lit 0{octal_digit}+
 hex_digit (([0-9]|[A-F])|([a-f]))
 hex_lit 0(x|X){hex_digit}+
-INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
+INTLIT (({decimal_lit}|{octal_lit})|{hex_lit}|0)
+teste "\\"("a"|"b"|"f"|"n"|"r"|"t"|"v"|"\\"|"\"")
+aux {INTLIT}$
 
 %%
+{RESERVED} {printf("RESERVED(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=0;}
 {ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}numcolunas=1;}
 {espaco}+ {numcolunas+=yyleng;};
-{SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;}
-{BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;}
+{SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;}
+{BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;}
 {RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;}
-{AND} {printf("AND\n");numcolunas+=yyleng;}
-{ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;}
-{STAR} {printf("STAR\n");numcolunas+=yyleng;}
-{COMMA} {printf("COMMA\n");numcolunas+=yyleng;}
-{DIV} {printf("DIV\n");numcolunas+=yyleng;}
-{EQ} {printf("EQ\n");numcolunas+=yyleng;}
-{GE} {printf("GE\n");numcolunas+=yyleng;}
-{GT} {printf("GT\n");numcolunas+=yyleng;}
-{LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;}
-{LE} {printf("LE\n");numcolunas+=yyleng;}
-{LPAR} {printf("LPAR\n");numcolunas+=yyleng;}
-{LSQ} {printf("LSQ\n");numcolunas+=yyleng;}
-{LT} {printf("LT\n");numcolunas+=yyleng;}
-{MINUS} {printf("MINUS\n");numcolunas+=yyleng;}
-{MOD} {printf("MOD\n");numcolunas+=yyleng;}
-{NE} {printf("NE\n");numcolunas+=yyleng;}
-{NOT} {printf("NOT\n");numcolunas+=yyleng;}
-{OR} {printf("OR\n");numcolunas+=yyleng;}
-{PLUS} {printf("PLUS\n");numcolunas+=yyleng;}
+{AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;}
+{ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;flag_semicolon=0;}
+{STAR} {printf("STAR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{COMMA} {printf("COMMA\n");numcolunas+=yyleng;flag_semicolon=0;}
+{DIV} {printf("DIV\n");numcolunas+=yyleng;flag_semicolon=0;}
+{EQ} {printf("EQ\n");numcolunas+=yyleng;flag_semicolon=0;}
+{GE} {printf("GE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LT} {printf("LT\n");numcolunas+=yyleng;flag_semicolon=0;}
+{MINUS} {printf("MINUS\n");numcolunas+=yyleng;flag_semicolon=0;}
+{MOD} {printf("MOD\n");numcolunas+=yyleng;flag_semicolon=0;}
+{NE} {printf("NE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;}
+{OR} {printf("OR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;}
 {RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;}
 {RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;}
 {RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;}
-{ELSE} {printf("ELSE\n");numcolunas+=yyleng;}
-{FOR} {printf("FOR\n");numcolunas+=yyleng;}
-{IF} {printf("IF\n");numcolunas+=yyleng;}
-{VAR} {printf("VAR\n");numcolunas+=yyleng;}
-{INT} {printf("INT\n");numcolunas+=yyleng;}
-{FLOAT32} {printf("FLOAT32\n");numcolunas+=yyleng;}
-{BOOL} {printf("BOOL\n");numcolunas+=yyleng;}
-{STRING} {printf("STRING\n");numcolunas+=yyleng;}
-{PRINT} {printf("PRINT\n");numcolunas+=yyleng;}
-{PARSEINT} {printf("PARSEINT\n");numcolunas+=yyleng;}
-{FUNC} {printf("FUNC\n");numcolunas+=yyleng;}
-{CMDARGS} {printf("CMDARGS\n");numcolunas+=yyleng;}
-{PACKAGE} {printf("PACKAGE\n");numcolunas+=yyleng;} 
+{ELSE} {printf("ELSE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{FOR} {printf("FOR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{IF} {printf("IF\n");numcolunas+=yyleng;flag_semicolon=0;}
+{VAR} {printf("VAR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{INT} {printf("INT\n");numcolunas+=yyleng;flag_semicolon=0;}
+{FLOAT32} {printf("FLOAT32\n");numcolunas+=yyleng;flag_semicolon=0;}
+{BOOL} {printf("BOOL\n");numcolunas+=yyleng;flag_semicolon=0;}
+{STRING} {printf("STRING\n");numcolunas+=yyleng;flag_semicolon=0;}
+{PRINT} {printf("PRINT\n");numcolunas+=yyleng;flag_semicolon=0;}
+{PARSEINT} {printf("PARSEINT\n");numcolunas+=yyleng;}flag_semicolon=0;
+{FUNC} {printf("FUNC\n");numcolunas+=yyleng;flag_semicolon=0;}
+{CMDARGS} {printf("CMDARGS\n");numcolunas+=yyleng;flag_semicolon=0;}
+{PACKAGE} {printf("PACKAGE\n");numcolunas+=yyleng;flag_semicolon=0;} 
 {alfa}+({numero}|{alfa})* {printf("ID(%s)\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;}
 {REALLIT} {printf("REALLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
 {INTLIT} {printf("INTLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
 
 
 
-"/*" {BEGIN COMENTARIO;}
-<COMENTARIO>.	;
+"/*" {aux_erroc=numcolunas;aux_errol=yylineno;numcolunas+=yyleng;BEGIN COMENTARIO;}
 <COMENTARIO>"\n" {numcolunas=1;}
-<COMENTARIO><<EOF>> {printf("Line %d, colummn %d: unterminated comment\n",yylineno,numcolunas);BEGIN 0;}
-<COMENTARIO>"*/" {BEGIN 0;}
+<COMENTARIO><<EOF>> {printf("Line %d, column %d: unterminated comment\n",aux_errol,aux_erroc);BEGIN 0;}
+<COMENTARIO>"*/" {numcolunas+=yyleng;BEGIN 0;}
+<COMENTARIO>.	{numcolunas+=yyleng;}
 
 
-"//" {BEGIN COMENTARIO_2;}
-<COMENTARIO_2>.	;
+"//" {numcolunas+=yyleng;BEGIN COMENTARIO_2;}
+<COMENTARIO_2>.	{numcolunas+=yyleng;};
 <COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}BEGIN 0;}
 
+"\"" {aux_erroc=numcolunas;aux_errol=yylineno;numcolunas+=yyleng;BEGIN STRLITT;}
+<STRLITT>"\\""\\" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
+<STRLITT>"\\""\"" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
+<STRLITT>"\\"(f|r|t|n) {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
+<STRLITT>"\\". {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
+<STRLITT>"\"" {if(flag_do_mal==0){printf("STRLIT(\"");for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");flag_semicolon=1;tamanho=0;BEGIN 0;}tamanho=0;flag_do_mal=0;numcolunas+=yyleng;BEGIN 0;}
+<STRLITT>"\\" {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
+<STRLITT>. {s[tamanho]=*yytext;tamanho++;numcolunas+=yyleng;};
+<STRLITT>"\n" {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}
+<STRLITT><<EOF>> {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}
 
-"\"" {BEGIN STRLITT;}
-<STRLITT>"\n" {printf("Line %d, colummn %d: unterminated string literal\n",yylineno-1,numcolunas);BEGIN 0;}
-<STRLITT>.*"\\"{tudo}+.* {printf("Line %d, colummn %d: invalid escape sequence\n",yylineno-1,numcolunas);BEGIN 0;}
 
-<STRLITT>[^("|"\n")]* {printf("STRLIT(\"%s\")\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;}
-<STRLITT>"\"" {BEGIN 0;}
 
-. {printf("Line %d, colummn %d: illegal character (%s)\n",yylineno,numcolunas,&yytext[0]);}
+
+
+
+
+. {printf("Line %d, column %d: illegal character (%s)\n",yylineno,numcolunas,&yytext[0]);numcolunas+=yyleng;}
 
 
 
@@ -160,4 +180,5 @@ int yywrap()
 {
 return 1;
 }
+
 
