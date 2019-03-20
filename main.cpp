@@ -71,11 +71,11 @@ static GLfloat cores[]={
 void inicializa(void)
 {
     glClearColor(BLACK);        //………………………………………………………………………………Apagar
-    glEnable(GL_DEPTH_TEST);    //………………………………………………………………………………Profundidade
+    //glEnable(GL_DEPTH_TEST);    //………………………………………………………………………………Profundidade
     glShadeModel(GL_SMOOTH);    //………………………………………………………………………………Interpolacao de cores
     
-    glEnable(GL_CULL_FACE);        //………………………………………………………………………………Faces visiveis
-    glCullFace(GL_BACK);        //………………………………………………………………………………Mostrar so as da frente
+    //glEnable(GL_CULL_FACE);        //………………………………………………………………………………Faces visiveis
+    //glCullFace(GL_BACK);        //………………………………………………………………………………Mostrar so as da frente
     
     glVertexPointer(3, GL_FLOAT, 0, vertices); //………………………………………Vertex arrays
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -118,15 +118,12 @@ void drawEixos()
 void drawScene(){
     int i;
     //=================================================== Qual o lado ?
-    if (frenteVisivel)
-        glCullFace(GL_BACK);  //glFrontFace(GL_CW);
-    else
-        glCullFace(GL_FRONT);  //glFrontFace(GL_CCW);
     
+
     
     //==================================== MESA
     //glColorPointer(3, GL_FLOAT, 0, cor);     podia ser modificada a cor !
-    for(i=1;i<=23;i++){
+    for(i=0;i<=23;i++){
         glPushMatrix();
         esquerda[0]=4*i;
         esquerda[1]=4*i+1;
@@ -153,22 +150,25 @@ void display(void){
     //================================================================= APaga ecran/profundidade
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-    //glOrtho(-400, 400, -400, 400, -400, 400);
+   
 
     //================================================================= NAO MOFIFICAR
     glViewport (0, 0, wScreen, hScreen);                                // ESQUECER PoR AGORA
     glMatrixMode(GL_PROJECTION);                                        // ESQUECER PoR AGORA
-    glLoadIdentity();                                                    // ESQUECER PoR AGORA
-    gluPerspective(angZoom, (float)wScreen/hScreen, 0.1, 30*zC);            // ESQUECER PoR AGORA
+    glLoadIdentity();
+    glOrtho(-200, 200, -200, 200, -200, 200);
+    // ESQUECER PoR AGORA
+    //gluPerspective(angZoom, (float)wScreen/hScreen, 0.1, 30*zC);            // ESQUECER PoR AGORA
+    //gluPerspective(90, (float)wScreen/hScreen, 1, 30*zC);
     glMatrixMode(GL_MODELVIEW);                                            // ESQUECER PoR AGORA
     glLoadIdentity();                                                    // ESQUECER PoR AGORA
     //================================================================= NAO MOFIFICAR
     
     
     //-------------------------------------------------------------- observador
-    //gluLookAt(obsP[0], obsP[1], -50, 0,0,0, 0, 1, 0);
+    gluLookAt(obsP[0], obsP[1], obsP[2], tx,ty,tz, 0, 1, 0);
     
-    gluLookAt(0, 0, -50, 0,0,50, 0, 1, 0);
+    //gluLookAt(0, 0, -50, 0,0,50, 0, 1, 0);
     //…………………………………………………………………………………………………………………………………………………………Objectos/modelos
     drawEixos();
     drawScene();
@@ -191,25 +191,25 @@ void keyboard(unsigned char key, int x, int y){
             
         case 'A':
         case 'a':
-            //??
+            tz = tz + 25;
             glutPostRedisplay();
             break;
             
         case 'S':
         case 's':
-            //??
+            tz = tz - 25;
             glutPostRedisplay();
             break;
             
         case 'e':
         case 'E':
-            //??
+            ty = ty +25;
             glutPostRedisplay();
             break;
             
         case 'd':
         case 'D':
-            //??
+            ty = ty -25;
             glutPostRedisplay();
             break;
             //--------------------------- Escape
@@ -229,10 +229,10 @@ void teclasNotAscii(int key, int x, int y){
     if(key == GLUT_KEY_DOWN)
         obsP[1] = (obsP[1]- 0.5) ;
     
-    if (obsP[1]>yC)
-        obsP[1]=yC;
-    if (obsP[1]<-yC)
-        obsP[1]=-yC;
+//    if (obsP[1]>yC)
+//        obsP[1]=yC;
+//    if (obsP[1]<-yC)
+//        obsP[1]=-yC;
     
     if(key == GLUT_KEY_LEFT)
         aVisao = (aVisao + 0.5) ;
