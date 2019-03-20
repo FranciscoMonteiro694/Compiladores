@@ -98,20 +98,20 @@ aux {INTLIT}$
 {SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;}
 {BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;}
 {RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;}
-{AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;}
+{AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return AND;}
 {ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;flag_semicolon=0;}
 {STAR} {printf("STAR\n");numcolunas+=yyleng;flag_semicolon=0;}
 {COMMA} {printf("COMMA\n");numcolunas+=yyleng;flag_semicolon=0;}
 {DIV} {printf("DIV\n");numcolunas+=yyleng;flag_semicolon=0;}
 {EQ} {printf("EQ\n");numcolunas+=yyleng;flag_semicolon=0;}
 {GE} {printf("GE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;}
+{GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return GT;}
 {LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;}
 {LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;}
 {LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;}
 {LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;}
-{LT} {printf("LT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{MINUS} {printf("MINUS\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LT} {printf("LT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LT;}
+{MINUS} {printf("MINUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MINUS;}
 {MOD} {printf("MOD\n");numcolunas+=yyleng;flag_semicolon=0;}
 {NE} {printf("NE\n");numcolunas+=yyleng;flag_semicolon=0;}
 {NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;}

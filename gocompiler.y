@@ -38,7 +38,7 @@
 /*para testes*/
 %type <string> expr
 
-%left PLUS
+%left PLUS AND LT MINUS GT
 %%
 
 
@@ -46,8 +46,6 @@
 statement: expr                        ;
 /*
 expr: expr OR expr   {$$=$1+$3;}
-    |   expr LT expr 
-    |   expr GT expr 
     |   expr EQ expr 
     |   expr NE expr 
     |   expr LE expr
@@ -58,10 +56,8 @@ expr: expr OR expr   {$$=$1+$3;}
     |   expr DIV expr
     |   expr MOD expr
     |   expr NOT expr
-    |   expr MINUS expr
     |   INTLIT
     |   REALLIT
-    |   ID {$$=$1;printf("Encontrei um ID\n");}
     |   funcInvocation
     |   LPAR expr RPAR
     ;
@@ -69,6 +65,9 @@ expr: expr OR expr   {$$=$1+$3;}
     expr: ID {$$=$1;printf("expr = ID\n");}
     |   expr AND expr {$$=$1;printf(" expr = expr AND expr!\n");}
     |   expr PLUS expr {$$=$1;printf(" expr = expr PLUS expr!\n");}
+    |   expr LT expr {$$=$1;printf(" expr = expr LT expr!\n");}
+    |   expr MINUS expr {$$=$1;printf(" expr = expr MINUS expr!\n");}
+    |   expr GT expr {$$=$1;printf(" expr = expr GT expr!\n");}
     ;
 %%
 
