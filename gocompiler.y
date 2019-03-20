@@ -1,13 +1,17 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <string.h>
     int yylex(void);
-    void yyerror (const char *s);
+    /*void yyerror (const char *s);*/
+    void yyerror(const char* msg) {
+      printf("%s\n", msg);
+   }
 %}
 %union{
     char cval;
     int intval;
-    char string[100];
+    char *string;
 }
 
 
@@ -31,15 +35,18 @@
 %token <cval> LPAR
 %token <cval> RPAR
 
+/*para testes*/
+%type <string> expr
+
 
 %%
 
 
 
-calc: expression                        {printf("%d\n", $1);}
-
+statement: expr                        ;
+/*
 expr: expr OR expr   {$$=$1+$3;}
-    |   expr AND expr    
+    |   expr AND expr
     |   expr LT expr 
     |   expr GT expr 
     |   expr EQ expr 
@@ -56,11 +63,12 @@ expr: expr OR expr   {$$=$1+$3;}
     |   expr PLUS expr
     |   INTLIT
     |   REALLIT
-    |   ID
+    |   ID {$$=$1;printf("Encontrei um ID\n");}
     |   funcInvocation
     |   LPAR expr RPAR
-
-
+    ;
+*/
+    expr: ID {$$=$1;printf("Encontrei um ID\n");}
     ;
 %%
 
@@ -68,4 +76,8 @@ int main() {
     yyparse();
     return 0;
 }
-
+/*
+void yyerror (char *s) {
+    printf ("Line %d, column %d: %s: %s\n", <num linha >, <num coluna>, s, yytext);
+}
+*/

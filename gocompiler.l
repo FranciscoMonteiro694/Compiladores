@@ -13,9 +13,11 @@ onde num linha e num coluna devem ser substituidos pelos valores correspondentes
 e <c> devem ser substituidos por esse token.
 O analisador deve recuperar da ocorrência de erros lexicias a partir do fim desse token.
 Tanto as linhas como as colunas são numeradas a partir de 1
-a lara ta nos a foder e eu a ver caralho->String e comentarios do git no bueno mas o strlit test ou e do mal o que nos fode e os \| 
 ;==========================================
 */
+%{
+#include "y.tab.h"
+%}
 %{
 	int numcolunas=1;
 	int flag_semicolon=0;
@@ -131,7 +133,7 @@ aux {INTLIT}$
 {FUNC} {printf("FUNC\n");numcolunas+=yyleng;flag_semicolon=0;}
 {CMDARGS} {printf("CMDARGS\n");numcolunas+=yyleng;flag_semicolon=0;}
 {PACKAGE} {printf("PACKAGE\n");numcolunas+=yyleng;flag_semicolon=0;} 
-{alfa}+({numero}|{alfa})* {printf("ID(%s)\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;}
+{alfa}+({numero}|{alfa})* {printf("ID(%s)\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return ID;}
 {REALLIT} {printf("REALLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
 {INTLIT} {printf("INTLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
 
