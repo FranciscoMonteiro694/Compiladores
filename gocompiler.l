@@ -116,7 +116,7 @@ aux {INTLIT}$
 {NE} {printf("NE\n");numcolunas+=yyleng;flag_semicolon=0;}
 {NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;}
 {OR} {printf("OR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;}
+{PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return PLUS;}
 {RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;}
 {RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;}
 {RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;}
@@ -172,11 +172,7 @@ aux {INTLIT}$
 
 
 %%
-int main()
-{
-yylex();
-return 0;
-}
+
 
 int yywrap()
 {

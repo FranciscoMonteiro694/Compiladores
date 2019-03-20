@@ -38,7 +38,7 @@
 /*para testes*/
 %type <string> expr
 
-
+%left PLUS
 %%
 
 
@@ -46,7 +46,6 @@
 statement: expr                        ;
 /*
 expr: expr OR expr   {$$=$1+$3;}
-    |   expr AND expr
     |   expr LT expr 
     |   expr GT expr 
     |   expr EQ expr 
@@ -60,7 +59,6 @@ expr: expr OR expr   {$$=$1+$3;}
     |   expr MOD expr
     |   expr NOT expr
     |   expr MINUS expr
-    |   expr PLUS expr
     |   INTLIT
     |   REALLIT
     |   ID {$$=$1;printf("Encontrei um ID\n");}
@@ -68,7 +66,9 @@ expr: expr OR expr   {$$=$1+$3;}
     |   LPAR expr RPAR
     ;
 */
-    expr: ID {$$=$1;printf("Encontrei um ID\n");}
+    expr: ID {$$=$1;printf("expr = ID\n");}
+    |   expr AND expr {$$=$1;printf(" expr = expr AND expr!\n");}
+    |   expr PLUS expr {$$=$1;printf(" expr = expr PLUS expr!\n");}
     ;
 %%
 
@@ -76,8 +76,4 @@ int main() {
     yyparse();
     return 0;
 }
-/*
-void yyerror (char *s) {
-    printf ("Line %d, column %d: %s: %s\n", <num linha >, <num coluna>, s, yytext);
-}
-*/
+
