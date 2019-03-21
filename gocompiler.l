@@ -100,22 +100,22 @@ aux {INTLIT}$
 {RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;}
 {AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return AND;}
 {ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;flag_semicolon=0;}
-{STAR} {printf("STAR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{STAR} {printf("STAR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return STAR;}
 {COMMA} {printf("COMMA\n");numcolunas+=yyleng;flag_semicolon=0;}
-{DIV} {printf("DIV\n");numcolunas+=yyleng;flag_semicolon=0;}
-{EQ} {printf("EQ\n");numcolunas+=yyleng;flag_semicolon=0;}
-{GE} {printf("GE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{DIV} {printf("DIV\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return DIV;}
+{EQ} {printf("EQ\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return EQ;}
+{GE} {printf("GE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return GE;}
 {GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return GT;}
 {LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LE;}
 {LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;}
 {LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;}
 {LT} {printf("LT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LT;}
 {MINUS} {printf("MINUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MINUS;}
-{MOD} {printf("MOD\n");numcolunas+=yyleng;flag_semicolon=0;}
-{NE} {printf("NE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{OR} {printf("OR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{MOD} {printf("MOD\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MOD;}
+{NE} {printf("NE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return NE;}
+{NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return NOT;}
+{OR} {printf("OR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return OR;}
 {PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return PLUS;}
 {RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;}
 {RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;}
