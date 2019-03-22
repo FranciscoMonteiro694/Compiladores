@@ -95,7 +95,7 @@ aux {INTLIT}$
 {RESERVED} {printf("RESERVED(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=0;}
 {ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}numcolunas=1;}
 {espaco}+ {numcolunas+=yyleng;};
-{SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;}
+{SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;return SEMICOLON;}
 {BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;}
 {RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;}
 {AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return AND;}
@@ -108,7 +108,7 @@ aux {INTLIT}$
 {GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return GT;}
 {LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;}
 {LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LE;}
-{LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LPAR;}
 {LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;}
 {LT} {printf("LT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LT;}
 {MINUS} {printf("MINUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MINUS;}
@@ -119,7 +119,7 @@ aux {INTLIT}$
 {PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return PLUS;}
 {RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;}
 {RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;}
-{RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;}
+{RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RPAR;}
 {ELSE} {printf("ELSE\n");numcolunas+=yyleng;flag_semicolon=0;}
 {FOR} {printf("FOR\n");numcolunas+=yyleng;flag_semicolon=0;}
 {IF} {printf("IF\n");numcolunas+=yyleng;flag_semicolon=0;}
@@ -134,8 +134,8 @@ aux {INTLIT}$
 {CMDARGS} {printf("CMDARGS\n");numcolunas+=yyleng;flag_semicolon=0;}
 {PACKAGE} {printf("PACKAGE\n");numcolunas+=yyleng;flag_semicolon=0;} 
 {alfa}+({numero}|{alfa})* {printf("ID(%s)\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return ID;}
-{REALLIT} {printf("REALLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
-{INTLIT} {printf("INTLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
+{REALLIT} {printf("REALLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return REALLIT;}
+{INTLIT} {printf("INTLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return INTLIT;}
 
 
 
