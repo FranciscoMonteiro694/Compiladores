@@ -93,23 +93,23 @@ aux {INTLIT}$
 
 %%
 {RESERVED} {printf("RESERVED(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=0;}
-{ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}numcolunas=1;}
+{ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}numcolunas=1;return SEMICOLON;}
 {espaco}+ {numcolunas+=yyleng;};
 {SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;return SEMICOLON;}
-{BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;}
-{RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;}
+{BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return BLANKID;}
+{RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return RETURN;}
 {AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return AND;}
-{ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;flag_semicolon=0;}
+{ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return ASSIGN;}
 {STAR} {printf("STAR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return STAR;}
-{COMMA} {printf("COMMA\n");numcolunas+=yyleng;flag_semicolon=0;}
+{COMMA} {printf("COMMA\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return COMMA;}
 {DIV} {printf("DIV\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return DIV;}
 {EQ} {printf("EQ\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return EQ;}
 {GE} {printf("GE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return GE;}
 {GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return GT;}
-{LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LBRACE}
 {LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LE;}
 {LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LPAR;}
-{LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;}
+{LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LSQ;}
 {LT} {printf("LT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LT;}
 {MINUS} {printf("MINUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MINUS;}
 {MOD} {printf("MOD\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MOD;}
@@ -117,22 +117,22 @@ aux {INTLIT}$
 {NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return NOT;}
 {OR} {printf("OR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return OR;}
 {PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return PLUS;}
-{RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;}
-{RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;}
+{RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RBRACE;}
+{RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RSQ;}
 {RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RPAR;}
-{ELSE} {printf("ELSE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{FOR} {printf("FOR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{IF} {printf("IF\n");numcolunas+=yyleng;flag_semicolon=0;}
-{VAR} {printf("VAR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{INT} {printf("INT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{FLOAT32} {printf("FLOAT32\n");numcolunas+=yyleng;flag_semicolon=0;}
-{BOOL} {printf("BOOL\n");numcolunas+=yyleng;flag_semicolon=0;}
-{STRING} {printf("STRING\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PRINT} {printf("PRINT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PARSEINT} {printf("PARSEINT\n");numcolunas+=yyleng;}flag_semicolon=0;
-{FUNC} {printf("FUNC\n");numcolunas+=yyleng;flag_semicolon=0;}
-{CMDARGS} {printf("CMDARGS\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PACKAGE} {printf("PACKAGE\n");numcolunas+=yyleng;flag_semicolon=0;} 
+{ELSE} {printf("ELSE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return ELSE;}
+{FOR} {printf("FOR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FOR;}
+{IF} {printf("IF\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return IF;}
+{VAR} {printf("VAR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return VAR;}
+{INT} {printf("INT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return INT;}
+{FLOAT32} {printf("FLOAT32\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FLOAT32;}
+{BOOL} {printf("BOOL\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return BOOL;}
+{STRING} {printf("STRING\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return STRING;}
+{PRINT} {printf("PRINT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PRINT;}
+{PARSEINT} {printf("PARSEINT\n");numcolunas+=yyleng;yylval.string =(char*)strdup(yytext);return PARSEINT;}flag_semicolon=0;
+{FUNC} {printf("FUNC\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FUNC;}
+{CMDARGS} {printf("CMDARGS\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return CMDARGS;}
+{PACKAGE} {printf("PACKAGE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PACKAGE;} 
 {alfa}+({numero}|{alfa})* {printf("ID(%s)\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return ID;}
 {REALLIT} {printf("REALLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return REALLIT;}
 {INTLIT} {printf("INTLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return INTLIT;}
