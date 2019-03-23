@@ -106,7 +106,7 @@ aux {INTLIT}$
 {EQ} {printf("EQ\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return EQ;}
 {GE} {printf("GE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return GE;}
 {GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return GT;}
-{LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LBRACE}
+{LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LBRACE;}
 {LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LE;}
 {LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LPAR;}
 {LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LSQ;}
