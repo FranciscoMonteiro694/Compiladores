@@ -79,12 +79,12 @@
 %%
 
 
-
+/*
 inicio: inicio Expr
         | 
         ;
-
-Program: PACKAGE ID SEMICOLON Declarations {printf("Program\n");}
+*/
+Program: PACKAGE ID SEMICOLON Declarations {printf("Program\n");} /* Entra aqui */
     ;
 
 /*
@@ -98,7 +98,7 @@ Declarations: VarDeclaration SEMICOLON
 
 Declarations: Declarations VarDeclaration SEMICOLON {printf("Declarations");}
     |   Declarations FuncDeclaration SEMICOLON {printf("Declarations");}
-    |
+    |   {printf("Encontrei");}
     ;
 
 VarDeclaration: VAR VarSpec {printf("VarDeclaration\n");}
@@ -108,8 +108,8 @@ VarDeclaration: VAR VarSpec {printf("VarDeclaration\n");}
 VarSpec: ID teste Type {printf("Varspec\n");}
     ;
 
-teste: teste COMMA ID  
-    |
+teste: teste COMMA ID  {printf("Aux");}
+    |   {printf("Aux");}
     ;
 
 Type: INT {printf("Type---->Int\n");}
@@ -127,8 +127,8 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {printf("FuncDeclaration");}
 Parameters: ID Type AuxParameters {printf("Parameters");} 
     ;
 
-AuxParameters: AuxParameters COMMA ID Type 
-    |
+AuxParameters: AuxParameters COMMA ID Type {printf("Aux");}
+    |   {printf("Aux");}
     ;
 
 FuncBody: LBRACE VarsAndStatements RBRACE {printf("FuncBody");} 
@@ -154,24 +154,24 @@ Statement: PRINT LPAR Expr RPAR {printf("Statement");}
     |   LBRACE AuxStatement1 RBRACE {printf("Statement");}
     ;
 
-AuxStatement1: AuxStatement1 Statement SEMICOLON 
-    |
+AuxStatement1: AuxStatement1 Statement SEMICOLON {printf("Aux");}
+    |   {printf("Aux");}
     ;
-AuxStatement2: ELSE LBRACE AuxStatement1 RBRACE
-    |   
+AuxStatement2: ELSE LBRACE AuxStatement1 RBRACE {printf("Aux");}
+    |   {printf("Aux");}
     ;
 
 ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR {printf("ParseArgs");}
-    |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR /* Para os erros */ {printf("errrrrrrs");}
+    |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR {printf("errrrrrrs");}
     ;
 
-FuncInvocation: ID LPAR error RPAR /* Para os erros */ {printf("FuncInvocation");}
+FuncInvocation: ID LPAR error RPAR {printf("FuncInvocation");}
     |   ID LPAR RPAR {printf("FuncInvocation");}
     |   ID LPAR Expr AuxFuncInvocation RPAR {printf("FuncInvocation");}
     ;
 
-AuxFuncInvocation: AuxFuncInvocation COMMA Expr
-    |
+AuxFuncInvocation: AuxFuncInvocation COMMA Expr {printf("Aux");}
+    | {printf("Aux");}
     ;
 
 Expr: ID {$$=$1;printf("Expr = ID!\n");}
@@ -192,7 +192,7 @@ Expr: ID {$$=$1;printf("Expr = ID!\n");}
     |   Expr LE Expr {$$=$1;printf("Expr = Expr LE expr!\n");}
     |   Expr OR Expr {$$=$1;printf("Expr = Expr OR expr!\n");}
     |   LPAR Expr RPAR {$$=$2;printf("Expr = LPAR Expr RPAR!\n");}
-    |   FuncInvocation
+    |   FuncInvocation {printf("Aux");}
 /*    |   LPAR error RPAR No enunciado está "Expression: LPAR error RPAR" será que foi engano? */
     ;
 
