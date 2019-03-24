@@ -4,9 +4,12 @@
     #include <string.h>
     #define YYDEBUG 1
     extern int yydebug;
+    extern int numcolunas;
+    extern int yylineno;
+    extern char* yytext;
     int yylex(void);
-    void yyerror ();
-    /*void yyerror (const char *s);*/
+    void yyerror (char *s);
+    int flagLex=0;
 %}
 %union{
     char cval;
@@ -61,9 +64,11 @@
 %token <string> VAR
 
 
+/*
+vai ser preciso quase de certeza
 %type <string> Expr
 %type <string> FuncInvocation
-
+*/
 
 
 
@@ -199,25 +204,27 @@ Expr: ID {printf("Expr = ID!\n");}
     |   MINUS Expr {printf("Expr = MINUS Expr!\n");}
     |   PLUS Expr {printf("Expr = PLUS Expr!\n");}
     |   FuncInvocation {printf("FuncInvocation\n");}
-/*    |   LPAR error RPAR No enunciado está "Expression: LPAR error RPAR" será que foi engano? */
+    |   LPAR error RPAR {printf("error\n");}/*   No enunciado está "Expression: LPAR error RPAR" será que foi engano? */
     ;
 
 
 
 %%
 
-int main() {
+int main(int argc, char **argv) {
+    /*
     yydebug=1;
+    */
+    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
+    if (strcmp(argv[1],"-l")==0){
+        flagLex=1;
+    }
     yyparse();
     return 0;
 }
 
-void yyerror () {
-    /*
-    void yyerror (char *s)
+void yyerror (char *s) {
     
-    printf ("Line %d, column %d: %s: %s\n", <num linha >, <num coluna>, s, yytext);
-    */
-    
-    printf ("BOOOOOOOOOOM! ESTOIROU, ERRO SINTÁTICO!\n");
+    printf ("Line %d, column %d: %s: %s\n", yylineno, numcolunas, s, yytext);
+
 }
