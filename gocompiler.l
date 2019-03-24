@@ -93,7 +93,7 @@ aux {INTLIT}$
 
 %%
 {RESERVED} {printf("RESERVED(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=0;}
-{ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}numcolunas=1;return SEMICOLON;}
+{ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;return SEMICOLON;}numcolunas=1;}
 {espaco}+ {numcolunas+=yyleng;};
 {SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;return SEMICOLON;}
 {BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return BLANKID;}
@@ -178,5 +178,6 @@ int yywrap()
 {
 return 1;
 }
+
 
 
