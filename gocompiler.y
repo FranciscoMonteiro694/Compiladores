@@ -2,6 +2,8 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #define YYDEBUG 1
+    extern int yydebug;
     int yylex(void);
     void yyerror ();
     /*void yyerror (const char *s);*/
@@ -76,6 +78,7 @@
 %left LPAR RPAR
 
 
+
 %%
 
 
@@ -96,9 +99,9 @@ Declarations: VarDeclaration SEMICOLON
     ;
 */
 
-Declarations: Declarations VarDeclaration SEMICOLON {printf("Declarations");}
-    |   Declarations FuncDeclaration SEMICOLON {printf("Declarations");}
-    |   {printf("Encontrei");}
+Declarations: Declarations VarDeclaration SEMICOLON {printf("Declarations\n");}
+    |   Declarations FuncDeclaration SEMICOLON {printf("Declarations\n");}
+    |    /* empty */
     ;
 
 VarDeclaration: VAR VarSpec {printf("VarDeclaration\n");}
@@ -108,8 +111,8 @@ VarDeclaration: VAR VarSpec {printf("VarDeclaration\n");}
 VarSpec: ID teste Type {printf("Varspec\n");}
     ;
 
-teste: teste COMMA ID  {printf("Aux");}
-    |   {printf("Aux");}
+teste: teste COMMA ID 
+    |   /* empty */
     ;
 
 Type: INT {printf("Type---->Int\n");}
@@ -118,81 +121,84 @@ Type: INT {printf("Type---->Int\n");}
     |FLOAT32    {printf("Type---->FLOAT32\n");} 
     ;
 
-FuncDeclaration: FUNC ID LPAR RPAR FuncBody {printf("FuncDeclaration");} 
-    |   FUNC ID LPAR Parameters RPAR FuncBody {printf("FuncDeclaration");} 
-    |   FUNC ID LPAR RPAR Type FuncBody {printf("FuncDeclaration");} 
-    |   FUNC ID LPAR Parameters RPAR Type FuncBody {printf("FuncDeclaration");} 
+FuncDeclaration: FUNC ID LPAR RPAR FuncBody {printf("FuncDeclaration\n");} 
+    |   FUNC ID LPAR Parameters RPAR FuncBody {printf("FuncDeclaration\n");} 
+    |   FUNC ID LPAR RPAR Type FuncBody {printf("FuncDeclaration\n");} 
+    |   FUNC ID LPAR Parameters RPAR Type FuncBody {printf("FuncDeclaration\n");} 
     ;
 
-Parameters: ID Type AuxParameters {printf("Parameters");} 
+Parameters: ID Type AuxParameters {printf("Parameters\n");} 
     ;
 
-AuxParameters: AuxParameters COMMA ID Type {printf("Aux");}
-    |   {printf("Aux");}
+AuxParameters: AuxParameters COMMA ID Type 
+    |   /* empty */
     ;
 
-FuncBody: LBRACE VarsAndStatements RBRACE {printf("FuncBody");} 
+FuncBody: LBRACE VarsAndStatements RBRACE {printf("FuncBody\n");} 
         ;
 
-VarsAndStatements: VarsAndStatements SEMICOLON {printf("VarsAndStatements");} 
-    |   VarsAndStatements VarDeclaration SEMICOLON {printf("VarsAndStatements");}
-    |   VarsAndStatements Statement SEMICOLON {printf("VarsAndStatements");}
-    |   {printf("VarsAndStatements");}
+VarsAndStatements: VarsAndStatements SEMICOLON {printf("VarsAndStatements\n");} 
+    |   VarsAndStatements VarDeclaration SEMICOLON {printf("VarsAndStatements\n");}
+    |   VarsAndStatements Statement SEMICOLON {printf("VarsAndStatements\n");}
+    |   /* empty */
     ;
 
-Statement: PRINT LPAR Expr RPAR {printf("Statement");}
-    |   PRINT LPAR STRLIT RPAR {printf("Statement");}
+Statement: PRINT LPAR Expr RPAR {printf("Statement\n");}
+    |   PRINT LPAR STRLIT RPAR {printf("Statement\n");}
     |   error {printf("errorrrrrr");}
-    |   FuncInvocation {printf("Statement");}
-    |   ParseArgs {printf("Statement");}
-    |   RETURN {printf("Statement");}
-    |   RETURN Expr {printf("Statement");}
-    |   FOR Expr LBRACE AuxStatement1 RBRACE {printf("Statement");}
-    |   FOR LBRACE AuxStatement1 RBRACE {printf("Statement");}
-    |   ID ASSIGN Expr {printf("Statement");}
-    |   IF Expr LBRACE AuxStatement1 RBRACE AuxStatement2 {printf("Statement");}
-    |   LBRACE AuxStatement1 RBRACE {printf("Statement");}
+    |   FuncInvocation {printf("Statement\n");}
+    |   ParseArgs {printf("Statement\n");}
+    |   RETURN {printf("Statement\n");}
+    |   RETURN Expr {printf("Statement\n");}
+    |   FOR Expr LBRACE AuxStatement1 RBRACE {printf("Statement\n");}
+    |   FOR LBRACE AuxStatement1 RBRACE {printf("Statement\n");}
+    |   ID ASSIGN Expr {printf("Statement\n");}
+    |   IF Expr LBRACE AuxStatement1 RBRACE AuxStatement2 {printf("Statement\n");}
+    |   LBRACE AuxStatement1 RBRACE {printf("Statement\n");}
     ;
 
-AuxStatement1: AuxStatement1 Statement SEMICOLON {printf("Aux");}
-    |   {printf("Aux");}
+AuxStatement1: AuxStatement1 Statement SEMICOLON
+    |   /* empty */
     ;
-AuxStatement2: ELSE LBRACE AuxStatement1 RBRACE {printf("Aux");}
-    |   {printf("Aux");}
+AuxStatement2: ELSE LBRACE AuxStatement1 RBRACE 
+    |   /* empty */
     ;
 
-ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR {printf("ParseArgs");}
+ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR {printf("ParseArgs\n");}
     |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR {printf("errrrrrrs");}
     ;
 
-FuncInvocation: ID LPAR error RPAR {printf("FuncInvocation");}
-    |   ID LPAR RPAR {printf("FuncInvocation");}
-    |   ID LPAR Expr AuxFuncInvocation RPAR {printf("FuncInvocation");}
+FuncInvocation: ID LPAR error RPAR {printf("FuncInvocation\n");}
+    |   ID LPAR RPAR {printf("FuncInvocation\n");}
+    |   ID LPAR Expr AuxFuncInvocation RPAR {printf("FuncInvocation\n");}
     ;
 
-AuxFuncInvocation: AuxFuncInvocation COMMA Expr {printf("Aux");}
-    | {printf("Aux");}
+AuxFuncInvocation: AuxFuncInvocation COMMA Expr
+    | /* empty */
     ;
 
-Expr: ID {$$=$1;printf("Expr = ID!\n");}
-    |   REALLIT {$$=$1;printf("Expr = REALLIT!\n");}
-    |   INTLIT {$$=$1;printf("Expr = INTLIT!\n");}
-    |   Expr AND Expr {$$=$1;printf("Expr = Expr AND expr!\n");}
-    |   Expr PLUS Expr {$$=$1;printf("Expr = Expr PLUS expr!\n");}
-    |   Expr LT Expr {$$=$1;printf("Expr = Expr LT expr!\n");}
-    |   Expr MINUS Expr {$$=$1;printf("Expr = Expr MINUS expr!\n");}
-    |   Expr GT Expr {$$=$1;printf("Expr = Expr GT expr!\n");}
-    |   Expr NOT Expr {$$=$1;printf("Expr = Expr NOT expr!\n");}
-    |   Expr MOD Expr {$$=$1;printf("Expr = Expr MOD expr!\n");}
-    |   Expr DIV Expr {$$=$1;printf("Expr = Expr DIV expr!\n");}
-    |   Expr GE Expr {$$=$1;printf("Expr = Expr GE expr!\n");}
-    |   Expr STAR Expr {$$=$1;printf("Expr = Expr STAR expr!\n");}
-    |   Expr EQ Expr {$$=$1;printf("Expr = Expr EQ expr!\n");}
-    |   Expr NE Expr {$$=$1;printf("Expr = Expr NE expr!\n");}
-    |   Expr LE Expr {$$=$1;printf("Expr = Expr LE expr!\n");}
-    |   Expr OR Expr {$$=$1;printf("Expr = Expr OR expr!\n");}
-    |   LPAR Expr RPAR {$$=$2;printf("Expr = LPAR Expr RPAR!\n");}
-    |   FuncInvocation {printf("Aux");}
+Expr: ID {printf("Expr = ID!\n");}
+    |   REALLIT {printf("Expr = REALLIT!\n");}
+    |   INTLIT {printf("Expr = INTLIT!\n");}
+    |   Expr AND Expr {printf("Expr = Expr AND expr!\n");}
+    |   Expr PLUS Expr {printf("Expr = Expr PLUS expr!\n");}
+    |   Expr LT Expr {printf("Expr = Expr LT expr!\n");}
+    |   Expr MINUS Expr {printf("Expr = Expr MINUS expr!\n");}
+    |   Expr GT Expr {printf("Expr = Expr GT expr!\n");}
+    |   Expr NOT Expr {printf("Expr = Expr NOT expr!\n");}
+    |   Expr MOD Expr {printf("Expr = Expr MOD expr!\n");}
+    |   Expr DIV Expr {printf("Expr = Expr DIV expr!\n");}
+    |   Expr GE Expr {printf("Expr = Expr GE expr!\n");}
+    |   Expr STAR Expr {printf("Expr = Expr STAR expr!\n");}
+    |   Expr EQ Expr {printf("Expr = Expr EQ expr!\n");}
+    |   Expr NE Expr {printf("Expr = Expr NE expr!\n");}
+    |   Expr LE Expr {printf("Expr = Expr LE expr!\n");}
+    |   Expr OR Expr {printf("Expr = Expr OR expr!\n");}
+    |   LPAR Expr RPAR {printf("Expr = LPAR Expr RPAR!\n");}
+    |   NOT Expr {printf("Expr = NOT Expr!\n");}
+    |   MINUS Expr {printf("Expr = MINUS Expr!\n");}
+    |   PLUS Expr {printf("Expr = PLUS Expr!\n");}
+    |   FuncInvocation {printf("FuncInvocation\n");}
 /*    |   LPAR error RPAR No enunciado está "Expression: LPAR error RPAR" será que foi engano? */
     ;
 
@@ -201,6 +207,7 @@ Expr: ID {$$=$1;printf("Expr = ID!\n");}
 %%
 
 int main() {
+    yydebug=1;
     yyparse();
     return 0;
 }
@@ -214,4 +221,3 @@ void yyerror () {
     
     printf ("BOOOOOOOOOOM! ESTOIROU, ERRO SINTÁTICO!\n");
 }
-
