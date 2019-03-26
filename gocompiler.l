@@ -156,7 +156,7 @@ aux {INTLIT}$
 <STRLITT>"\\""\"" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
 <STRLITT>"\\"(f|r|t|n) {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
 <STRLITT>"\\". {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
-<STRLITT>"\"" {if(flag_do_mal==0){if (flagLex==1){printf("STRLIT(\"");}for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");flag_semicolon=1;tamanho=0;BEGIN 0;return STRLIT;}tamanho=0;flag_do_mal=0;numcolunas+=yyleng;BEGIN 0;}
+<STRLITT>"\"" {if(flag_do_mal==0){if (flagLex==1){printf("STRLIT(\"");for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");}flag_semicolon=1;tamanho=0;BEGIN 0;return STRLIT;}tamanho=0;flag_do_mal=0;numcolunas+=yyleng;BEGIN 0;}
 <STRLITT>"\\" {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
 <STRLITT>. {s[tamanho]=*yytext;tamanho++;numcolunas+=yyleng;};
 <STRLITT>"\n" {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}

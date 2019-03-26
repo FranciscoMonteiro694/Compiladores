@@ -73,6 +73,7 @@ vai ser preciso quase de certeza
 
 
 /* Se usarmos dois lefts, ou rights, o de baixo tem prioridade sobre o de cima */
+/* Estávamos a usar estes 
 %left OR
 %left AND
 %left EQ NE
@@ -81,8 +82,15 @@ vai ser preciso quase de certeza
 %left STAR DIV MOD
 %right NOT
 %left LPAR RPAR
+*/
 
-
+%left OR
+%left AND
+%left EQ NE GE GT LE LT 
+%left PLUS MINUS
+%left STAR DIV MOD 
+%right NOT
+%left LPAR RPAR
 
 %%
 
@@ -110,7 +118,7 @@ Declarations: Declarations VarDeclaration SEMICOLON /*{printf("Declarations\n");
     ;
 
 VarDeclaration: VAR VarSpec /*{printf("VarDeclaration\n");} */
-    |VAR LPAR VarSpec SEMICOLON RPAR /*{printf("VarDeclaration\n");}*/
+    |   VAR LPAR VarSpec SEMICOLON RPAR /*{printf("VarDeclaration\n");}*/
     ;
 
 VarSpec: ID teste Type /*{printf("Varspec\n");}*/
@@ -200,9 +208,9 @@ Expr: ID /*{printf("Expr = ID!\n");}*/
     |   Expr LE Expr /*{printf("Expr = Expr LE expr!\n");}*/
     |   Expr OR Expr /*{printf("Expr = Expr OR expr!\n");}*/
     |   LPAR Expr RPAR /*{printf("Expr = LPAR Expr RPAR!\n");}*/
-    |   NOT Expr /*{printf("Expr = NOT Expr!\n");}*/
-    |   MINUS Expr /*{printf("Expr = MINUS Expr!\n");}*/
-    |   PLUS Expr /*{printf("Expr = PLUS Expr!\n");}*/
+    |   MINUS Expr %prec STAR /*{printf("Expr = MINUS Expr!\n");}*/
+    |   PLUS Expr %prec STAR/*{printf("Expr = PLUS Expr!\n");}*/
+    |   NOT Expr %prec STAR/*{printf("Expr = NOT Expr!\n");}*/
     |   FuncInvocation /*{printf("FuncInvocation\n");}*/
     |   LPAR error RPAR /*{printf("error\n");}*/
     ;
