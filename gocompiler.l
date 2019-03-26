@@ -16,6 +16,10 @@ Tanto as linhas como as colunas são numeradas a partir de 1
 ;==========================================
 */
 %{
+#include "y.tab.h"
+	extern int flagLex;
+%}
+%{
 	int numcolunas=1;
 	int flag_semicolon=0;
 	int flag_javarda=0;
@@ -27,7 +31,7 @@ Tanto as linhas como as colunas são numeradas a partir de 1
 	int mais_uma=0;
 
 %}
-%X COMENTARIO STRLITT COMENTARIO_2
+%X COMENTARIO STRLITT STRLITT2 COMENTARIO_2
 
 %option yylineno
 
@@ -79,95 +83,96 @@ decimal_digit [0-9]
 decimals {decimal_digit}+
 exponent  ((e|E)("+"|"-")?{decimals})
 REALLIT ("."{decimals}{exponent}?)|({decimals}"."{decimals}?{exponent}?)|({decimals}{exponent})
-decimal_lit [1-9]{decimal_digit}*
+decimal_lit [0-9]{decimal_digit}*
 octal_digit [0-7]
-octal_lit 0{octal_digit}*
+octal_lit 0{octal_digit}+
 hex_digit (([0-9]|[A-F])|([a-f]))
 hex_lit 0(x|X){hex_digit}+
-INTLIT (({decimal_lit}|{octal_lit})|{hex_lit})
+INTLIT (({decimal_lit}|{octal_lit})|{hex_lit}|0)
 teste "\\"("a"|"b"|"f"|"n"|"r"|"t"|"v"|"\\"|"\"")
 aux {INTLIT}$
 
 %%
-{RESERVED} {printf("RESERVED(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=0;}
-{ENTER} {if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}numcolunas=1;}
+{RESERVED} {if (flagLex==1){printf("RESERVED(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=0;}
+{ENTER} {if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;return SEMICOLON;}numcolunas=1;}
 {espaco}+ {numcolunas+=yyleng;};
-{SEMICOLON} {printf("SEMICOLON\n");numcolunas+=yyleng;flag_semicolon=0;}
-{BLANKID} {printf("BLANKID\n");numcolunas+=yyleng;flag_semicolon=0;}
-{RETURN} {printf("RETURN\n");numcolunas+=yyleng;flag_semicolon=1;}
-{AND} {printf("AND\n");numcolunas+=yyleng;flag_semicolon=0;}
-{ASSIGN} {printf("ASSIGN\n");numcolunas+=yyleng;flag_semicolon=0;}
-{STAR} {printf("STAR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{COMMA} {printf("COMMA\n");numcolunas+=yyleng;flag_semicolon=0;}
-{DIV} {printf("DIV\n");numcolunas+=yyleng;flag_semicolon=0;}
-{EQ} {printf("EQ\n");numcolunas+=yyleng;flag_semicolon=0;}
-{GE} {printf("GE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{GT} {printf("GT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{LBRACE} {printf("LBRACE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{LE} {printf("LE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{LPAR} {printf("LPAR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{LSQ} {printf("LSQ\n");numcolunas+=yyleng;flag_semicolon=0;}
-{LT} {printf("LT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{MINUS} {printf("MINUS\n");numcolunas+=yyleng;flag_semicolon=0;}
-{MOD} {printf("MOD\n");numcolunas+=yyleng;flag_semicolon=0;}
-{NE} {printf("NE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{NOT} {printf("NOT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{OR} {printf("OR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PLUS} {printf("PLUS\n");numcolunas+=yyleng;flag_semicolon=0;}
-{RBRACE} {printf("RBRACE\n");numcolunas+=yyleng;flag_semicolon=1;}
-{RSQ} {printf("RSQ\n");numcolunas+=yyleng;flag_semicolon=1;}
-{RPAR} {printf("RPAR\n");numcolunas+=yyleng;flag_semicolon=1;}
-{ELSE} {printf("ELSE\n");numcolunas+=yyleng;flag_semicolon=0;}
-{FOR} {printf("FOR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{IF} {printf("IF\n");numcolunas+=yyleng;flag_semicolon=0;}
-{VAR} {printf("VAR\n");numcolunas+=yyleng;flag_semicolon=0;}
-{INT} {printf("INT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{FLOAT32} {printf("FLOAT32\n");numcolunas+=yyleng;flag_semicolon=0;}
-{BOOL} {printf("BOOL\n");numcolunas+=yyleng;flag_semicolon=0;}
-{STRING} {printf("STRING\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PRINT} {printf("PRINT\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PARSEINT} {printf("PARSEINT\n");numcolunas+=yyleng;}flag_semicolon=0;
-{FUNC} {printf("FUNC\n");numcolunas+=yyleng;flag_semicolon=0;}
-{CMDARGS} {printf("CMDARGS\n");numcolunas+=yyleng;flag_semicolon=0;}
-{PACKAGE} {printf("PACKAGE\n");numcolunas+=yyleng;flag_semicolon=0;} 
-{alfa}+({numero}|{alfa})* {printf("ID(%s)\n",&yytext[0]);numcolunas+=yyleng;flag_semicolon=1;}
-{REALLIT} {printf("REALLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
-{INTLIT} {printf("INTLIT(%s)\n",yytext);numcolunas+=yyleng;flag_semicolon=1;}
+{SEMICOLON} {if (flagLex==1){printf("SEMICOLON\n");}numcolunas+=yyleng;flag_semicolon=0;return SEMICOLON;}
+{BLANKID} {if (flagLex==1){printf("BLANKID\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return BLANKID;}
+{RETURN} {if (flagLex==1){printf("RETURN\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return RETURN;}
+{AND} {if (flagLex==1){printf("AND\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return AND;}
+{ASSIGN} {if (flagLex==1){printf("ASSIGN\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return ASSIGN;}
+{STAR} {if (flagLex==1){printf("STAR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return STAR;}
+{COMMA} {if (flagLex==1){printf("COMMA\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return COMMA;}
+{DIV} {if (flagLex==1){printf("DIV\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return DIV;}
+{EQ} {if (flagLex==1){printf("EQ\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return EQ;}
+{GE} {if (flagLex==1){printf("GE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return GE;}
+{GT} {if (flagLex==1){printf("GT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return GT;}
+{LBRACE} {if (flagLex==1){printf("LBRACE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LBRACE;}
+{LE} {if (flagLex==1){printf("LE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LE;}
+{LPAR} {if (flagLex==1){printf("LPAR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LPAR;}
+{LSQ} {if (flagLex==1){printf("LSQ\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LSQ;}
+{LT} {if (flagLex==1){printf("LT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LT;}
+{MINUS} {if (flagLex==1){printf("MINUS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MINUS;}
+{MOD} {if (flagLex==1){printf("MOD\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MOD;}
+{NE} {if (flagLex==1){printf("NE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return NE;}
+{NOT} {if (flagLex==1){printf("NOT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return NOT;}
+{OR} {if (flagLex==1){printf("OR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return OR;}
+{PLUS} {if (flagLex==1){printf("PLUS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return PLUS;}
+{RBRACE} {if (flagLex==1){printf("RBRACE\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RBRACE;}
+{RSQ} {if (flagLex==1){printf("RSQ\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RSQ;}
+{RPAR} {if (flagLex==1){printf("RPAR\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RPAR;}
+{ELSE} {if (flagLex==1){printf("ELSE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return ELSE;}
+{FOR} {if (flagLex==1){printf("FOR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FOR;}
+{IF} {if (flagLex==1){printf("IF\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return IF;}
+{VAR} {if (flagLex==1){printf("VAR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return VAR;}
+{INT} {if (flagLex==1){printf("INT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return INT;}
+{FLOAT32} {if (flagLex==1){printf("FLOAT32\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FLOAT32;}
+{BOOL} {if (flagLex==1){printf("BOOL\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return BOOL;}
+{STRING} {if (flagLex==1){printf("STRING\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return STRING;}
+{PRINT} {if (flagLex==1){printf("PRINT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PRINT;}
+{PARSEINT} {if (flagLex==1){printf("PARSEINT\n");}numcolunas+=yyleng;yylval.string =(char*)strdup(yytext);return PARSEINT;}flag_semicolon=0;
+{FUNC} {if (flagLex==1){printf("FUNC\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FUNC;}
+{CMDARGS} {if (flagLex==1){printf("CMDARGS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return CMDARGS;}
+{PACKAGE} {if (flagLex==1){printf("PACKAGE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PACKAGE;} 
+{alfa}+({numero}|{alfa})* {if (flagLex==1){printf("ID(%s)\n",&yytext[0]);}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return ID;}
+{REALLIT} {if (flagLex==1){printf("REALLIT(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return REALLIT;}
+{INTLIT} {if (flagLex==1){printf("INTLIT(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return INTLIT;}
 
 
-
-"/*" {aux_erroc=numcolunas;aux_errol=yylineno;BEGIN COMENTARIO;}
+"/*" {aux_erroc=numcolunas;aux_errol=yylineno;numcolunas+=yyleng;BEGIN COMENTARIO;}
 <COMENTARIO>"\n" {numcolunas=1;}
 <COMENTARIO><<EOF>> {printf("Line %d, column %d: unterminated comment\n",aux_errol,aux_erroc);BEGIN 0;}
 <COMENTARIO>"*/" {numcolunas+=yyleng;BEGIN 0;}
 <COMENTARIO>.	{numcolunas+=yyleng;}
 
 
-"//" {BEGIN COMENTARIO_2;}
-<COMENTARIO_2>.	;
-<COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;}BEGIN 0;}
+"//" {numcolunas+=yyleng;BEGIN COMENTARIO_2;}
+<COMENTARIO_2>.	{numcolunas+=yyleng;};
+<COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;}BEGIN 0;}
 
-"\"" {aux_erroc=numcolunas;aux_errol=yylineno;BEGIN STRLITT;}
-<STRLITT>"\\""\\" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[0];tamanho++;numcolunas+=yyleng;}
+"\"" {aux_erroc=numcolunas;aux_errol=yylineno;numcolunas+=yyleng;BEGIN STRLITT;}
+<STRLITT>"\\""\\" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
 <STRLITT>"\\""\"" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
-<STRLITT>"\\"[^(f|r|t|n)] {numcolunas+=yyleng;printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas-1,yytext);tamanho+=yyleng;flag_do_mal=1;}
-<STRLITT>"\"" {if(flag_do_mal==0){printf("STRLIT(\"");for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");numcolunas+=yyleng;flag_semicolon=1;tamanho=0;BEGIN 0;}tamanho=0;flag_do_mal=0;BEGIN 0;}
+<STRLITT>"\\"(f|r|t|n) {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
+<STRLITT>"\\". {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
+<STRLITT>"\"" {if(flag_do_mal==0){if (flagLex==1){printf("STRLIT(\"");s[tamanho+1]='\0';printf("%s",s);printf("\")\n");}flag_semicolon=1;tamanho=0;return STRLIT;BEGIN 0;}tamanho=0;flag_do_mal=0;numcolunas+=yyleng;BEGIN 0;}
+<STRLITT>"\\" {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
 <STRLITT>. {s[tamanho]=*yytext;tamanho++;numcolunas+=yyleng;};
 <STRLITT>"\n" {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}
+<STRLITT><<EOF>> {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}
+<<EOF>> {if (flagLex==1){if (flag_semicolon==1){printf("SEMICOLON\n");flag_semicolon=0;return SEMICOLON;}}exit(0);}
 
 
 
 
-. {printf("Line %d, column %d: illegal character (%s)\n",yylineno,numcolunas,&yytext[0]);}
+
+
+. {printf("Line %d, column %d: illegal character (%s)\n",yylineno,numcolunas,&yytext[0]);numcolunas+=yyleng;}
 
 
 
 %%
-int main()
-{
-yylex();
-return 0;
-}
+
 
 int yywrap()
 {
