@@ -29,6 +29,7 @@ Tanto as linhas como as colunas são numeradas a partir de 1
 	int tamanho=0;
 	int flag_do_mal=0;
 	int mais_uma=0;
+	int flagString=0;
 
 %}
 %X COMENTARIO STRLITT STRLITT2 COMENTARIO_2
@@ -93,8 +94,8 @@ teste "\\"("a"|"b"|"f"|"n"|"r"|"t"|"v"|"\\"|"\"")
 aux {INTLIT}$
 
 %%
-{RESERVED} {if (flagLex==1){printf("RESERVED(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=0;}
-{ENTER} {if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;return SEMICOLON;}numcolunas=1;}
+{RESERVED} {if (flagLex==1){printf("RESERVED(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=0;return RESERVED;}
+{ENTER} {numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;return SEMICOLON;}}
 {espaco}+ {numcolunas+=yyleng;};
 {SEMICOLON} {if (flagLex==1){printf("SEMICOLON\n");}numcolunas+=yyleng;flag_semicolon=0;return SEMICOLON;}
 {BLANKID} {if (flagLex==1){printf("BLANKID\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return BLANKID;}
@@ -130,7 +131,7 @@ aux {INTLIT}$
 {BOOL} {if (flagLex==1){printf("BOOL\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return BOOL;}
 {STRING} {if (flagLex==1){printf("STRING\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return STRING;}
 {PRINT} {if (flagLex==1){printf("PRINT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PRINT;}
-{PARSEINT} {if (flagLex==1){printf("PARSEINT\n");}numcolunas+=yyleng;yylval.string =(char*)strdup(yytext);return PARSEINT;}flag_semicolon=0;
+{PARSEINT} {if (flagLex==1){printf("PARSEINT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PARSEINT;}
 {FUNC} {if (flagLex==1){printf("FUNC\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FUNC;}
 {CMDARGS} {if (flagLex==1){printf("CMDARGS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return CMDARGS;}
 {PACKAGE} {if (flagLex==1){printf("PACKAGE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PACKAGE;} 
@@ -149,21 +150,21 @@ aux {INTLIT}$
 
 "//" {numcolunas+=yyleng;BEGIN COMENTARIO_2;}
 <COMENTARIO_2>.	{numcolunas+=yyleng;};
-<COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;}BEGIN 0;}
+<COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}return SEMICOLON;flag_semicolon=0;}BEGIN 0;}
 
 "\"" {aux_erroc=numcolunas;aux_errol=yylineno;numcolunas+=yyleng;BEGIN STRLITT;}
 <STRLITT>"\\""\\" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
 <STRLITT>"\\""\"" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
 <STRLITT>"\\"(f|r|t|n) {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
 <STRLITT>"\\". {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
-<STRLITT>"\"" {if(flag_do_mal==0){if (flagLex==1){printf("STRLIT(\"");for(int i=0;i<tamanho;i++){printf("%c", s[i]);}printf("\")\n");}flag_semicolon=1;tamanho=0;BEGIN 0;return STRLIT;}tamanho=0;flag_do_mal=0;numcolunas+=yyleng;BEGIN 0;}
+<STRLITT>"\"" {if(flag_do_mal==0){s[tamanho]='\0';if (flagLex==1){printf("STRLIT(\"");printf("%s", s);printf("\")\n");}flag_semicolon=1;tamanho=0;flagString=1;BEGIN 0;return STRLIT;}tamanho=0;flag_do_mal=0;numcolunas+=yyleng;BEGIN 0;}
 <STRLITT>"\\" {printf("Line %d, column %d: invalid escape sequence (%s)\n",aux_errol,numcolunas,yytext);tamanho+=yyleng;numcolunas+=yyleng;flag_do_mal=1;}
 <STRLITT>. {s[tamanho]=*yytext;tamanho++;numcolunas+=yyleng;};
 <STRLITT>"\n" {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}
 <STRLITT><<EOF>> {printf("Line %d, column %d: unterminated string literal\n",aux_errol,aux_erroc);tamanho=0;flag_do_mal=0;numcolunas=1;BEGIN 0;}
 
 
-
+<<EOF>>	{if(flag_semicolon==1){if(flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;return SEMICOLON;}exit(0);}
 
 
 
@@ -179,5 +180,4 @@ int yywrap()
 {
 return 1;
 }
-
 

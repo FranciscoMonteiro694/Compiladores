@@ -6,9 +6,11 @@
     extern int yydebug;
     extern int numcolunas;
     extern int yylineno;
+    extern int flagString;
+    extern char s[500];
     extern char* yytext;
     int yylex(void);
-    void yyerror (char *s);
+    void yyerror (char *st);
     int flagLex=0;
 %}
 %union{
@@ -36,6 +38,7 @@
 %token <string> INTLIT /*Vamos ter de mudar para número */
 %token <string> REALLIT
 %token <string> ID
+%token <string> RESERVED
 %token <cval> LPAR
 %token <cval> RPAR
 %token <cval> SEMICOLON
@@ -84,13 +87,16 @@ vai ser preciso quase de certeza
 %left LPAR RPAR
 */
 
+%left COMMA
+%right ASSIGN
 %left OR
 %left AND
-%left EQ NE GE GT LE LT 
+%left EQ NE 
+%left GE GT LE LT 
 %left PLUS MINUS
-%left STAR DIV MOD 
-%right NOT
-%left LPAR RPAR
+%left STAR DIV MOD
+%left NOT
+%left LPAR RPAR LBRACE RBRACE
 
 %%
 
@@ -208,9 +214,9 @@ Expr: ID /*{printf("Expr = ID!\n");}*/
     |   Expr LE Expr /*{printf("Expr = Expr LE expr!\n");}*/
     |   Expr OR Expr /*{printf("Expr = Expr OR expr!\n");}*/
     |   LPAR Expr RPAR /*{printf("Expr = LPAR Expr RPAR!\n");}*/
-    |   MINUS Expr %prec STAR /*{printf("Expr = MINUS Expr!\n");}*/
-    |   PLUS Expr %prec STAR/*{printf("Expr = PLUS Expr!\n");}*/
-    |   NOT Expr %prec STAR/*{printf("Expr = NOT Expr!\n");}*/
+    |   MINUS Expr  /*{printf("Expr = MINUS Expr!\n");}*/
+    |   PLUS Expr/*{printf("Expr = PLUS Expr!\n");}*/
+    |   NOT Expr /*{printf("Expr = NOT Expr!\n");}*/
     |   FuncInvocation /*{printf("FuncInvocation\n");}*/
     |   LPAR error RPAR /*{printf("error\n");}*/
     ;
@@ -233,8 +239,16 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void yyerror (char *s) {
+void yyerror (char *st) {
+    printf("%d\n",flagString);
     
-    printf ("Line %d, column %d: %s: %s\n", yylineno, numcolunas-(int)strlen(yytext), s, yytext);
+    if(flagString==0){
+        printf ("Line %d, column %d: %s: %s\n", yylineno, numcolunas-(int)strlen(yytext), st, yytext);
+    }
+    else{
+        printf ("Line %d, column %d: %s: \"%s\"\n", yylineno, numcolunas-(int)strlen(s), st, s);
+        flagString=0;
+    }
+    printf("%d\n",flagString);
 
 }
