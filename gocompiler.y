@@ -12,12 +12,25 @@
     int yylex(void);
     void yyerror (char *st);
     int flagLex=0;
+    int flagArvore=0;
+    typedef enum { Terminal, Operadores, Statements, DecFuncoes, DecVariaveis, Raiz} nodeType;
+    typedef struct node{
+        char *string;
+        nodeType tipo;
+        struct node **ponteiros;
+        int nrFilhos;
+    }nodeDefault;
+    nodeDefault * criaNo(nodeType tipo, char* str, int nrNosfilhos, nodeDefault** arrayPonteiros);
+    int imprimeTralha(nodeDefault *raiz,int depth);
+    int limpaTralha(nodeDefault *raiz);
+
 %}
 %union{
     char cval;
     int intval;
     char *string;
     double d;
+    nodeDefault *ponteiro;
 }
 
 
@@ -69,10 +82,12 @@
 
 /*
 vai ser preciso quase de certeza
-%type <string> Expr
-%type <string> FuncInvocation
-*/
 
+
+
+%type <ponteiro> Program Declarations VarDeclaration VarSpec teste Type FuncDeclaration Parameters AuxParameters FuncBody VarsAndStatements Statement AuxStatement1 AuxStatement2 ParseArgs FuncInvocation AuxFuncInvocation Expr
+*/
+%type <ponteiro> Expr
 
 
 /* Se usarmos dois lefts, ou rights, o de baixo tem prioridade sobre o de cima */
@@ -107,7 +122,7 @@ inicio: inicio Expr
         | 
         ;
 */
-Program: PACKAGE ID SEMICOLON Declarations /*{printf("Program\n");}*/
+Program: PACKAGE ID SEMICOLON Declarations /*{printf("Program\n");} imprimir a árvore aqui*/
     ;
 
 
@@ -190,10 +205,10 @@ AuxFuncInvocation: AuxFuncInvocation COMMA Expr
     | /* empty */
     ;
 
-Expr: ID /*{printf("Expr = ID!\n");}*/
-    |   REALLIT /*{printf("Expr = REALLIT!\n");}*/
-    |   INTLIT /*{printf("Expr = INTLIT!\n");}*/
-    |   Expr AND Expr /*{printf("Expr = Expr AND expr!\n");}*/
+Expr: ID {$$ = criaNo(Terminal, $1, 0, NULL);}
+    |   REALLIT {$$ = criaNo(Terminal, $1, 0, NULL);}/*{printf("Expr = REALLIT!\n");}*/
+    |   INTLIT {$$ = criaNo(Terminal, $1, 0, NULL);}/*{printf("Expr = INTLIT!\n");}*/
+    |   Expr AND Expr {$$ = criaNo(Operadores, $2, 2, NULL);}/*{printf("Expr = Expr AND expr!\n");}*/
     |   Expr PLUS Expr /*{printf("Expr = Expr PLUS expr!\n");}*/
     |   Expr LT Expr /*{printf("Expr = Expr LT expr!\n");}*/
     |   Expr MINUS Expr /*{printf("Expr = Expr MINUS expr!\n");}*/
@@ -219,19 +234,7 @@ Expr: ID /*{printf("Expr = ID!\n");}*/
 
 %%
 
-int main(int argc, char **argv) {
-    /*
-    yydebug=1;
-    */
-    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
-    if(argc>1){
-        if (strcmp(argv[1],"-l")==0){
-            flagLex=1;
-        }
-    }
-    yyparse();
-    return 0;
-}
+
 
 void yyerror (char *st) {
 
@@ -246,4 +249,76 @@ void yyerror (char *st) {
         flagString=0;
     }
 
+}
+
+nodeDefault * criaNo(nodeType tipo, char* str, int nrNosfilhos, nodeDefault** arrayPonteiros){
+    nodeDefault *ponteiro;
+    int i;
+    // Reservar espaço para o nó
+    if ((ponteiro=malloc(sizeof(nodeDefault)))== NULL)
+        printf("Estoirou!\n");
+    ponteiro->tipo=tipo;
+    ponteiro->string=str;
+    ponteiro->nrFilhos=nrNosfilhos;
+    
+    // Vai reservar espaço para os filhos do nó criado
+     if(nrNosfilhos>0){
+         if ((ponteiro->ponteiros=malloc(nrNosfilhos*sizeof(nodeDefault)))==NULL)
+            printf("BOOM SHAKA LAKA!\n");
+         for(i=0;i<nrNosfilhos;i++){
+             ponteiro->ponteiros[i]=arrayPonteiros[i];
+         }
+     }
+    return ponteiro;
+    
+}
+int imprimeTralha(nodeDefault *raiz,int depth){
+    int iterador;
+    int i;
+    for(i=0;i<depth;i++){
+        printf("..");
+    }
+    printf("%s\n",raiz->string);
+    if (raiz->tipo==Terminal){
+        return 0;
+    }
+    for (iterador=0;iterador<raiz->nrFilhos;iterador++){
+        imprimeTralha(raiz->ponteiros[iterador],depth+1);
+    }
+    return 0;
+
+}
+int limpaTralha(nodeDefault *raiz){
+    int iterador;
+    if (raiz->tipo==Terminal){
+        free(raiz);
+        return 0;
+    }
+    
+    
+    for (iterador=0;iterador<raiz->nrFilhos;iterador++){
+        limpaTralha(raiz->ponteiros[iterador]);
+    }
+    free(raiz->ponteiros);
+    free(raiz);
+
+    return 0;
+    
+}
+
+int main(int argc, char **argv) {
+    /*
+    yydebug=1;
+    */
+    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
+    if(argc>1){
+        if (strcmp(argv[1],"-l")==0){
+            flagLex=1;
+        }
+        if (strcmp(argv[1],"-t")==0){
+            flagArvore=0;
+        }
+    }
+    yyparse();
+    return 0;
 }
