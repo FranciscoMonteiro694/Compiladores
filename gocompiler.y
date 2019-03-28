@@ -122,7 +122,7 @@ Program: PACKAGE ID SEMICOLON Declarations {$$=criaNoPai(Raiz,"Program");adicion
 
 Declarations: Declarations VarDeclaration SEMICOLON {$$=$1;adicionaIrmao2($$,$1);}
     |   Declarations FuncDeclaration SEMICOLON {$$=$1;adicionaIrmao2($$,$1);}
-    |    /* empty */ {$$=NULL;}
+    |    /* empty */ {printf("ola");$$=NULL;}
     ;
 
 VarDeclaration: VAR VarSpec {$$=criaNoPai(DecVariaveis,"VarDecl");adicionaFilho2($$,$2);}
@@ -183,10 +183,18 @@ AuxParameters: AuxParameters COMMA ID Type {$$=$1;adicionaIrmao2($1,criaNoPai(Te
     |   /* empty */ {$$=NULL;}
     ;
 
-FuncBody: LBRACE VarsAndStatements RBRACE {$$=criaNoPai(DecFuncoes,"FuncBody");adicionaFilho2($$,$2);}
+FuncBody: LBRACE VarsAndStatements RBRACE {
+    if($$!=NULL){
+        $$=criaNoPai(DecFuncoes,"FuncBody");
+        adicionaFilho2($$,$2);
+    }
+    else{
+        $$=criaNoPai(DecFuncoes,"FuncBody");
+    }
+}
         ;
 
-VarsAndStatements: VarsAndStatements SEMICOLON {$$=$1;} /* ???? */
+VarsAndStatements: VarsAndStatements SEMICOLON {$$=$1;} 
     |   VarsAndStatements VarDeclaration SEMICOLON {$$=$1;adicionaIrmao2($1,$2);}
     |   VarsAndStatements Statement SEMICOLON {$$=$1;adicionaIrmao2($1,$2);}
     |   /* empty */ {$$=NULL;}
