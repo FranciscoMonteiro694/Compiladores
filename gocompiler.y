@@ -12,50 +12,70 @@
     int yylex(void);
     void yyerror (char *st);
     int flagLex=0;
+    int flagArvore=0;
+    typedef enum { Terminal, Operadores, Statements, DecFuncoes, DecVariaveis, Raiz} nodeType;
+    typedef struct node *lista;
+    typedef struct node{
+        char *string;
+        nodeType tipo;
+        lista filho;
+        lista irmao;
+    }nodeDefault;
+    int imprimeTralha(nodeDefault *raiz,int depth);
+    int limpaTralha(nodeDefault *raiz);
+    nodeDefault * criaNoPai(nodeType tipo, char *str);
+    nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str);
+    nodeDefault * adicionaIrmao(nodeDefault * atual,nodeType tipo, char *str);
+    int imprimeTralha(nodeDefault *raiz,int depth);
+    nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo);
+    nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo);
+    nodeDefault * adicionaIrmaoInicio(nodeDefault * atual,nodeDefault *novo);
+
 %}
 %union{
     char cval;
     int intval;
     char *string;
     double d;
+    struct node *ponteiro;
 }
 
 
-%token <cval> OR
+%token <string> OR
 %token <string> AND
-%token <cval> LT
-%token <cval> GT
-%token <cval> EQ
+%token <string> LT
+%token <string> GT
+%token <string> EQ
 %token <string> NE
 %token <string> LE
 %token <string> GE
-%token <cval> PLUS
-%token <cval> MINUS
-%token <cval> STAR
-%token <cval> DIV
-%token <cval> MOD
-%token <cval> NOT
+%token <string> PLUS
+%token <string> MINUS
+%token <string> STAR
+%token <string> DIV
+%token <string> MOD
+%token <string> NOT
 %token <string> INTLIT /*Vamos ter de mudar para número */
 %token <string> REALLIT
 %token <string> ID
 %token <string> RESERVED
-%token <cval> LPAR
-%token <cval> RPAR
-%token <cval> SEMICOLON
+%token <string> LPAR
+%token <string> RPAR
+%token <string> SEMICOLON
 
 %token <string> RSQ
 %token <string> FOR
 %token <string> CMDARGS
-%token <cval> BLANKID
+%token <string> BLANKID
 %token <string> FUNC
-%token <cval> RBRACE
-%token <cval> LSQ
-%token <cval> ASSIGN
+%token <string> RBRACE
+%token <string> LSQ
+%token <string> ASSIGN
 %token <string> IF
 %token <string> RETURN
-%token <cval> LBRACE
+%token <string> LBRACE
 %token <string> PARSEINT
-%token <cval> COMMA
+%token <string> COMMA
 %token <string> STRLIT
 %token <string> ELSE
 %token <string> PRINT
@@ -66,27 +86,20 @@
 %token <string> PACKAGE
 %token <string> VAR
 
-
 /*
 vai ser preciso quase de certeza
-%type <string> Expr
-%type <string> FuncInvocation
+
+
+
+%type <ponteiro> Program Declarations VarDeclaration VarSpec teste Type FuncDeclaration Parameters AuxParameters FuncBody VarsAndStatements Statement AuxStatement1 AuxStatement2 ParseArgs FuncInvocation AuxFuncInvocation Expr
 */
 
+%type <ponteiro> Program Declarations VarDeclaration VarSpec teste Type FuncDeclaration Parameters AuxParameters FuncBody VarsAndStatements Statement AuxStatement1 ParseArgs FuncInvocation AuxFuncInvocation Expr
 
 
 /* Se usarmos dois lefts, ou rights, o de baixo tem prioridade sobre o de cima */
-/* Estávamos a usar estes 
-%left OR
-%left AND
-%left EQ NE
-%nonassoc GE GT LE LT 
-%left PLUS MINUS
-%left STAR DIV MOD
-%right NOT
-%left LPAR RPAR
 
-*/
+
 %left COMMA
 %right ASSIGN
 %left OR
@@ -99,139 +112,181 @@ vai ser preciso quase de certeza
 %left LPAR RPAR LBRACE RBRACE
 
 
-%%
-
-
-/*
-inicio: inicio Expr
-        | 
-        ;
-*/
-Program: PACKAGE ID SEMICOLON Declarations /*{printf("Program\n");}*/
-    ;
-
-
-
-Declarations: Declarations VarDeclaration SEMICOLON /*{printf("Declarations\n");} */
-    |   Declarations FuncDeclaration SEMICOLON /*{printf("Declarations\n");} */
-    |    /* empty */
-    ;
-
-VarDeclaration: VAR VarSpec /*{printf("VarDeclaration\n");} */
-    |   VAR LPAR VarSpec SEMICOLON RPAR /*{printf("VarDeclaration\n");}*/
-    ;
-
-VarSpec: ID teste Type /*{printf("Varspec\n");}*/
-    ;
-
-teste: teste COMMA ID 
-    |   /* empty */
-    ;
-
-Type:   INT /*{printf("Type---->Int\n");}*/
-    |   BOOL   /*{printf("Type---->BOOL\n");}*/
-    |   STRING /*{printf("Type---->STRING\n");}*/
-    |   FLOAT32   /* {printf("Type---->FLOAT32\n");} */
-    ;
-
-FuncDeclaration: FUNC ID LPAR RPAR FuncBody /*{printf("FuncDeclaration\n");} */
-    |   FUNC ID LPAR Parameters RPAR FuncBody /*{printf("FuncDeclaration\n");} */
-    |   FUNC ID LPAR RPAR Type FuncBody /*{printf("FuncDeclaration\n");} */
-    |   FUNC ID LPAR Parameters RPAR Type FuncBody /*{printf("FuncDeclaration\n");} */
-    ;
-
-Parameters: ID Type AuxParameters /*{printf("Parameters\n");} */
-    ;
-
-AuxParameters: AuxParameters COMMA ID Type 
-    |   /* empty */
-    ;
-
-FuncBody: LBRACE VarsAndStatements RBRACE /*{printf("FuncBody\n");} */
-        ;
-
-VarsAndStatements: VarsAndStatements SEMICOLON /*{printf("VarsAndStatements\n");} */
-    |   VarsAndStatements VarDeclaration SEMICOLON /*{printf("VarsAndStatements\n");}*/
-    |   VarsAndStatements Statement SEMICOLON /*{printf("VarsAndStatements\n");}*/
-    |   /* empty */
-    ;
-
-Statement: PRINT LPAR Expr RPAR /*{printf("Statement\n");}*/
-    |   PRINT LPAR STRLIT RPAR /*{printf("Statement\n");}*/
-    |   error /*{printf("errorrrrrr");}*/
-    |   FuncInvocation /*{printf("Statement\n");}*/
-    |   ParseArgs /*{printf("Statement\n");}*/
-    |   RETURN /*{printf("Statement\n");}*/
-    |   RETURN Expr /*{printf("Statement\n");}*/
-    |   FOR Expr LBRACE AuxStatement1 RBRACE /*{printf("Statement\n");}*/
-    |   FOR LBRACE AuxStatement1 RBRACE /*{printf("Statement\n");}*/
-    |   ID ASSIGN Expr /*{printf("Statement\n");}*/
-    |   IF Expr LBRACE AuxStatement1 RBRACE AuxStatement2 /*{printf("Statement\n");}*/
-    |   LBRACE AuxStatement1 RBRACE /*{printf("Statement\n");}*/
-    ;
-
-AuxStatement1: AuxStatement1 Statement SEMICOLON
-    |   /* empty */
-    ;
-AuxStatement2: ELSE LBRACE AuxStatement1 RBRACE 
-    |   /* empty */
-    ;
-
-ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR /*{printf("ParseArgs\n");}*/
-    |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR /*{printf("errrrrrrs");}*/
-    ;
-
-FuncInvocation: ID LPAR error RPAR /*{printf("FuncInvocation\n");}*/
-    |   ID LPAR RPAR /*{printf("FuncInvocation\n");}*/
-    |   ID LPAR Expr AuxFuncInvocation RPAR /*{printf("FuncInvocation\n");}*/
-    ;
-
-AuxFuncInvocation: AuxFuncInvocation COMMA Expr
-    | /* empty */
-    ;
-
-Expr: ID /*{printf("Expr = ID!\n");}*/
-    |   REALLIT /*{printf("Expr = REALLIT!\n");}*/
-    |   INTLIT /*{printf("Expr = INTLIT!\n");}*/
-    |   Expr AND Expr /*{printf("Expr = Expr AND expr!\n");}*/
-    |   Expr PLUS Expr /*{printf("Expr = Expr PLUS expr!\n");}*/
-    |   Expr LT Expr /*{printf("Expr = Expr LT expr!\n");}*/
-    |   Expr MINUS Expr /*{printf("Expr = Expr MINUS expr!\n");}*/
-    |   Expr GT Expr /*{printf("Expr = Expr GT expr!\n");}*/
-    |   Expr NOT Expr /*{printf("Expr = Expr NOT expr!\n");}*/
-    |   Expr MOD Expr /*{printf("Expr = Expr MOD expr!\n");}*/
-    |   Expr DIV Expr /*{printf("Expr = Expr DIV expr!\n");}*/
-    |   Expr GE Expr /*{printf("Expr = Expr GE expr!\n");}*/
-    |   Expr STAR Expr /*{printf("Expr = Expr STAR expr!\n");}*/
-    |   Expr EQ Expr /*{printf("Expr = Expr EQ expr!\n");}*/
-    |   Expr NE Expr /*{printf("Expr = Expr NE expr!\n");}*/
-    |   Expr LE Expr /*{printf("Expr = Expr LE expr!\n");}*/
-    |   Expr OR Expr /*{printf("Expr = Expr OR expr!\n");}*/
-    |   LPAR Expr RPAR /*{printf("Expr = LPAR Expr RPAR!\n");}*/
-    |   MINUS Expr  /*{printf("Expr = MINUS Expr!\n");}*/
-    |   PLUS Expr/*{printf("Expr = PLUS Expr!\n");}*/
-    |   NOT Expr /*{printf("Expr = NOT Expr!\n");}*/
-    |   FuncInvocation /*{printf("FuncInvocation\n");}*/
-    |   LPAR error RPAR /*{printf("error\n");}*/
-    ;
-
 
 
 %%
 
-int main(int argc, char **argv) {
-    /*
-    yydebug=1;
-    */
-    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
-    if(argc>1){
-        if (strcmp(argv[1],"-l")==0){
-            flagLex=1;
-        }
-    }
-    yyparse();
-    return 0;
+
+Program: PACKAGE ID SEMICOLON Declarations {$$=criaNoPai(Raiz,"Program");adicionaFilho2($$,$4);}
+    ;
+
+Declarations: Declarations VarDeclaration SEMICOLON {$$=$1;adicionaIrmao2($$,$1);}
+    |   Declarations FuncDeclaration SEMICOLON {$$=$1;adicionaIrmao2($$,$1);}
+    |    /* empty */ {$$=NULL;}
+    ;
+
+VarDeclaration: VAR VarSpec {$$=criaNoPai(DecVariaveis,"VarDecl");adicionaFilho2($$,$2);}
+    |   VAR LPAR VarSpec SEMICOLON RPAR {$$=criaNoPai(DecVariaveis,"VarDecl");adicionaFilho2($$,$3);}
+    ;
+
+VarSpec: ID teste Type { $$=$2;adicionaIrmaoInicio($$,criaNoPai(Terminal,$1));};
+    ;
+
+teste: teste COMMA ID { $$=$1;adicionaIrmao2($$,criaNoPai(Terminal,$3));};
+    |   /* empty */ {$$=NULL;}
+    ;
+
+Type:   INT {$$=criaNoPai(Terminal,$1);}
+    |   BOOL   {$$=criaNoPai(Terminal,$1);}
+    |   STRING {$$=criaNoPai(Terminal,$1);}
+    |   FLOAT32   {$$=criaNoPai(Terminal,$1);}
+    ;
+
+FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
+    nodeDefault *aux,*aux2,*aux3; 
+    $$=criaNoPai(DecFuncoes,"FuncDecl");
+    aux=criaNoPai(DecFuncoes,"FuncHeader");
+    adicionaFilho2($$,aux);
+    aux2=criaNoPai(Terminal,$2);
+    adicionaFilho2(aux,aux2);
+    aux3=criaNoPai(DecFuncoes,"FuncParams");
+    adicionaIrmao2(aux->filho,aux3);
+    adicionaIrmao2($$->filho,$5);
 }
+    |   FUNC ID LPAR Parameters RPAR FuncBody {
+        nodeDefault *aux,*aux2,*aux3; 
+        $$=criaNoPai(DecFuncoes,"FuncDecl");
+        aux=criaNoPai(DecFuncoes,"FuncHeader");
+        adicionaFilho2($$,aux);
+        aux2=criaNoPai(Terminal,$2);
+        adicionaFilho2(aux,aux2);
+        adicionaIrmao2(aux->filho,$4);
+        adicionaIrmao2($$->filho,$6);
+    }
+    |   FUNC ID LPAR Parameters RPAR Type FuncBody {
+        nodeDefault *aux,*aux2,*aux3,*aux4; 
+        $$=criaNoPai(DecFuncoes,"FuncDecl");
+        aux=criaNoPai(DecFuncoes,"FuncHeader");
+        adicionaFilho2($$,aux);
+        aux2=criaNoPai(Terminal,$2);
+        adicionaFilho2(aux,aux2);
+        adicionaIrmao2(aux->filho,$4);
+
+        adicionaIrmao2(aux->filho,$6);
+        adicionaIrmao2($$->filho,$7);
+    }
+    ;
+Parameters: ID Type AuxParameters {adicionaIrmaoInicio(criaNoPai(Terminal,$1),$3);}
+    ;
+
+AuxParameters: AuxParameters COMMA ID Type {$$=$1;adicionaIrmao2($1,criaNoPai(Terminal,$3));}
+    |   /* empty */ {$$=NULL;}
+    ;
+
+FuncBody: LBRACE VarsAndStatements RBRACE {$$=criaNoPai(DecFuncoes,"FuncBody");adicionaFilho2($$,$2);}
+        ;
+
+VarsAndStatements: VarsAndStatements SEMICOLON {$$=$1;} /* ???? */
+    |   VarsAndStatements VarDeclaration SEMICOLON {$$=$1;adicionaIrmao2($1,$2);}
+    |   VarsAndStatements Statement SEMICOLON {$$=$1;adicionaIrmao2($1,$2);}
+    |   /* empty */ {$$=NULL;}
+    ;
+
+Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,$1);adicionaFilho2($$,$3);}
+    |   PRINT LPAR STRLIT RPAR {$$=criaNoPai(Statements,$1);adicionaFilho2($$,criaNoPai(Terminal,$3));}
+    |   error {$$=NULL;}
+    |   FuncInvocation {$$=$1;}
+    |   ParseArgs {$$=$1;}
+    |   RETURN {$$=criaNoPai(Statements,$1);}
+    |   RETURN Expr {$$=criaNoPai(Statements,$1);adicionaFilho2($$,$2);}
+    |   FOR Expr LBRACE AuxStatement1 RBRACE {
+        nodeDefault *aux;
+        $$=criaNoPai(Statements,$1);
+        adicionaFilho2($$,criaNoPai(Statements,$1));
+        aux=criaNoPai(Statements,"Block");
+        adicionaFilho2(aux,$4);
+        adicionaIrmao2($$->filho,aux);
+    }
+    |   FOR LBRACE AuxStatement1 RBRACE {
+        nodeDefault *aux;
+        $$=criaNoPai(Statements,$1);
+        aux=criaNoPai(Statements,"Block");
+        adicionaFilho2(aux,$3);
+        adicionaFilho2($$,aux);
+    }
+    |   ID ASSIGN Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,criaNoPai(Terminal,$1));adicionaIrmao2($$->filho,$3);}
+    |   IF Expr LBRACE AuxStatement1 {
+        nodeDefault *aux;
+        $$=criaNoPai(Statements,$1);
+        adicionaFilho2($$,$2);
+        aux=criaNoPai(Statements,"Block");
+        adicionaFilho2(aux,$4);
+        adicionaIrmao2($$->filho,aux);
+        adicionaIrmao2($$->filho,criaNoPai(Statements,"Block"));
+    }
+    |   IF Expr LBRACE AuxStatement1 RBRACE ELSE LBRACE AuxStatement1 RBRACE {
+        nodeDefault *aux;
+        $$=criaNoPai(Statements,$1);
+        adicionaFilho2($$,$2);
+        aux=criaNoPai(Statements,"Block");
+        adicionaFilho2(aux,$4);
+        adicionaIrmao2($$->filho,aux);
+        adicionaIrmao2($$->filho,criaNoPai(Statements,"Block"));
+    }
+    |   LBRACE AuxStatement1 RBRACE {$$=$2;} /* Meter um if */
+    ;
+
+AuxStatement1: AuxStatement1 Statement SEMICOLON {$$=adicionaIrmao2($1,$2);}
+    |   /* empty */ {$$=NULL;}
+    ;
+
+ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR {
+    $$=criaNoPai(Statements,"ParseArgs");
+    adicionaFilho2($$,criaNoPai(Terminal,$1));
+    adicionaIrmao2($$->filho,$9);
+}
+    |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR {$$=NULL;}
+    ;
+
+FuncInvocation: ID LPAR error RPAR {$$=NULL;}
+    |   ID LPAR RPAR {$$=criaNoPai(Statements,"Call");adicionaFilho2($$,criaNoPai(Terminal,$1));} /* Não sabemos o Type a pôr aqui */ 
+    |   ID LPAR Expr AuxFuncInvocation RPAR {$$=criaNoPai(Statements,"Call");adicionaFilho2($$,criaNoPai(Terminal,$1));adicionaIrmao2($$->filho,$3);adicionaIrmao2($$->filho,$4);}
+    ;
+
+
+AuxFuncInvocation: AuxFuncInvocation COMMA Expr {if($$!=NULL){$$=adicionaIrmao2($1,$3);}else{$$=$3;}}
+    | /* empty */ {$$=NULL;}
+    ;
+
+Expr: Expr OR Expr 
+    |   ID {$$=criaNoPai(Terminal,$1);}
+    |   REALLIT {$$=criaNoPai(Terminal,$1);}
+    |   INTLIT {$$=criaNoPai(Terminal,$1);}
+    |   Expr AND Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr PLUS Expr  {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr LT Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr MINUS Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr GT Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr MOD Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr DIV Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr GE Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr STAR Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr EQ Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr NE Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr LE Expr {$$=criaNoPai(Operadores,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   LPAR Expr RPAR {$$=$2;}
+    |   MINUS Expr %prec STAR {$$=criaNoPai(Operadores,$1);adicionaFilho2($$,$2);}
+    |   PLUS Expr %prec STAR {$$=criaNoPai(Operadores,$1);adicionaFilho2($$,$2);}
+    |   NOT Expr %prec STAR {$$=criaNoPai(Operadores,$1);adicionaFilho2($$,$2);}
+    |   FuncInvocation {$$=$1;}
+    |   LPAR error RPAR {$$=NULL;}
+    ;
+
+
+
+%%
+
+
 
 void yyerror (char *st) {
 
@@ -242,8 +297,96 @@ void yyerror (char *st) {
     }
     else{
 
-        printf ("Line %d, column %d: %s: \"%s\"\n", yylineno, numcolunas-(int)strlen(s), st, s);
+        printf ("Line %d, column %d: %s: \"%s\"\n", yylineno, numcolunas-(int)strlen(s)-2, st, s);
         flagString=0;
     }
 
+}
+
+nodeDefault * criaNoPai(nodeType tipo, char *str){
+    nodeDefault *ponteiro;
+    if ((ponteiro=malloc(sizeof(nodeDefault)))== NULL)
+        printf("Estoirou!\n");
+    ponteiro->filho=NULL;
+    ponteiro->irmao=NULL;
+    ponteiro->string=str;
+    ponteiro->tipo=tipo;
+    return ponteiro;
+}
+nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str){
+    nodeDefault *novo;
+    novo=criaNoPai(tipo, str);
+    pai->filho=novo;
+    return novo;
+}
+
+nodeDefault * adicionaIrmao(nodeDefault * atual,nodeType tipo, char *str){
+    //Temos de adicionar no mais à direita
+    nodeDefault *novo;
+    nodeDefault *iterador;
+    iterador=atual;
+    while(iterador->irmao!=NULL){
+        iterador=iterador->irmao;
+    }
+    novo=criaNoPai(tipo, str);
+    iterador->irmao=novo;
+    return novo;
+}
+
+
+int imprimeTralha(nodeDefault *raiz,int depth){
+    nodeDefault *iterador;
+    int i;
+    for(i=0;i<depth;i++){
+        printf("..");
+    }
+    printf("%s\n",raiz->string);
+    if(raiz->filho!=NULL){
+    imprimeTralha(raiz->filho,depth+1);
+        iterador=raiz->filho->irmao;
+        while(iterador!=NULL){
+            imprimeTralha(iterador,depth+1);
+            iterador=iterador->irmao;
+        }
+    }
+   
+    return 0;
+
+}
+nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo){
+    //Temos de adicionar no mais à direita
+    nodeDefault *iterador;
+    iterador=atual;
+    while(iterador->irmao!=NULL){
+        iterador=iterador->irmao;
+    }
+    iterador->irmao=novo;
+    return novo;
+}
+
+nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo){
+    pai->filho=novo;
+    return novo;
+}
+nodeDefault * adicionaIrmaoInicio(nodeDefault * atual,nodeDefault *novo){
+    //Temos de adicionar no inicio
+    novo->irmao=atual;
+    return novo;
+}
+
+int main(int argc, char **argv) {
+    
+    yydebug=1;
+    
+    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
+    if(argc>1){
+        if (strcmp(argv[1],"-l")==0){
+            flagLex=1;
+        }
+        if (strcmp(argv[1],"-t")==0){
+            flagArvore=1;
+        }
+    }
+    yyparse();
+    return 0;
 }
