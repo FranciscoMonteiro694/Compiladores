@@ -12,12 +12,31 @@
     int yylex(void);
     void yyerror (char *st);
     int flagLex=0;
+    int flagArvore=0;
+    typedef enum { Terminal, Operadores, Statements, DecFuncoes, DecVariaveis, Raiz} nodeType;
+    typedef struct node *lista;
+    typedef struct node{
+        char *string;
+        nodeType tipo;
+        lista filho;
+        lista irmao;
+    }nodeDefault;
+    int imprimeTralha(nodeDefault *raiz,int depth);
+    int limpaTralha(nodeDefault *raiz);
+    nodeDefault * criaNoPai(nodeType tipo, char *str);
+    nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str);
+    nodeDefault * adicionaIrmao(nodeDefault * atual,nodeType tipo, char *str);
+    int imprimeTralha(nodeDefault *raiz,int depth);
+    nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo);
+    nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo);
+
 %}
 %union{
     char cval;
     int intval;
     char *string;
     double d;
+    struct node *ponteiro;
 }
 
 
@@ -66,27 +85,19 @@
 %token <string> PACKAGE
 %token <string> VAR
 
-
 /*
 vai ser preciso quase de certeza
-%type <string> Expr
-%type <string> FuncInvocation
+
+
+
+%type <ponteiro> Program Declarations VarDeclaration VarSpec teste Type FuncDeclaration Parameters AuxParameters FuncBody VarsAndStatements Statement AuxStatement1 AuxStatement2 ParseArgs FuncInvocation AuxFuncInvocation Expr
 */
 
-
+%type <ponteiro> Expr FuncInvocation AuxFuncInvocation
 
 /* Se usarmos dois lefts, ou rights, o de baixo tem prioridade sobre o de cima */
-/* Estávamos a usar estes 
-%left OR
-%left AND
-%left EQ NE
-%nonassoc GE GT LE LT 
-%left PLUS MINUS
-%left STAR DIV MOD
-%right NOT
-%left LPAR RPAR
 
-*/
+
 %left COMMA
 %right ASSIGN
 %left OR
@@ -99,6 +110,8 @@ vai ser preciso quase de certeza
 %left LPAR RPAR LBRACE RBRACE
 
 
+
+
 %%
 
 
@@ -107,7 +120,7 @@ inicio: inicio Expr
         | 
         ;
 */
-Program: PACKAGE ID SEMICOLON Declarations /*{printf("Program\n");}*/
+Program: PACKAGE ID SEMICOLON Declarations /*{printf("Program\n");} imprimir a árvore aqui*/
     ;
 
 
@@ -156,18 +169,18 @@ VarsAndStatements: VarsAndStatements SEMICOLON /*{printf("VarsAndStatements\n");
     |   /* empty */
     ;
 
-Statement: PRINT LPAR Expr RPAR /*{printf("Statement\n");}*/
-    |   PRINT LPAR STRLIT RPAR /*{printf("Statement\n");}*/
-    |   error /*{printf("errorrrrrr");}*/
-    |   FuncInvocation /*{printf("Statement\n");}*/
-    |   ParseArgs /*{printf("Statement\n");}*/
-    |   RETURN /*{printf("Statement\n");}*/
-    |   RETURN Expr /*{printf("Statement\n");}*/
-    |   FOR Expr LBRACE AuxStatement1 RBRACE /*{printf("Statement\n");}*/
-    |   FOR LBRACE AuxStatement1 RBRACE /*{printf("Statement\n");}*/
-    |   ID ASSIGN Expr /*{printf("Statement\n");}*/
-    |   IF Expr LBRACE AuxStatement1 RBRACE AuxStatement2 /*{printf("Statement\n");}*/
-    |   LBRACE AuxStatement1 RBRACE /*{printf("Statement\n");}*/
+Statement: PRINT LPAR Expr RPAR {}
+    |   PRINT LPAR STRLIT RPAR 
+    |   error 
+    |   FuncInvocation 
+    |   ParseArgs 
+    |   RETURN 
+    |   RETURN Expr 
+    |   FOR Expr LBRACE AuxStatement1 RBRACE 
+    |   FOR LBRACE AuxStatement1 RBRACE 
+    |   ID ASSIGN Expr 
+    |   IF Expr LBRACE AuxStatement1 RBRACE AuxStatement2 
+    |   LBRACE AuxStatement1 RBRACE 
     ;
 
 AuxStatement1: AuxStatement1 Statement SEMICOLON
@@ -177,41 +190,41 @@ AuxStatement2: ELSE LBRACE AuxStatement1 RBRACE
     |   /* empty */
     ;
 
-ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR /*{printf("ParseArgs\n");}*/
-    |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR /*{printf("errrrrrrs");}*/
+ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR {$$=criaNoPai(Statements,"ParseArgs");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$9);}
+    |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR 
     ;
 
-FuncInvocation: ID LPAR error RPAR /*{printf("FuncInvocation\n");}*/
-    |   ID LPAR RPAR /*{printf("FuncInvocation\n");}*/
-    |   ID LPAR Expr AuxFuncInvocation RPAR /*{printf("FuncInvocation\n");}*/
+FuncInvocation: ID LPAR error RPAR 
+    |   ID LPAR RPAR {$$=criaNoPai(Statements,"Call");adicionaFilho2($$,criaNoPai(Terminal,$1));} /* Não sabemos o Type a pôr aqui */ 
+    |   ID LPAR Expr AuxFuncInvocation RPAR {$$=criaNoPai(Statements,"Call");adicionaFilho2($$,criaNoPai(Terminal,$1));adicionaIrmao2($$->filho,$3);adicionaIrmao2($$->filho,$4);}
     ;
 
-AuxFuncInvocation: AuxFuncInvocation COMMA Expr
-    | /* empty */
+
+AuxFuncInvocation: AuxFuncInvocation COMMA Expr {if($$!=NULL){$$=adicionaIrmao2($1,$3);}else{$$=$3;}}
+    | /* empty */ {$$=NULL;}
     ;
 
-Expr: ID /*{printf("Expr = ID!\n");}*/
-    |   REALLIT /*{printf("Expr = REALLIT!\n");}*/
-    |   INTLIT /*{printf("Expr = INTLIT!\n");}*/
-    |   Expr AND Expr /*{printf("Expr = Expr AND expr!\n");}*/
-    |   Expr PLUS Expr /*{printf("Expr = Expr PLUS expr!\n");}*/
-    |   Expr LT Expr /*{printf("Expr = Expr LT expr!\n");}*/
-    |   Expr MINUS Expr /*{printf("Expr = Expr MINUS expr!\n");}*/
-    |   Expr GT Expr /*{printf("Expr = Expr GT expr!\n");}*/
-    |   Expr NOT Expr /*{printf("Expr = Expr NOT expr!\n");}*/
-    |   Expr MOD Expr /*{printf("Expr = Expr MOD expr!\n");}*/
-    |   Expr DIV Expr /*{printf("Expr = Expr DIV expr!\n");}*/
-    |   Expr GE Expr /*{printf("Expr = Expr GE expr!\n");}*/
-    |   Expr STAR Expr /*{printf("Expr = Expr STAR expr!\n");}*/
-    |   Expr EQ Expr /*{printf("Expr = Expr EQ expr!\n");}*/
-    |   Expr NE Expr /*{printf("Expr = Expr NE expr!\n");}*/
-    |   Expr LE Expr /*{printf("Expr = Expr LE expr!\n");}*/
-    |   Expr OR Expr /*{printf("Expr = Expr OR expr!\n");}*/
-    |   LPAR Expr RPAR /*{printf("Expr = LPAR Expr RPAR!\n");}*/
-    |   MINUS Expr  /*{printf("Expr = MINUS Expr!\n");}*/
-    |   PLUS Expr/*{printf("Expr = PLUS Expr!\n");}*/
-    |   NOT Expr /*{printf("Expr = NOT Expr!\n");}*/
-    |   FuncInvocation /*{printf("FuncInvocation\n");}*/
+Expr: Expr OR Expr 
+    |   ID {$$=criaNoPai(Terminal,$1);}
+    |   REALLIT {$$=criaNoPai(Terminal,$1);}
+    |   INTLIT {$$=criaNoPai(Terminal,$1);}
+    |   Expr AND Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr PLUS Expr  {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr LT Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr MINUS Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr GT Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr MOD Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr DIV Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr GE Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr STAR Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr EQ Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr NE Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   Expr LE Expr {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   LPAR Expr RPAR {$$=criaNoPai(Operador,$2);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3)}
+    |   MINUS Expr %prec STAR {$$=criaNoPai(Operador,$1);adicionaFilho2($$,$2);}
+    |   PLUS Expr %prec STAR {$$=criaNoPai(Operador,$1);adicionaFilho2($$,$2);}
+    |   NOT Expr %prec STAR {$$=criaNoPai(Operador,$1);adicionaFilho2($$,$2);}
+    |   FuncInvocation {$$=$1;}
     |   LPAR error RPAR /*{printf("error\n");}*/
     ;
 
@@ -219,19 +232,7 @@ Expr: ID /*{printf("Expr = ID!\n");}*/
 
 %%
 
-int main(int argc, char **argv) {
-    /*
-    yydebug=1;
-    */
-    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
-    if(argc>1){
-        if (strcmp(argv[1],"-l")==0){
-            flagLex=1;
-        }
-    }
-    yyparse();
-    return 0;
-}
+
 
 void yyerror (char *st) {
 
@@ -242,8 +243,90 @@ void yyerror (char *st) {
     }
     else{
 
-        printf ("Line %d, column %d: %s: \"%s\"\n", yylineno, numcolunas-(int)strlen(s), st, s);
+        printf ("Line %d, column %d: %s: \"%s\"\n", yylineno, numcolunas-(int)strlen(s)-2, st, s);
         flagString=0;
     }
 
+}
+
+nodeDefault * criaNoPai(nodeType tipo, char *str){
+    nodeDefault *ponteiro;
+    if ((ponteiro=malloc(sizeof(nodeDefault)))== NULL)
+        printf("Estoirou!\n");
+    ponteiro->filho=NULL;
+    ponteiro->irmao=NULL;
+    ponteiro->string=str;
+    ponteiro->tipo=tipo;
+    return ponteiro;
+}
+nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str){
+    nodeDefault *novo;
+    novo=criaNoPai(tipo, str);
+    pai->filho=novo;
+    return novo;
+}
+
+nodeDefault * adicionaIrmao(nodeDefault * atual,nodeType tipo, char *str){
+    //Temos de adicionar no mais à direita
+    nodeDefault *novo;
+    nodeDefault *iterador;
+    iterador=atual;
+    while(iterador->irmao!=NULL){
+        iterador=iterador->irmao;
+    }
+    novo=criaNoPai(tipo, str);
+    iterador->irmao=novo;
+    return novo;
+}
+
+
+int imprimeTralha(nodeDefault *raiz,int depth){
+    nodeDefault *iterador;
+    int i;
+    for(i=0;i<depth;i++){
+        printf("..");
+    }
+    printf("%s\n",raiz->string);
+    if(raiz->filho!=NULL){
+    imprimeTralha(raiz->filho,depth+1);
+        iterador=raiz->filho->irmao;
+        while(iterador!=NULL){
+            imprimeTralha(iterador,depth+1);
+            iterador=iterador->irmao;
+        }
+    }
+   
+    return 0;
+
+}
+nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo){
+    //Temos de adicionar no mais à direita
+    nodeDefault *iterador;
+    iterador=atual;
+    while(iterador->irmao!=NULL){
+        iterador=iterador->irmao;
+    }
+    iterador->irmao=novo;
+    return novo;
+}
+nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo){
+    pai->filho=novo;
+    return novo;
+}
+
+int main(int argc, char **argv) {
+    /*
+    yydebug=1;
+    */
+    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
+    if(argc>1){
+        if (strcmp(argv[1],"-l")==0){
+            flagLex=1;
+        }
+        if (strcmp(argv[1],"-t")==0){
+            flagArvore=0;
+        }
+    }
+    yyparse();
+    return 0;
 }
