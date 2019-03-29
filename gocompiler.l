@@ -95,33 +95,33 @@ aux {INTLIT}$
 
 %%
 {RESERVED} {if (flagLex==1){printf("RESERVED(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=0;return RESERVED;}
-{ENTER} {numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;return SEMICOLON;}}
+{ENTER} {flagString=0;numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;return SEMICOLON;}}
 {espaco}+ {numcolunas+=yyleng;};
 {SEMICOLON} {if (flagLex==1){printf("SEMICOLON\n");}numcolunas+=yyleng;flag_semicolon=0;return SEMICOLON;}
-{BLANKID} {if (flagLex==1){printf("BLANKID\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return BLANKID;}
+{BLANKID} {if (flagLex==1){printf("BLANKID\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return BLANKID;}
 {RETURN} {if (flagLex==1){printf("RETURN\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return RETURN;}
 {AND} {if (flagLex==1){printf("AND\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return AND;}
-{ASSIGN} {if (flagLex==1){printf("ASSIGN\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return ASSIGN;}
-{STAR} {if (flagLex==1){printf("STAR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return STAR;}
-{COMMA} {if (flagLex==1){printf("COMMA\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return COMMA;}
-{DIV} {if (flagLex==1){printf("DIV\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return DIV;}
+{ASSIGN} {if (flagLex==1){printf("ASSIGN\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return ASSIGN;}
+{STAR} {if (flagLex==1){printf("STAR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return STAR;}
+{COMMA} {if (flagLex==1){printf("COMMA\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return COMMA;}
+{DIV} {if (flagLex==1){printf("DIV\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return DIV;}
 {EQ} {if (flagLex==1){printf("EQ\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return EQ;}
 {GE} {if (flagLex==1){printf("GE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return GE;}
-{GT} {if (flagLex==1){printf("GT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return GT;}
-{LBRACE} {if (flagLex==1){printf("LBRACE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LBRACE;}
+{GT} {if (flagLex==1){printf("GT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return GT;}
+{LBRACE} {if (flagLex==1){printf("LBRACE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LBRACE;}
 {LE} {if (flagLex==1){printf("LE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LE;}
-{LPAR} {if (flagLex==1){printf("LPAR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LPAR;}
-{LSQ} {if (flagLex==1){printf("LSQ\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LSQ;}
-{LT} {if (flagLex==1){printf("LT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return LT;}
-{MINUS} {if (flagLex==1){printf("MINUS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MINUS;}
-{MOD} {if (flagLex==1){printf("MOD\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return MOD;}
+{LPAR} {if (flagLex==1){printf("LPAR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LPAR;}
+{LSQ} {if (flagLex==1){printf("LSQ\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LSQ;}
+{LT} {if (flagLex==1){printf("LT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return LT;}
+{MINUS} {if (flagLex==1){printf("MINUS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return MINUS;}
+{MOD} {if (flagLex==1){printf("MOD\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return MOD;}
 {NE} {if (flagLex==1){printf("NE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return NE;}
-{NOT} {if (flagLex==1){printf("NOT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return NOT;}
+{NOT} {if (flagLex==1){printf("NOT\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return NOT;}
 {OR} {if (flagLex==1){printf("OR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return OR;}
-{PLUS} {if (flagLex==1){printf("PLUS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.cval =*strdup(yytext);return PLUS;}
-{RBRACE} {if (flagLex==1){printf("RBRACE\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RBRACE;}
-{RSQ} {if (flagLex==1){printf("RSQ\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RSQ;}
-{RPAR} {if (flagLex==1){printf("RPAR\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.cval =*strdup(yytext);return RPAR;}
+{PLUS} {if (flagLex==1){printf("PLUS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PLUS;}
+{RBRACE} {if (flagLex==1){printf("RBRACE\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return RBRACE;}
+{RSQ} {if (flagLex==1){printf("RSQ\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return RSQ;}
+{RPAR} {if (flagLex==1){printf("RPAR\n");}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return RPAR;}
 {ELSE} {if (flagLex==1){printf("ELSE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return ELSE;}
 {FOR} {if (flagLex==1){printf("FOR\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FOR;}
 {IF} {if (flagLex==1){printf("IF\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return IF;}
