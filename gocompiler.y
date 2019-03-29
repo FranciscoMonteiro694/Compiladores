@@ -166,7 +166,9 @@ VarDeclaration: VAR VarSpec {
 
 VarSpec: ID teste Type { 
     if($2!=NULL){
-        $$=adicionaIrmaoInicio($2,criaNoPai(Terminal,$1));
+        char*a
+
+        $$=adicionaIrmaoInicio($2,criaNoPai(Terminal,aux)     );
         $$=juntarCenas($$,$3->string);
         
 
@@ -319,7 +321,7 @@ VarsAndStatements: VarsAndStatements SEMICOLON {
     ;
 
 Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,$1);adicionaFilho2($$,$3);}
-    |   PRINT LPAR STRLIT RPAR {$$=criaNoPai(Statements,$1);char *aux; aux=(char*)malloc(sizeof(char)*100);strcpy(aux,s); adicionaFilho2($$,criaNoPai(Terminal,aux));}
+    |   PRINT LPAR STRLIT RPAR {$$=criaNoPai(Statements,$1);adicionaFilho2($$,criaNoPai(Terminal,$3));}
     |   error {$$=NULL;}
     |   FuncInvocation {$$=$1;}
     |   ParseArgs {$$=$1;}
@@ -586,6 +588,11 @@ nodeDefault * juntarCenas(nodeDefault * alvo,char* string){
     
 
     return final;
+}
+
+
+char * juntaStrings(){
+    
 }
 
 int main(int argc, char **argv) {
