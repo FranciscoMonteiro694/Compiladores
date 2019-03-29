@@ -33,6 +33,7 @@
     nodeDefault * adicionaIrmaoInicio(nodeDefault * atual,nodeDefault *novo);
     nodeDefault * juntarCenas(nodeDefault * alvo,char* string);
     char * juntaStrings(char *tipo,char *valor, char *parenteses);
+    int contaIrmao(nodeDefault * alvo);
 
 %}
 %union{
@@ -106,9 +107,8 @@ vai ser preciso quase de certeza
 %left COMMA
 %right ASSIGN
 %left OR
-%left AND
-%left EQ NE 
-%left GE GT LE LT 
+%left AND 
+%left GE GT LE LT EQ NE
 %left PLUS MINUS
 %left STAR DIV MOD
 %left NOT
@@ -331,7 +331,7 @@ VarsAndStatements: VarsAndStatements SEMICOLON {
     ;
 
 Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2($$,$3);}
-    |   PRINT LPAR STRLIT RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2($$,criaNoPai(Terminal,$3));}
+    |   PRINT LPAR STRLIT RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2($$,criaNoPai(Terminal,juntaStrings("StrLit(\"",$3,"\")")));}
     |   error {$$=NULL;}
     |   FuncInvocation {$$=$1;}
     |   ParseArgs {$$=$1;}
@@ -393,13 +393,15 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
     }
     |   IF Expr LBRACE AuxStatement1 RBRACE ELSE LBRACE AuxStatement1 RBRACE {
         if($4!=NULL){
-            nodeDefault *aux;
+            nodeDefault *aux,*aux2;
             $$=criaNoPai(Statements,"If");
             adicionaFilho2($$,$2);
             aux=criaNoPai(Statements,"Block");
             adicionaFilho2(aux,$4);
             adicionaIrmao2($$->filho,aux);
-            adicionaIrmao2($$->filho,criaNoPai(Statements,"Block"));
+		aux2=criaNoPai(Statements,"Block");
+            adicionaIrmao2($$->filho,aux2);
+		adicionaFilho2(aux2,$8);
         }
         else{
             nodeDefault *aux;
@@ -414,10 +416,15 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
     |   LBRACE AuxStatement1 RBRACE { /* Dúvida */
 	//printf("tasse a espumar do boquinhaaa\n");
         if($2!=NULL){
-            $$=$2;
+            if(contaIrmao($2)>1){
+		$$=criaNoPai(Statements,"Block");
+            	adicionaFilho2($$,$2);
+		}
+		else{
+		$$=$2;}
         }
         else{
-
+		$$=NULL;
         }
     }
     ;
@@ -425,6 +432,7 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
 AuxStatement1: AuxStatement1 Statement SEMICOLON {
     if($1!=NULL){
         $$=adicionaIrmao2($1,$2);
+	
     }
     else{
         $$=$2;
@@ -447,7 +455,8 @@ FuncInvocation: ID LPAR error RPAR {$$=NULL;}
         if($4!=NULL){
             $$=criaNoPai(Statements,"Call");
             adicionaFilho2($$,criaNoPai(Terminal,juntaStrings("Id(",$1,")")));
-            adicionaIrmao2($$->filho,$3);adicionaIrmao2($$->filho,$4);
+	    adicionaIrmao2($3,$4);
+            adicionaIrmao2($$->filho,$3);
     }
     else{
         nodeDefault *aux;
@@ -460,18 +469,18 @@ FuncInvocation: ID LPAR error RPAR {$$=NULL;}
     ;
 
 
-AuxFuncInvocation: AuxFuncInvocation COMMA Expr {if($1!=NULL){$$=adicionaIrmao2($1,$3);}else{$$=$3;}}
+AuxFuncInvocation: AuxFuncInvocation COMMA Expr {if($1!=NULL){$$=$1;adicionaIrmao2($1,$3);}else{$$=$3;}}
     | /* empty */ {$$=NULL;}
     ;
 
-Expr: Expr OR Expr 
+Expr: Expr OR Expr {$$=criaNoPai(Operadores,"Or");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
     |   ID {$$=criaNoPai(Terminal,juntaStrings("Id(",$1,")"));}
     |   REALLIT {$$=criaNoPai(Terminal,juntaStrings("RealLit(",$1,")"));}
     |   INTLIT {$$=criaNoPai(Terminal,juntaStrings("IntLit(",$1,")"));}
     |   Expr AND Expr {$$=criaNoPai(Operadores,"And");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr PLUS Expr  {$$=criaNoPai(Operadores,"Plus");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr PLUS Expr  {$$=criaNoPai(Operadores,"Add");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
     |   Expr LT Expr {$$=criaNoPai(Operadores,"Lt");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr MINUS Expr {$$=criaNoPai(Operadores,"Minus");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr MINUS Expr {$$=criaNoPai(Operadores,"Sub");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
     |   Expr GT Expr {$$=criaNoPai(Operadores,"Gt");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
     |   Expr MOD Expr {$$=criaNoPai(Operadores,"Mod");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
     |   Expr DIV Expr {$$=criaNoPai(Operadores,"Div");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
@@ -574,7 +583,7 @@ nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo){
         iterador=iterador->irmao;
     }
     iterador->irmao=novo;
-    return novo;
+    return iterador;
 }
 
 nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo){
@@ -608,6 +617,19 @@ nodeDefault * juntarCenas(nodeDefault * alvo,char* string){
     return final;
 }
 
+
+ int contaIrmao(nodeDefault * alvo){
+	nodeDefault * iterador;
+	int sum=1;
+	iterador=alvo;
+	while(iterador->irmao!=NULL){
+		sum++;
+		iterador=iterador->irmao;
+	
+	}
+	return sum;
+
+	}
 
 int main(int argc, char **argv) {
     /*
