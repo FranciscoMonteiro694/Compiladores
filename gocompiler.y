@@ -409,12 +409,14 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
             adicionaFilho2(aux2,$8);
         }
         else{
-            nodeDefault *aux;
+            nodeDefault *aux,*aux2;
             $$=criaNoPai(Statements,"If");
             adicionaFilho2($$,$2);
             aux=criaNoPai(Statements,"Block");
             adicionaIrmao2($$->filho,aux);
-            adicionaIrmao2($$->filho,criaNoPai(Statements,"Block"));
+            aux2=criaNoPai(Statements,"Block");
+            adicionaIrmao2($$->filho,aux2);
+            adicionaFilho2(aux2,$8);
         }
 
     }
@@ -666,3 +668,4 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
+
