@@ -90,6 +90,7 @@
 %token <string> PACKAGE
 %token <string> VAR
 
+%token IFELSE
 /*
 vai ser preciso quase de certeza
 
@@ -113,7 +114,7 @@ vai ser preciso quase de certeza
 %left STAR DIV MOD
 %left NOT
 %left LPAR RPAR LBRACE RBRACE
-
+%nonassoc IFELSE
 
 
 
@@ -124,20 +125,20 @@ Program: PACKAGE ID SEMICOLON Declarations {
     if($4!=NULL){
         $$=criaNoPai(Raiz,"Program");
         adicionaFilho2($$,$4);
-	if(flagErro!=1&&flagArvore!=0){
-	
-	    imprimeTralha($$,0);
+    if(flagErro!=1&&flagArvore!=0){
+    
+        imprimeTralha($$,0);
 
-	}
+    }
         
     }
     else{
         $$=criaNoPai(Raiz,"Program");
-	if(flagErro!=1&&flagArvore!=0){
-	
-	    imprimeTralha($$,0);
+    if(flagErro!=1&&flagArvore!=0){
+    
+        imprimeTralha($$,0);
 
-	}
+    }
         
     }
 }
@@ -371,8 +372,12 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
             adicionaFilho2($$,aux);  
         }
     }
-    |   ID ASSIGN Expr {$$=criaNoPai(Operadores,"Assign");adicionaFilho2($$,criaNoPai(Terminal,juntaStrings("Id(",$1,")")));adicionaIrmao2($$->filho,$3);}
-    |   IF Expr LBRACE AuxStatement1 RBRACE{
+    |   ID ASSIGN Expr {
+            $$=criaNoPai(Operadores,"Assign");
+            adicionaFilho2($$,criaNoPai(Terminal,juntaStrings("Id(",$1,")")));
+            adicionaIrmao2($$->filho,$3);
+}
+    |   IF Expr LBRACE AuxStatement1 RBRACE {
         if($4!=NULL){
             nodeDefault *aux;
             $$=criaNoPai(Statements,"If");
@@ -391,7 +396,7 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
             adicionaIrmao2($$->filho,criaNoPai(Statements,"Block"));
         }
     }
-    |   IF Expr LBRACE AuxStatement1 RBRACE ELSE LBRACE AuxStatement1 RBRACE {
+    |   IF Expr LBRACE AuxStatement1 RBRACE ELSE LBRACE AuxStatement1 RBRACE %prec IFELSE{
         if($4!=NULL){
             nodeDefault *aux,*aux2;
             $$=criaNoPai(Statements,"If");
@@ -399,9 +404,9 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
             aux=criaNoPai(Statements,"Block");
             adicionaFilho2(aux,$4);
             adicionaIrmao2($$->filho,aux);
-		aux2=criaNoPai(Statements,"Block");
+            aux2=criaNoPai(Statements,"Block");
             adicionaIrmao2($$->filho,aux2);
-		adicionaFilho2(aux2,$8);
+            adicionaFilho2(aux2,$8);
         }
         else{
             nodeDefault *aux;
@@ -414,25 +419,25 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
 
     }
     |   LBRACE AuxStatement1 RBRACE { /* Dúvida */
-	//printf("tasse a espumar do boquinhaaa\n");
         if($2!=NULL){
-            if(contaIrmao($2)>1){
-		$$=criaNoPai(Statements,"Block");
-            	adicionaFilho2($$,$2);
-		}
-		else{
-		$$=$2;}
+            if(contaIrmao($2)>1){ // Se for maior ou igual a 2 cria Block
+                $$=criaNoPai(Statements,"Block");
+                adicionaFilho2($$,$2);
+
+            }
+            else{ // Caso contrário não cria, mas não é preciso adicionar também?
+                $$=$2;
+            }
         }
         else{
-		$$=NULL;
+            $$=NULL;
         }
     }
     ;
 
 AuxStatement1: AuxStatement1 Statement SEMICOLON {
     if($1!=NULL){
-        $$=adicionaIrmao2($1,$2);
-	
+        $$=adicionaIrmao2($1,$2);// vai receber o irmao à esquerda do novo
     }
     else{
         $$=$2;
@@ -455,7 +460,7 @@ FuncInvocation: ID LPAR error RPAR {$$=NULL;}
         if($4!=NULL){
             $$=criaNoPai(Statements,"Call");
             adicionaFilho2($$,criaNoPai(Terminal,juntaStrings("Id(",$1,")")));
-	    adicionaIrmao2($3,$4);
+        adicionaIrmao2($3,$4);
             adicionaIrmao2($$->filho,$3);
     }
     else{
@@ -504,7 +509,7 @@ Expr: Expr OR Expr {$$=criaNoPai(Operadores,"Or");adicionaFilho2($$,$1);adiciona
 
 
 void yyerror (char *st) {
-	flagErro=1;
+    flagErro=1;
     if(flagString==0){
 
         printf ("Line %d, column %d: %s: %s\n", yylineno, numcolunas-(int)strlen(yytext), st, yytext);
@@ -517,14 +522,16 @@ void yyerror (char *st) {
     }
 
 }
+
 char * juntaStrings(char *tipo,char *valor, char *parenteses){
-    char *tmp = strdup(tipo);
-    char *tmp2 = strdup(valor);
-    char *tmp3 = strdup(parenteses);
-    return strcat(tmp,strcat(tmp2,tmp3));
+    char *aux;
+    aux = (char*)malloc(sizeof(char)*200);
+    strcpy(aux,tipo);
+    strcat(aux,valor);
+    strcat(aux, parenteses);
+    
+    return aux;
 }
-
-
 nodeDefault * criaNoPai(nodeType tipo, char *str){
     nodeDefault *ponteiro;
     if ((ponteiro=malloc(sizeof(nodeDefault)))== NULL)
@@ -576,20 +583,21 @@ int imprimeTralha(nodeDefault *raiz,int depth){
 
 }
 nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo){
-    //Temos de adicionar no mais à direita
     nodeDefault *iterador;
     iterador=atual;
     while(iterador->irmao!=NULL){
         iterador=iterador->irmao;
     }
     iterador->irmao=novo;
-    return iterador;
-}
 
+
+    return atual;
+}
 nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo){
     pai->filho=novo;
     return novo;
 }
+
 nodeDefault * adicionaIrmaoInicio(nodeDefault * atual,nodeDefault *novo){
     //Temos de adicionar no inicio
     novo->irmao=atual;
@@ -619,43 +627,42 @@ nodeDefault * juntarCenas(nodeDefault * alvo,char* string){
 
 
  int contaIrmao(nodeDefault * alvo){
-	nodeDefault * iterador;
-	int sum=1;
-	iterador=alvo;
-	while(iterador->irmao!=NULL){
-		sum++;
-		iterador=iterador->irmao;
-	
-	}
-	return sum;
+    nodeDefault * iterador;
+    int sum=1;
+    iterador=alvo;
+    while(iterador->irmao!=NULL){
+        sum++;
+        iterador=iterador->irmao;
+    
+    }
+    return sum;
 
-	}
+    }
 
 int main(int argc, char **argv) {
     /*
     yydebug=1;
     */
-    /* Se a flag -l for passada, deve pôr a flag a 1 para o lex fazer a análise lexical */
     if(argc>1){
         if (strcmp(argv[1],"-l")==0){
-	flagArvore=0;
+    flagArvore=0;
             flagLex=1;
-		while(yylex()){
-	
-		}
+        while(yylex()){
+    
         }
-	else{
-	if (strcmp(argv[1],"-t")==0){
+        }
+    else{
+    if (strcmp(argv[1],"-t")==0){
             flagArvore=1;
-	 flagLex=0;
-		yyparse();
+     flagLex=0;
+        yyparse();
         }
-	}	
+    }   
         
     }
     else{
-		yyparse();
-  		flagArvore=0;
-	}
+        yyparse();
+        flagArvore=0;
+    }
     return 0;
 }

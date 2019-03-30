@@ -150,7 +150,7 @@ aux {INTLIT}$
 
 "//" {numcolunas+=yyleng;BEGIN COMENTARIO_2;}
 <COMENTARIO_2>.	{numcolunas+=yyleng;};
-<COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}return SEMICOLON;flag_semicolon=0;}BEGIN 0;}
+<COMENTARIO_2>"\n" {numcolunas=1;if(flag_semicolon==1){if (flagLex==1){printf("SEMICOLON\n");}flag_semicolon=0;return SEMICOLON;}BEGIN 0;}
 
 "\"" {aux_erroc=numcolunas;aux_errol=yylineno;numcolunas+=yyleng;BEGIN STRLITT;}
 <STRLITT>"\\""\\" {s[tamanho]=yytext[0];tamanho++;s[tamanho]=yytext[1];tamanho++;numcolunas+=yyleng;}
