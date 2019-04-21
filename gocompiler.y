@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include "tabelas.h"
     #define YYDEBUG 1
     extern int yydebug;
     extern int numcolunas;
@@ -13,15 +14,8 @@
     void yyerror (char *st);
     int flagLex=0;
     int flagArvore=0;
-     int flagErro=0;
-    typedef enum { Terminal, Operadores, Statements, DecFuncoes, DecVariaveis, Raiz} nodeType;
-    typedef struct node *lista;
-    typedef struct node{
-        char *string;
-        nodeType tipo;
-        lista filho;
-        lista irmao;
-    }nodeDefault;
+    int flagErro=0;
+    
     int imprimeTralha(nodeDefault *raiz,int depth);
     int limpaTralha(nodeDefault *raiz);
     nodeDefault * criaNoPai(nodeType tipo, char *str);
@@ -34,6 +28,9 @@
     nodeDefault * juntarCenas(nodeDefault * alvo,char* string);
     char * juntaStrings(char *tipo,char *valor, char *parenteses);
     int contaIrmao(nodeDefault * alvo);
+
+    /* Inicializa tabela de símbolos global */
+    elemento_tabelag *tg = NULL;
 
 %}
 %union{
@@ -102,7 +99,6 @@ vai ser preciso quase de certeza
 %type <ponteiro> Program Declarations VarDeclaration VarSpec teste Type FuncDeclaration Parameters AuxParameters FuncBody VarsAndStatements Statement AuxStatement1 ParseArgs FuncInvocation AuxFuncInvocation Expr
 
 
-/* Se usarmos dois lefts, ou rights, o de baixo tem prioridade sobre o de cima */
 
 
 %left COMMA
@@ -115,7 +111,6 @@ vai ser preciso quase de certeza
 %left NOT
 %left LPAR RPAR LBRACE RBRACE
 %nonassoc IFELSE
-
 
 
 %%
@@ -220,16 +215,21 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
     aux3=criaNoPai(DecFuncoes,"FuncParams");
     adicionaIrmao2(aux->filho,aux3);
     adicionaIrmao2($$->filho,$5);
+
+    elemento_tabelag* newel=insert_el($2, none);
 }
     |   FUNC ID LPAR Parameters RPAR FuncBody {
         nodeDefault *aux,*aux2; 
         $$=criaNoPai(DecFuncoes,"FuncDecl");
         aux=criaNoPai(DecFuncoes,"FuncHeader");
         adicionaFilho2($$,aux);
-       aux2=criaNoPai(Terminal,juntaStrings("Id(",$2,")"));
+        aux2=criaNoPai(Terminal,juntaStrings("Id(",$2,")"));
         adicionaFilho2(aux,aux2);
         adicionaIrmao2(aux->filho,$4);
         adicionaIrmao2($$->filho,$6);
+
+        elemento_tabelag* newel=insert_el($2, none);
+        insertTipos($2, $4);
     }
     |   FUNC ID LPAR Parameters RPAR Type FuncBody {
         nodeDefault *aux,*aux2; 
@@ -241,6 +241,13 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
         adicionaIrmao2(aux->filho,$6);
         adicionaIrmao2(aux->filho,$4);
         adicionaIrmao2($$->filho,$7);
+
+        elemento_tabelag* newel=insert_elNode($2, $6);
+
+        //printf("Valor %s\n",$4->filho->filho->string);
+        insertTipos($2, $4);
+
+        //insertTipos($2,$4);
         
     }
     ;
@@ -254,6 +261,8 @@ Parameters: ID Type AuxParameters {
         adicionaIrmaoInicio($3,aux2);
         $$=criaNoPai(DecFuncoes,"FuncParams");
         adicionaFilho2($$,aux2);
+
+
 
     }
     else{
@@ -397,7 +406,8 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
         }
     }
     |   IF Expr LBRACE AuxStatement1 RBRACE ELSE LBRACE AuxStatement1 RBRACE %prec IFELSE{
-        if($4!=NULL){
+        //NENHUM NULL
+        if($4!=NULL && $8!=NULL){
             nodeDefault *aux,*aux2;
             $$=criaNoPai(Statements,"If");
             adicionaFilho2($$,$2);
@@ -408,7 +418,8 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
             adicionaIrmao2($$->filho,aux2);
             adicionaFilho2(aux2,$8);
         }
-        else{
+        // $4 NULL E $8 NÃO NULL
+        if($4==NULL && $8!=NULL){
             nodeDefault *aux,*aux2;
             $$=criaNoPai(Statements,"If");
             adicionaFilho2($$,$2);
@@ -417,6 +428,27 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
             aux2=criaNoPai(Statements,"Block");
             adicionaIrmao2($$->filho,aux2);
             adicionaFilho2(aux2,$8);
+        }
+        // $4 NÃO NULL E $8 NULL
+        if($4!=NULL && $8==NULL){
+            nodeDefault *aux,*aux2;
+            $$=criaNoPai(Statements,"If");
+            adicionaFilho2($$,$2);
+            aux=criaNoPai(Statements,"Block");
+            adicionaFilho2(aux,$4);
+            adicionaIrmao2($$->filho,aux);
+            aux2=criaNoPai(Statements,"Block");
+            adicionaIrmao2($$->filho,aux2);
+        }
+        // $4 NULL E $8 NULL
+        if($4==NULL && $8==NULL){
+            nodeDefault *aux,*aux2;
+            $$=criaNoPai(Statements,"If");
+            adicionaFilho2($$,$2);
+            aux=criaNoPai(Statements,"Block");
+            adicionaIrmao2($$->filho,aux);
+            aux2=criaNoPai(Statements,"Block");
+            adicionaIrmao2($$->filho,aux2);
         }
 
     }
@@ -527,7 +559,7 @@ void yyerror (char *st) {
 
 char * juntaStrings(char *tipo,char *valor, char *parenteses){
     char *aux;
-    aux = (char*)malloc(sizeof(char)*200);
+    aux = (char*)malloc(sizeof(char)*300);
     strcpy(aux,tipo);
     strcat(aux,valor);
     strcat(aux, parenteses);
@@ -641,6 +673,8 @@ nodeDefault * juntarCenas(nodeDefault * alvo,char* string){
 
     }
 
+
+
 int main(int argc, char **argv) {
     /*
     yydebug=1;
@@ -665,6 +699,7 @@ int main(int argc, char **argv) {
     else{
         yyparse();
         flagArvore=0;
+        imprime_tabelaGlobal();
     }
     return 0;
 }
