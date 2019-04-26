@@ -251,6 +251,24 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
 
         
     }
+	|   FUNC ID LPAR  RPAR Type FuncBody {
+        nodeDefault *aux,*aux2; 
+        $$=criaNoPai(DecFuncoes,"FuncDecl");
+        aux=criaNoPai(DecFuncoes,"FuncHeader");
+        adicionaFilho2($$,aux);
+        aux2=criaNoPai(Terminal,juntaStrings("Id(",$2,")"));
+        adicionaFilho2(aux,aux2);
+	
+        adicionaIrmao2(aux->filho,$5);//dar double checkkkkk
+	
+        adicionaIrmao2($$->filho,$6);
+	adicionaIrmao2(aux->filho,criaNoPai(DecFuncoes,"FuncParams"));
+        //elemento_tabelag* newel=insert_elNode($2, $6);
+
+        //insertTipos($2, $4);
+
+        
+    }
     ;
 Parameters: ID Type AuxParameters {
     if ($3!=NULL){
@@ -677,6 +695,54 @@ nodeDefault * juntarCenas(nodeDefault * alvo,char* string){
 
 int criaTabelas(nodeDefault *raiz){
     nodeDefault *iterador;
+	elemento_tabelag * aux;
+    iterador=raiz->filho;
+    while(iterador!=NULL){
+	if(strcmp(iterador->string,"FuncDecl")==0){
+		aux=insertFuncaoT(iterador);
+	    criaLocal(iterador,aux);
+		//imprime_tabelaLocal(aux->local);
+        }
+	if(strcmp(iterador->string,"VarDecl")==0){
+            insertVarD(iterador);
+        }
+
+
+	iterador=iterador->irmao;
+	}
+/*
+    //printf("%s\n",raiz->string);
+    if(raiz->filho!=NULL){
+
+        if(strcmp(raiz->filho->string,"FuncDecl")==0){
+            insertFuncaoT(raiz->filho);
+        }
+	if(strcmp(raiz->filho->string,"VarDecl")==0){
+	    printf("heheheheh\n");
+            insertVarD(raiz->filho);
+        }
+        criaTabelas(raiz->filho);
+        iterador=raiz->filho->irmao;
+        while(iterador!=NULL){
+            if(strcmp(iterador->string,"FuncDecl")==0){
+                insertFuncaoT(iterador);
+            }
+	    if(strcmp(iterador->string,"VarDecl")==0){
+		printf("heheheheh2\n");
+            	insertVarD(iterador);
+       		 }
+            criaTabelas(iterador);
+            iterador=iterador->irmao;
+        }
+	//varDecl
+    }*/
+   
+    return 0;
+
+}
+/*
+int criaTabelas(nodeDefault *raiz){
+    nodeDefault *iterador;
 
 
     //printf("%s\n",raiz->string);
@@ -707,7 +773,7 @@ int criaTabelas(nodeDefault *raiz){
    
     return 0;
 
-}
+}*/
 
 
 int main(int argc, char **argv) {

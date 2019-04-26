@@ -89,8 +89,8 @@ elemento_tabelal *insert_elLocal(char *str, char* t,int param,elemento_tabelal *
 	}
 	else	//symtab tem um elemento -> o novo simbolo
 		lista_local=newSymbol;		
-	
-	return newSymbol;
+	//imprime_tabelaLocal(lista_local);
+	return lista_local;
 
 
 
@@ -202,11 +202,9 @@ void imprime_tabelaGlobal()
 	printf("\n");
 	for(aux=tg; aux; aux=aux->next){
 		printf("%s\t",aux->name);
-		if(aux->tipos!=NULL){
 		printf("(");
 		imprimeTipos(aux);
 		printf(")");
-		}
 		switch(aux->tipo){
 		case none:
 			printf("\tnone");
@@ -226,18 +224,43 @@ void imprime_tabelaGlobal()
 		}
 		printf("\n");
 	}
-
 	printf("\n");
 	for(aux=tg; aux; aux=aux->next){
 	if(aux->local!=NULL){
-		imprime_tabelaLocal(aux->local);
+		imprime_tabelaLocal(aux->local,aux->name);
 	}
 	}
 }
-void imprime_tabelaLocal(elemento_tabelal * lista_local){
-	printf("===== Local Symbol Table =====");//---------------------------->adicionar nome da funcao etc
-	elemento_tabelal *aux;
-	printf("\n");
+char * estupido(type c){
+	switch(c){
+		case none:
+			return("none,");
+			break;
+		case integer:
+			return("int,");
+			break;
+		case string:
+			return("string,");
+			break;
+		case boolean:
+			return("bool,");
+			break;
+		case float32:
+			return("float32,");
+			break;
+		}
+	}
+void imprime_tabelaLocal(elemento_tabelal * lista_local,char* s){
+	char auxS [100] ;
+	elemento_tabelal *aux,*aux2;
+	aux2=lista_local->next;
+	strcpy(auxS,"");
+	while(aux2!=NULL){
+		strcat(auxS,estupido(aux2->tipo));
+		aux2=aux2->next;
+	}
+	auxS[strlen(auxS)-1]='\0';
+	printf("===== Function %s(%s)Symbol Table =====\n",s,auxS);//---------------------------->adicionar nome da funcao etc
 	for(aux=lista_local; aux; aux=aux->next){
 		printf("%s\t",aux->name);
 		switch(aux->tipo){
@@ -354,9 +377,10 @@ char * tiraId(char *str){
     return aux;
 }
 
-void insertFuncaoT(nodeDefault *no){// FuncDecl
+elemento_tabelag* insertFuncaoT(nodeDefault *no){// FuncDecl
 	// Insere o nome da função na tabela global
 	// Se tiver tipo de retorno
+	elemento_tabelag* newel;
 	nodeDefault *aux;
 	aux=no->filho->filho;//Nome da função
 	char * nomeFunc;
@@ -365,12 +389,12 @@ void insertFuncaoT(nodeDefault *no){// FuncDecl
 	strcpy(nomeFunc,tiraId(aux->string));
 	//printf("Nome da func %s\n",nomeFunc);
 	if (checkHasReturn(aux)==1){
-		elemento_tabelag* newel=insert_el(nomeFunc,aux->irmao->string);
+		newel=insert_el(nomeFunc,aux->irmao->string);
 		aux=aux->irmao;
 		aux=aux->irmao;
 	}
 	else{
-		elemento_tabelag* newel=insert_el(nomeFunc,"none");
+		newel=insert_el(nomeFunc,"none");
 		aux=aux->irmao;
 
 	}
@@ -379,19 +403,78 @@ void insertFuncaoT(nodeDefault *no){// FuncDecl
 	}
 
 	
-
+	return newel;
 }
 
-void insertVarD(nodeDefault *no){//VarDecl ta a entrar um funcdec wtf
+elemento_tabelag* insertVarD(nodeDefault *no){//VarDecl ta a entrar um funcdec wtf
 	nodeDefault *aux=no;
-        printf("teste %s\n",aux->string);
+	elemento_tabelag* newel;
+        /*printf("teste %s\n",aux->string);
 	printf("teste %s\n",aux->filho->string);
-	printf("teste %s\n",aux->filho->irmao->string);
+	printf("teste %s\n",aux->filho->irmao->string);*/
 	//falta verificaçoes mas wahteveeeer
-	elemento_tabelag* newel=insert_el(aux->filho->irmao->string,aux->filho->string);
+	 newel=insert_el(aux->filho->irmao->string,aux->filho->string);
+	return newel;
 	
 
 }
+
+void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
+    nodeDefault *iterador,*iterador2,*iterador3;
+	//printf("iterador %s\n",no->string);
+    iterador=no->filho;
+	//printf("iterador %s\n",iterador->string);
+    while(iterador!=NULL){
+	//printf("a percored o iterador1 %s \n",iterador->string);
+	if(strcmp(iterador->string,"FuncHeader")==0){
+		if(strcmp(iterador->filho->irmao->string,"FuncParams")!=0){
+			elemento->local=insert_elLocal("return",iterador->filho->irmao->string,0,elemento->local);
+			iterador3=iterador->filho->irmao->irmao->filho;
+			while(iterador3!=NULL){
+			//printf("a percored o iterador3 %s \n",iterador3->string);
+			elemento->local=insert_elLocal(iterador3->filho->irmao->string,iterador3->filho->string,1,elemento->local);
+			iterador3=iterador3->irmao;
+			}
+			
+
+		}
+		else{
+		elemento->local=insert_elLocal("return","none",0,elemento->local);
+		iterador3=iterador->filho->irmao->filho;
+		while(iterador3!=NULL){
+			//printf("a percored o iterador3 %s \n",iterador3->string);
+
+			elemento->local=insert_elLocal(iterador3->filho->irmao->string,iterador3->filho->string,1,elemento->local);
+			iterador3=iterador3->irmao;
+			}
+			
+		}
+		
+	    //fazer local
+        }
+	if(strcmp(iterador->string,"FuncBody")==0){
+		iterador2=iterador->filho;
+		while(iterador2!=NULL){
+			//printf("a percored o iterador2 %s \n",iterador2->string);
+			if(strcmp(iterador->string,"VarDecl")==0){
+				elemento->local=insert_elLocal(iterador2->filho->irmao->string,iterador2->filho->string,0,elemento->local);
+			
+			}
+			iterador2=iterador2->irmao;
+
+		}
+		
+	
+        }
+
+
+	iterador=iterador->irmao;
+	}
+}
+
+
+
+
 
 
 
