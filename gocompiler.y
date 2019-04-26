@@ -28,7 +28,7 @@
     nodeDefault * juntarCenas(nodeDefault * alvo,char* string);
     char * juntaStrings(char *tipo,char *valor, char *parenteses);
     int contaIrmao(nodeDefault * alvo);
-
+    int criaTabelas(nodeDefault *raiz);
     /* Inicializa tabela de símbolos global */
     elemento_tabelag *tg = NULL;
 
@@ -124,6 +124,7 @@ Program: PACKAGE ID SEMICOLON Declarations {
     
         imprimeTralha($$,0);
 
+
     }
         
     }
@@ -136,6 +137,8 @@ Program: PACKAGE ID SEMICOLON Declarations {
     }
         
     }
+    criaTabelas($$);
+    imprime_tabelaGlobal();
 }
     ;
 
@@ -216,7 +219,7 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
     adicionaIrmao2(aux->filho,aux3);
     adicionaIrmao2($$->filho,$5);
 
-    elemento_tabelag* newel=insert_el($2, none);
+    //elemento_tabelag* newel=insert_el($2, none);
 }
     |   FUNC ID LPAR Parameters RPAR FuncBody {
         nodeDefault *aux,*aux2; 
@@ -228,8 +231,8 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
         adicionaIrmao2(aux->filho,$4);
         adicionaIrmao2($$->filho,$6);
 
-        elemento_tabelag* newel=insert_el($2, none);
-        insertTipos($2, $4);
+        //elemento_tabelag* newel=insert_el($2, none);
+        //insertTipos($2, $4);
     }
     |   FUNC ID LPAR Parameters RPAR Type FuncBody {
         nodeDefault *aux,*aux2; 
@@ -242,12 +245,10 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
         adicionaIrmao2(aux->filho,$4);
         adicionaIrmao2($$->filho,$7);
 
-        elemento_tabelag* newel=insert_elNode($2, $6);
+        //elemento_tabelag* newel=insert_elNode($2, $6);
 
-        //printf("Valor %s\n",$4->filho->filho->string);
-        insertTipos($2, $4);
+        //insertTipos($2, $4);
 
-        //insertTipos($2,$4);
         
     }
     ;
@@ -673,6 +674,31 @@ nodeDefault * juntarCenas(nodeDefault * alvo,char* string){
 
     }
 
+
+int criaTabelas(nodeDefault *raiz){
+    nodeDefault *iterador;
+
+
+    //printf("%s\n",raiz->string);
+    if(raiz->filho!=NULL){
+
+        if(strcmp(raiz->filho->string,"FuncDecl")==0){
+            insertFuncaoT(raiz->filho);
+        }
+        criaTabelas(raiz->filho);
+        iterador=raiz->filho->irmao;
+        while(iterador!=NULL){
+            if(strcmp(iterador->string,"FuncDecl")==0){
+                insertFuncaoT(iterador);
+            }
+            criaTabelas(iterador);
+            iterador=iterador->irmao;
+        }
+    }
+   
+    return 0;
+
+}
 
 
 int main(int argc, char **argv) {

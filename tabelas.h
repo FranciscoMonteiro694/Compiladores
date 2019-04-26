@@ -32,7 +32,7 @@ typedef struct _tg{
 
 
 
-elemento_tabelag *insert_el(char *str, type t);
+elemento_tabelag *insert_el(char *str, char* t);
 void imprime_tabelaGlobal();
 void imprimeTipos(elemento_tabelag *tabela);
 noTipo *insertTipo(noTipo *tipos,char *tipoo);
@@ -40,4 +40,6 @@ elemento_tabelag *insertParamTypes(char *nomefuncao, nodeDefault *no);
 elemento_tabelag *insert_elNode(char *str, nodeDefault *no);
 elemento_tabelag *search_el(char *str);
 void insertTipos(char *funcNam, nodeDefault *no);
+void insertFuncaoT(nodeDefault *no);
+int checkHasReturn(nodeDefault *no);
 

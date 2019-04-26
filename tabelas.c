@@ -7,14 +7,30 @@ extern elemento_tabelag* tg;
 
 
 //Insere um novo identificador na cauda de uma lista ligada de simbolo
-elemento_tabelag *insert_el(char *str, type t)
+elemento_tabelag *insert_el(char *str, char* t)
 {
 	elemento_tabelag *newSymbol=(elemento_tabelag*) malloc(sizeof(elemento_tabelag));
 	elemento_tabelag *aux;
 	elemento_tabelag *previous;
 
 	strcpy(newSymbol->name, str);
-	newSymbol->tipo=t;
+	if(strcmp(t,"Int")==0){
+		newSymbol->tipo=integer;
+	}
+	else if(strcmp(t,"Bool")==0){
+		newSymbol->tipo=boolean;
+	}
+	else if(strcmp(t,"Float32")==0)
+	{	
+		newSymbol->tipo=float32;
+	}
+	else if(strcmp(t,"String")==0){
+		newSymbol->tipo=string;
+	}
+	else if(strcmp(t,"none")==0){
+		newSymbol->tipo=none;
+	}
+	newSymbol->tipos=NULL;
 	newSymbol->next=NULL;	
 
 	if(tg)	//Se table ja tem elementos
@@ -136,7 +152,7 @@ void imprime_tabelaGlobal()
 	for(aux=tg; aux; aux=aux->next){
 		printf("%s\t",aux->name);
 		printf("(");
-		imprimeTipos(aux);
+		//imprimeTipos(aux);
 		printf(")");
 		switch(aux->tipo){
 		case none:
@@ -208,9 +224,6 @@ elemento_tabelag *insertParamTypes(char *nomefuncao, nodeDefault *no){
 }
 
 
-
-
-
 //Procura um identificador, devolve 0 caso nao exista
 
 elemento_tabelag *search_el(char *str)
@@ -222,7 +235,34 @@ elemento_tabelag *search_el(char *str)
 	return NULL;
 }
 
+// Função que verifica se uma função tem tipo de retorno, devolve 1 se tiver
+// Recebe o irmão mais da esquerda (nome da funcao)
+// Assume-se que o FuncParams é o irmão logo há direita caso não tenha tipo de retorno
+int checkHasReturn(nodeDefault *no){
+	// Significa que não tem tipo
+	if (strcmp(no->irmao->string,"FuncParams")==0)
+		return 0;
+	else
+		return 1;
+}
 
+
+/*
+Esta função vai receber o node do tipo FuncDecl e vai logo meter esta função na tabela global e criar a tabela local, com tudo lá dentro 
+*/
+void insertFuncaoT(nodeDefault *no){// FuncDecl
+	// Insere o nome da função na tabela global
+	// Se tiver tipo de retorno
+	nodeDefault *aux;
+	aux=no->filho->filho;//Nome da função
+	if (checkHasReturn(aux)==1){
+		elemento_tabelag* newel=insert_el(aux->string,aux->irmao->string);
+	}
+	else{
+		elemento_tabelag* newel=insert_el(aux->string,"none");
+	}
+
+}
 
 
 
