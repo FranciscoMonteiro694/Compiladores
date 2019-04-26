@@ -685,15 +685,24 @@ int criaTabelas(nodeDefault *raiz){
         if(strcmp(raiz->filho->string,"FuncDecl")==0){
             insertFuncaoT(raiz->filho);
         }
+	if(strcmp(raiz->filho->string,"VarDecl")==0){
+	    printf("heheheheh\n");
+            insertVarD(raiz->filho);
+        }
         criaTabelas(raiz->filho);
         iterador=raiz->filho->irmao;
         while(iterador!=NULL){
             if(strcmp(iterador->string,"FuncDecl")==0){
                 insertFuncaoT(iterador);
             }
+	    if(strcmp(iterador->string,"VarDecl")==0){
+		printf("heheheheh2\n");
+            	insertVarD(iterador);
+       		 }
             criaTabelas(iterador);
             iterador=iterador->irmao;
         }
+	//varDecl
     }
    
     return 0;
@@ -725,8 +734,9 @@ int main(int argc, char **argv) {
     else{
         yyparse();
         flagArvore=0;
-        imprime_tabelaGlobal();
+        //imprime_tabelaGlobal();
     }
     return 0;
 }
+
 
