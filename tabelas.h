@@ -35,6 +35,7 @@ typedef struct _tg{
     char name[32]; /* Nome da função/variável global*/
     listaTipos tipos; /* Lista ligada de tipos ( dos parâmetros da função) */
     type tipo;	/* Tipo de retorno da função ou tipo da variável */
+    int funcao;
     struct _tg *next; /* Ponteiro para o próximo elemento */
     elemento_tabelal *local;
 }elemento_tabelag;
@@ -42,20 +43,21 @@ typedef struct _tg{
 
 
 
-elemento_tabelag *insert_el(char *str, char* t);
+elemento_tabelag *insert_el(char *str, char* t,int func);
 elemento_tabelal *insert_elLocal(char *str, char* t,int param,elemento_tabelal * lista_local);
 
 void imprime_tabelaGlobal();
-void imprime_tabelaLocal(elemento_tabelal * lista_local);
+void imprime_tabelaLocal(elemento_tabelal * lista_local,char* s);
 void imprimeTipos(elemento_tabelag *tabela);
 noTipo *insertTipo(noTipo *tipos,char *tipoo);
 elemento_tabelag *insertParamTypes(char *nomefuncao, nodeDefault *no);
 elemento_tabelag *insert_elNode(char *str, nodeDefault *no);
 elemento_tabelag *search_el(char *str);
 void insertTipos(char *funcNam, nodeDefault *no);
-void insertFuncaoT(nodeDefault *no);
-void insertVarD(nodeDefault *no);
+elemento_tabelag* insertFuncaoT(nodeDefault *no);
+elemento_tabelag* insertVarD(nodeDefault *no);
 int checkHasReturn(nodeDefault *no);
 char * tiraId(char *str);
+void criaLocal(nodeDefault *no,elemento_tabelag * elemento);
 
 
