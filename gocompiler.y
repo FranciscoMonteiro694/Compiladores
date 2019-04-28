@@ -15,6 +15,7 @@
     int flagLex=0;
     int flagArvore=0;
     int flagErro=0;
+    int flagSemantica=0;
     
     int imprimeTralha(nodeDefault *raiz,int depth);
     int limpaTralha(nodeDefault *raiz);
@@ -29,6 +30,11 @@
     char * juntaStrings(char *tipo,char *valor, char *parenteses);
     int contaIrmao(nodeDefault * alvo);
     int criaTabelas(nodeDefault *raiz);
+    int anota(nodeDefault *raiz);
+	void checkaTerminais(nodeDefault *no,int local);
+	int recursiva(nodeDefault *no,int local);
+	void teste1(nodeDefault *raiz);
+	char* percorreTabela(char* str,int local);
     /* Inicializa tabela de símbolos global */
     elemento_tabelag *tg = NULL;
 
@@ -138,7 +144,14 @@ Program: PACKAGE ID SEMICOLON Declarations {
         
     }
     criaTabelas($$);
-    imprime_tabelaGlobal();
+    //anota
+	if(flagSemantica==1){
+		imprime_tabelaGlobal();
+		imprimeTralha($$,0);
+		teste1($$);
+
+	}
+    
 }
     ;
 
@@ -774,8 +787,123 @@ int criaTabelas(nodeDefault *raiz){
     return 0;
 
 }*/
+/*
+int anota(nodeDefault *raiz){
+
+	if(no==expressoes){
+		if(no nao for equal)
+		recursiva();
+	}
 
 
+}
+ recursiva(){
+	no->filho;
+	if(eu sou x&& meiu irmao for x){
+		return;	
+	}
+	se o meu irmao nao tiver tipo recursiva
+	se eu nao tiver tipo ir ver
+	while(no!=NULL)	{
+		if(){
+		}
+		no=no->irmao;
+	}
+
+}*/
+//so o body e que iporta ir a cada body de cada funcao
+void teste1(nodeDefault *raiz){
+	nodeDefault *aux;
+	int x=0;
+	aux=raiz->filho;
+	while(aux!=NULL){
+		recursiva(aux->filho->irmao,x);
+		aux=aux->irmao;
+		x++;
+	}
+	
+	}
+int recursiva(nodeDefault *no,int local){
+	//teoria so no body e que importa
+	nodeDefault *aux;
+	aux=no->filho;
+	if(aux==NULL){
+		return 0;	
+	}
+	if(strcmp(aux->string,"VarDecl")==0){
+		aux=aux->irmao;
+	}
+	/*if do mal para saber se e multi divi etccccc acho que seria aqui Or(2) And(2) Eq(2) Ne(2) Lt(2) Gt(2) Le(2) Ge(2) Add(2) Sub(2) Mul(2) Div(2) Mod(2)
+Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
+	while(aux!=NULL){
+		//acho que precisamos de um array para saber erros e tal do genero string*int
+		checkaTerminais(aux,local);
+		recursiva(aux,local);
+		aux=aux->irmao;
+	}
+	//secalahr aqui em baixo duno
+	return 0;
+
+	}
+void checkaTerminais(nodeDefault *no,int local){
+	char* aux,*id,*intlit,*strlit,*realit;
+	aux=no->string;
+	/*strcpy(id,"id");
+	strcpy(intlit,"intlit");
+	strcpy(strlit,"strlit");
+	strcpy(realit,"realit");*/
+	if(strncmp("Id",aux,strlen("Id"))==0){
+		printf("id-->%s\n",aux);
+		percorreTabela(aux,local);
+		//quando temos o id temos de ir sempre as tabelas acho eu
+		//temos de ir ver as tabelas e adicionar a lista de tipos
+	}
+	if(strncmp("IntLit",aux,strlen("IntLit"))==0){
+		printf("intlit\n");
+		//temos de adicionar ao no o tipo int
+	}
+	if(strncmp("RealLit",aux,strlen("RealLit"))==0){
+		printf("realit\n");
+		//temos de adicionar ao no o tipo float32
+	}
+	if(strncmp("StrLit",aux,strlen("StrLit"))==0){
+		printf("strlit\n");
+		//temos de adicionar ao no o tipo string
+	}
+
+	}
+
+char* percorreTabela(char* str,int local){
+	elemento_tabelag * aux;
+	elemento_tabelal * aux2;
+	int i;
+	aux=tg;
+	printf("tabela Global\n");
+	while(aux){
+		printf("-%s\n",aux->name);
+		if(strcmp(aux->name,str)==0){
+			printf("encontramos Global");	
+		}
+		aux=aux->next;	
+		
+	}
+	//na ta na global ver local
+	aux=tg;
+	for(i=0;i<local;i++){
+		aux=aux->next;	
+	}
+	aux2=aux->local;
+	printf("tabela local\n");
+	while(aux2){
+		printf("--%s\n",aux2->name);
+		if(strcmp(aux2->name,str)==0){
+			printf("encontramos local");
+		}
+		aux2=aux2->next;	
+	}
+	return "";
+	//nao encontramos nada
+	}
 int main(int argc, char **argv) {
     /*
     yydebug=1;
@@ -797,6 +925,7 @@ int main(int argc, char **argv) {
 	if (strcmp(argv[1],"-s")==0){
 		 flagArvore=0;
 			flagLex=0;
+			flagSemantica=1;
 		yyparse();
 		}
     }   

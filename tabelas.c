@@ -231,6 +231,9 @@ void imprime_tabelaGlobal()
 	for(aux=tg; aux; aux=aux->next){
 	if(aux->local!=NULL){
 		imprime_tabelaLocal(aux->local,aux->name);
+		/*if(aux->next!=NULL){
+			printf("\n");
+		}*/
 	}
 	}
 }
@@ -291,10 +294,7 @@ void imprime_tabelaLocal(elemento_tabelal * lista_local,char* s){
 		}
 		printf("\n");
 	}
-
-
 printf("\n");
-
 
 }
 void imprimeTipos(elemento_tabelag *tabela){
