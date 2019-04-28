@@ -59,5 +59,6 @@ elemento_tabelag* insertVarD(nodeDefault *no);
 int checkHasReturn(nodeDefault *no);
 char * tiraId(char *str);
 void criaLocal(nodeDefault *no,elemento_tabelag * elemento);
+char * estupido(type c);
 
 

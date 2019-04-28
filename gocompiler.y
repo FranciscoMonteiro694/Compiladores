@@ -31,7 +31,7 @@
     int contaIrmao(nodeDefault * alvo);
     int criaTabelas(nodeDefault *raiz);
     int anota(nodeDefault *raiz);
-	void checkaTerminais(nodeDefault *no,int local);
+	void checkaTerminais(nodeDefault *no,int local,int flag);
 	int recursiva(nodeDefault *no,int local);
 	void teste1(nodeDefault *raiz);
 	char* percorreTabela(char* str,int local);
@@ -826,6 +826,10 @@ void teste1(nodeDefault *raiz){
 int recursiva(nodeDefault *no,int local){
 	//teoria so no body e que importa
 	nodeDefault *aux;
+	int flag=0;
+	if(strcmp(no->string,"Call")==0){
+		flag=1;
+	}
 	aux=no->filho;
 	if(aux==NULL){
 		return 0;	
@@ -833,27 +837,109 @@ int recursiva(nodeDefault *no,int local){
 	if(strcmp(aux->string,"VarDecl")==0){
 		aux=aux->irmao;
 	}
-	/*if do mal para saber se e multi divi etccccc acho que seria aqui Or(2) And(2) Eq(2) Ne(2) Lt(2) Gt(2) Le(2) Ge(2) Add(2) Sub(2) Mul(2) Div(2) Mod(2)
-Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
+	
 	while(aux!=NULL){
 		//acho que precisamos de um array para saber erros e tal do genero string*int
-		checkaTerminais(aux,local);
+		checkaTerminais(aux,local,flag);
 		recursiva(aux,local);
 		aux=aux->irmao;
+		flag=0;
+	}
+	if(strcmp(no->string,"Eq")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Or")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"And")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Ne")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Lt")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	/*if do mal para saber se e multi divi etccccc acho que seria aqui Or(2) And(2) Eq(2) Ne(2) Lt(2) Gt(2) Le(2) Ge(2) Add(2) Sub(2) Mul(2) Div(2) Mod(2)
+Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
+	if(strcmp(no->string,"Gt")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Le")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Ge")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Add")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Sub")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Mul")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Div")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Mod")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Not")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Minus")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Plus")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Assign")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"Call")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+	}
+	if(strcmp(no->string,"ParseArgs")==0){
+		//percorrer filho ja com o tipo e depois meter o tipo
+		printf("percorrer filho ja com o tipo e depois meter o tipo\n");
 	}
 	//secalahr aqui em baixo duno
 	return 0;
 
 	}
-void checkaTerminais(nodeDefault *no,int local){
+void checkaTerminais(nodeDefault *no,int local,int flag){
 	char* aux,*id,*intlit,*strlit,*realit;
 	aux=no->string;
-	/*strcpy(id,"id");
-	strcpy(intlit,"intlit");
-	strcpy(strlit,"strlit");
-	strcpy(realit,"realit");*/
 	if(strncmp("Id",aux,strlen("Id"))==0){
 		printf("id-->%s\n",aux);
+		if(flag==1){
+			//temos funcao percorrer tabelas da maneira x	
+			printf("encotramos um id depois de um call\n");	
+		}
+		else{
+			printf("encotramos um id normal\n");
+			//temos uma variavel percorrer da outra maneira
+		}
 		percorreTabela(aux,local);
 		//quando temos o id temos de ir sempre as tabelas acho eu
 		//temos de ir ver as tabelas e adicionar a lista de tipos
@@ -877,12 +963,16 @@ char* percorreTabela(char* str,int local){
 	elemento_tabelag * aux;
 	elemento_tabelal * aux2;
 	int i;
+	char* auxS;
 	aux=tg;
-	printf("tabela Global\n");
+	auxS=(char*)malloc(sizeof(char)*100);
+	auxS=tiraId(str);
+	//printf("tabela Global\n");
 	while(aux){
-		printf("-%s\n",aux->name);
-		if(strcmp(aux->name,str)==0){
-			printf("encontramos Global");	
+		//printf("-%s\n",aux->name);
+		if(strcmp(aux->name,auxS)==0){
+			printf("encontramos Global\n");	
+			return estupido(aux->tipo);
 		}
 		aux=aux->next;	
 		
@@ -893,11 +983,12 @@ char* percorreTabela(char* str,int local){
 		aux=aux->next;	
 	}
 	aux2=aux->local;
-	printf("tabela local\n");
+	//printf("tabela local\n");
 	while(aux2){
-		printf("--%s\n",aux2->name);
-		if(strcmp(aux2->name,str)==0){
-			printf("encontramos local");
+		//printf("--%s\n",aux2->name);
+		if(strcmp(aux2->name,auxS)==0){
+			printf("encontramos local\n");
+			return estupido(aux2->tipo);
 		}
 		aux2=aux2->next;	
 	}
