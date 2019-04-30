@@ -3,14 +3,17 @@
 //  Pratica2
 //
 //  Created by Francisco Monteiro on 03/03/2019.
-//  Copyright Â© 2019 Francisco Monteiro. All rights reserved.
+//  Copyright © 2019 Francisco Monteiro. All rights reserved.
+#include <windows.h>
+#include "stdlib.h"
+#include "math.h"
+#include "stdio.h"
+#include <GL\glut.h>
+#include "RgbImage.h"
 //
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
+//  main.cpp
+//  Pratica2
+
 
 //--------------------------------- Definir cores
 #define BLUE     0.0, 0.0, 1.0, 1.0
@@ -19,25 +22,35 @@
 #define GREEN    0.0, 1.0, 0.0, 1.0
 #define WHITE    1.0, 1.0, 1.0, 1.0
 #define BLACK    0.0, 0.0, 0.0, 1.0
+#define LARANJA    0.7, 1,1, 1.0
 #define PI         3.14159
 
 //================================================================================
 //===========================================================Variaveis e constantes
+GLuint   texture[4];
+RgbImage imag;
 
 //------------------------------------------------------------ Sistema Coordenadas + objectos
-GLint        wScreen=800, hScreen=600;        //.. janela (pixeis)
+GLint        wScreen=1200, hScreen=1000;        //.. janela (pixeis)
 GLfloat        xC=10.0, yC=10.0, zC=10.0;        //.. Mundo  (unidades mundo)
 
 //------------------------------------------------------------ Observador
 GLfloat  rVisao=150, aVisao=0.5*PI, incVisao=0.05*PI;
-GLfloat  obsP[] ={rVisao*cos(aVisao), 3.0, rVisao*sin(aVisao)};
+GLfloat  obsP[] ={0,50,-100};
 GLfloat  angZoom=90;
 GLfloat  incZoom=3;
-
+GLdouble larguraEscada=40;
+GLdouble comprimentoEscada=7.5;
+GLdouble alturaEscada=5;
+GLdouble larguraTecla=30;
+GLdouble comprimentoTecla=2;
+GLdouble alturaTecla=1;
+static GLint pretas[]={1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0};
 GLdouble tx=0;
 GLdouble ty=0;
 GLdouble tz=0;
-
+GLint SEGUIDAS=4;
+GLint INTERVALO=3;
 GLdouble Upx=0;
 GLdouble Upy=0;
 GLdouble Upz=-1;
@@ -56,7 +69,7 @@ static GLuint     esquerda[] = {0,1,2,3};
 static GLuint     direita[] = {7,6,5,4};
 
 
-GLfloat tam=2.0; //estÃ£o com largura de 800
+GLfloat tam=2.0; //estão com largura de 800
 static GLfloat vertices[]={
 -40.000000, -0.000000, 15.000000, 40.000000, -0.000000, 15.000000, 40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 15.000000, 40.000000, 0.000000, 15.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000};
 
@@ -66,26 +79,27 @@ static GLfloat normais[] = {
 static GLfloat cores[]={
 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, };
 
-
+void initTexturas();
 //================================================================================
 //=========================================================================== INIT
 //================================================================================
 //=========================================================================== INIT
 void inicializa(void)
 {
-    glClearColor(BLACK);        //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦Apagar
-    glEnable(GL_DEPTH_TEST);    //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦Profundidade
-    glShadeModel(GL_SMOOTH);    //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦Interpolacao de cores
+    glClearColor(BLACK);        //………………………………………………………………………………Apagar
+    glEnable(GL_DEPTH_TEST);    //………………………………………………………………………………Profundidade
+    glShadeModel(GL_SMOOTH);    //………………………………………………………………………………Interpolacao de cores
     
-    //glEnable(GL_CULL_FACE);        //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦Faces visiveis
-    //glCullFace(GL_BACK);        //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦Mostrar so as da frente
+    //glEnable(GL_CULL_FACE);        //………………………………………………………………………………Faces visiveis
+    //glCullFace(GL_BACK);        //………………………………………………………………………………Mostrar so as da frente
     
-    glVertexPointer(3, GL_FLOAT, 0, vertices); //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦Vertex arrays
+    glVertexPointer(3, GL_FLOAT, 0, vertices); //………………………………………Vertex arrays
     glEnableClientState(GL_VERTEX_ARRAY);
     glNormalPointer(GL_FLOAT, 0, normais);
     glEnableClientState(GL_NORMAL_ARRAY);
     glColorPointer(3, GL_FLOAT, 0, cores);
     glEnableClientState(GL_COLOR_ARRAY);
+     initTexturas();
     
     
 }
@@ -98,19 +112,19 @@ void drawEixos()
     glColor4f(RED);
     glBegin(GL_LINES);
     glVertex3i( 0, 0, 0);
-    glVertex3i(10, 0, 0);
+    glVertex3i(150, 0, 0);
     glEnd();
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Eixo Y
     glColor4f(GREEN);
     glBegin(GL_LINES);
     glVertex3i(0,  0, 0);
-    glVertex3i(0, 10, 0);
+    glVertex3i(0, 150, 0);
     glEnd();
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Eixo Z
     glColor4f(BLUE);
     glBegin(GL_LINES);
     glVertex3i( 0, 0, 0);
-    glVertex3i( 0, 0,10);
+    glVertex3i( 0, 0,150);
     glEnd();
     
 }
@@ -118,21 +132,24 @@ void drawEixos()
 void drawBola()
 {
     //------------------------- Bola
-    glEnable(GL_TEXTURE_2D);
+  //  glEnable(GL_TEXTURE_2D);
+   glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,texture[1]);
     glPushMatrix();
+    glRotatef (       90, -1, 0, 0);
     glTranslatef ( 2,4,2);
-    gluQuadricDrawStyle ( bola, GLU_LINE   ); // estava GLU_FILL
+    gluQuadricDrawStyle ( bola, GLU_FILL   ); // estava GLU_FILL
     gluQuadricNormals   ( bola, GLU_SMOOTH );
     gluQuadricTexture   ( bola, GL_TRUE    );
-    gluSphere ( bola, 400, 150, 150);
+    gluSphere ( bola, 350, 150, 150);
     glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
+   glDisable(GL_TEXTURE_2D);
     
 }
 void drawChao(){
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Chao y=0
-    glEnable(GL_TEXTURE_2D);
+    //glEnable(GL_TEXTURE_2D);
     glPushMatrix();
     glColor4f(WHITE);
     glTranslatef(0,-5,0);
@@ -143,82 +160,206 @@ void drawChao(){
     glTexCoord2f(0.0f, 1.0f);    glVertex3i(  500,     0,  -500);
     glEnd();
     glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
+    //glDisable(GL_TEXTURE_2D);
 }
-void drawCubo(){
-    glScalef(30, 1, 3);
+void drawCubo2(GLdouble x ,GLdouble y,GLdouble z){
+//	glColor4f(YELLOW);glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,texture[0]);
+	glEnable(GL_TEXTURE_2D);
+	glPushMatrix();
+	glTranslatef(x,y,z);
+    glScalef(comprimentoEscada, alturaEscada, larguraEscada);
     glBegin(GL_QUADS);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f( 1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f,  1.0f);
-    glVertex3f( 1.0f, 1.0f,  1.0f);
+    glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, 1.0f, -1.0f);
+    glTexCoord2f(1.0f,0.0f);  glVertex3f(-1.0f, 1.0f, -1.0f);
+    glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, 1.0f,  1.0f);
+    glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f, 1.0f,  1.0f);
+    glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
+    glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
+    glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
+    glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
     
-    glColor3f(1.0f, 0.5f, 0.0f);     // Orange
+    glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f,  1.0f, 1.0f);
+    glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f,  1.0f, 1.0f);
+    glTexCoord2f(1.0f,1.0f);  glVertex3f(-1.0f, -1.0f, 1.0f);
+    glTexCoord2f(0.0f,1.0f);glVertex3f( 1.0f, -1.0f, 1.0f);
+    
+    // Back face (z = -1.0f)
+    glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
+    glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
+    glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
+    glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
+    
+    // Left face (x = -1.0f)
+    glTexCoord2f(0.0f,0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
+    glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
+    glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
+    glTexCoord2f(0.0f,1.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
+    
+    // Right face (x = 1.0f)
+     glTexCoord2f(0.0f,0.0f); glVertex3f(1.0f,  1.0f, -1.0f);
+     glTexCoord2f(1.0f,0.0f);glVertex3f(1.0f,  1.0f,  1.0f);
+     glTexCoord2f(1.0f,1.0f);glVertex3f(1.0f, -1.0f,  1.0f);
+     glTexCoord2f(0.0f,1.0f);glVertex3f(1.0f, -1.0f, -1.0f);
+     glDisable(GL_TEXTURE_2D);
+     glEnd();  // End of drawing color-cube
+     glPopMatrix();
+      glDisable(GL_TEXTURE_2D);
+}
+
+void drawCubo(GLdouble x ,GLdouble y,GLdouble z){
+		glColor4f(BLACK);
+		glBindTexture(GL_TEXTURE_2D,texture[2]);
+			glColor4f(BLACK);
+	glEnable(GL_TEXTURE_2D);
+	glPushMatrix();
+		glColor4f(BLACK);
+	glTranslatef(x,y,z);
+    glScalef(comprimentoTecla, alturaTecla, larguraTecla);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, 1.0f, -1.0f);
+    glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
+    glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, 1.0f,  1.0f);
+    glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f, 1.0f,  1.0f);
+    
     glVertex3f( 1.0f, -1.0f,  1.0f);
     glVertex3f(-1.0f, -1.0f,  1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
     glVertex3f( 1.0f, -1.0f, -1.0f);
     
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
     glVertex3f( 1.0f,  1.0f, 1.0f);
     glVertex3f(-1.0f,  1.0f, 1.0f);
     glVertex3f(-1.0f, -1.0f, 1.0f);
     glVertex3f( 1.0f, -1.0f, 1.0f);
     
     // Back face (z = -1.0f)
-    glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
     glVertex3f( 1.0f, -1.0f, -1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
     glVertex3f(-1.0f,  1.0f, -1.0f);
     glVertex3f( 1.0f,  1.0f, -1.0f);
     
     // Left face (x = -1.0f)
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
     glVertex3f(-1.0f,  1.0f,  1.0f);
     glVertex3f(-1.0f,  1.0f, -1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
     glVertex3f(-1.0f, -1.0f,  1.0f);
     
     // Right face (x = 1.0f)
-    glColor3f(1.0f, 0.0f, 1.0f);     // Magenta
     glVertex3f(1.0f,  1.0f, -1.0f);
     glVertex3f(1.0f,  1.0f,  1.0f);
     glVertex3f(1.0f, -1.0f,  1.0f);
     glVertex3f(1.0f, -1.0f, -1.0f);
     glEnd();  // End of drawing color-cube
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
 void drawScene(){
-    int i;
-    //=================================================== Qual o lado ?
-    
-
-    
-    //==================================== MESA
+    int i,auxx,auxy,auxz,aux,auy,auz;
+    //levar double checkkkk <----------------------------------------------------------------------------------------------------------
     //glColorPointer(3, GL_FLOAT, 0, cor);     podia ser modificada a cor !
-    for(i=0;i<=23;i++){
+    /*for(i=0;i<=23;i++){
         glPushMatrix();
         esquerda[0]=4*i;
         esquerda[1]=4*i+1;
         esquerda[2]=4*i+2;
         esquerda[3]=4*i+3;
-        glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, esquerda);
+       if((i/SEGUIDAS)%INTERVALO==0){
+       
+        auxy=vertices[(4*i)*3+1]+alturaTecla;
+        auxx=vertices[(4*i)*3]+larguraEscada/2-((larguraEscada/2)-larguraTecla);
+        auxz=vertices[(4*i)*3+2]-comprimentoEscada/2;
+        glPushMatrix();
+        printf("teste...%d %d %d\n",auxx,auxy,auxz);
+        drawCubo(auxx,auxy,auxz);
+   glPopMatrix();
+}
+    
+	
+        glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, esquerda);auxz+larguraTecla/2-5
         glPopMatrix();
-    }
-    //drawBola();
-    drawChao();
+    }*/
+    auxx=0;
+    auxy=0;
+    auxz=0;
+    for(i=0;i<10;i++){
+    	glColor4f(cores[i],cores[i+1],cores[i+2],0);
+    	drawCubo2(auxx,auxy,auxz);
+    	if(pretas[i]==1){
+    		drawCubo(auxx+comprimentoEscada-comprimentoTecla,auxy+alturaEscada+alturaTecla,auxz+(larguraEscada-larguraTecla));
+    	}
+        
+    	auxx+=comprimentoEscada*2;
+    	auxy+= alturaEscada*2;
+    	
+       auy=auxy+alturaTecla;
+        aux=auxx+larguraEscada/2-((larguraEscada/2)-larguraTecla);
+        auz=auxz-comprimentoEscada/2;
+        
+    	//auxz+=comprimentoEscada;
+}
+    glColor4f(LARANJA);
+    drawBola();
+   // drawChao();
 
     
     
     //==================================== PAralelipipedo Amarelo
-    glColor4f(YELLOW);
-    glPushMatrix();
-    //?? escala, rotacao, translacao ??
-    glPopMatrix();
     
-    drawCubo();
+    
     
 }
+
+void initTexturas()
+{   
+	//----------------------------------------- Chao
+		
+	glGenTextures(1, &texture[0]);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	imag.LoadBmpFile("marmore.bmp");
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);  
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, 
+		imag.GetNumCols(),
+		imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+		imag.ImageData());  		   
+		
+	//
+	glGenTextures(1, &texture[1]);
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
+	imag.LoadBmpFile("pano3.bmp");
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, 
+		imag.GetNumCols(),
+		imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+		imag.ImageData());
+		
+ 		glGenTextures(1, &texture[2]);
+	glBindTexture(GL_TEXTURE_2D, texture[2]);
+	imag.LoadBmpFile("pls.bmp");
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, 
+		imag.GetNumCols(),
+		imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+		imag.ImageData()); 
+}
+
+
+
+
 
 // Calcula a norma de um vetor
 GLfloat norma(int x, int y, int z){
@@ -250,7 +391,7 @@ void display(void){
     gluLookAt(obsP[0], obsP[1], obsP[2], tx,ty,tz, 0, 1, 0);
     
     //gluLookAt(0, 0, -50, 0,0,50, 0, 1, 0);
-    //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦Objectos/modelos
+    //…………………………………………………………………………………………………………………………………………………………Objectos/modelos
     drawEixos();
     drawScene();
     
@@ -344,9 +485,9 @@ void teclasNotAscii(int key, int x, int y){
         aVisao = (aVisao + 0.3) ;
     
     
+    
     tx=rVisao*cos(aVisao)+obsP[0];
     tz=rVisao*sin(aVisao)+obsP[2];
-    
     
     glutPostRedisplay();
     
