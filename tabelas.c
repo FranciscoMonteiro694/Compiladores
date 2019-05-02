@@ -325,6 +325,40 @@ void imprimeTipos(elemento_tabelag *tabela){
 	}
 }
 
+// Vai imprimir as notas da AST, se estiver a 1 quer dizer que é uma call de uma função e tem de pôr parenteses
+void imprimeTiposAST(noTipo *tipos, int flag){
+	noTipo *iterador;
+	iterador=tipos;
+	// Se for call tem de pôr parenteses
+	if(flag==1)
+		printf("(");
+	while(iterador!=NULL){
+		switch(iterador->tipo){
+		case none:
+			printf("none");
+			break;
+		case integer:
+			printf("int");
+			break;
+		case string:
+			printf("string");
+			break;
+		case boolean:
+			printf("bool");
+			break;
+		case float32:
+			printf("float32");
+			break;
+		}
+		if(iterador->next!=NULL){// Para não imprimir virgula no ultimo
+			printf(",");
+		}
+		iterador=iterador->next;
+	}
+	if (flag==1)
+		printf(")");
+}
+
 /* Podemos ter de trocar o tipo da função */
 elemento_tabelag *insertParamTypes(char *nomefuncao, nodeDefault *no){
 	nodeDefault *iterador;
@@ -492,7 +526,6 @@ void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
 	iterador=iterador->irmao;
 	}
 }
-
 
 
 

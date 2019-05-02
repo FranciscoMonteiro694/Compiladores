@@ -9,6 +9,7 @@ typedef struct node{//meta2 basicamete e a nossa arvore abstracta
     nodeType tipo;
     lista filho;
     lista irmao;
+    //listaTipos tipos;
 }nodeDefault;
 
 typedef enum { integer, boolean, float32, string, none} type;
@@ -25,7 +26,7 @@ typedef struct nodeT{
 typedef struct _tl{
     char name[32]; /* Nome da função/variável local*/
     int param; //se e parametro ou nao (pode se omitirrrr)
-    type tipo;	/* Tipo de retorno da função ou tipo da variável */
+    type tipo;  /* Tipo de retorno da função ou tipo da variável */
     struct _tl *next;
 }elemento_tabelal;
 //fazer funçoes para inseir na tabela local etc e depois associar a global
@@ -34,7 +35,7 @@ typedef struct _tl{
 typedef struct _tg{
     char name[32]; /* Nome da função/variável global*/
     listaTipos tipos; /* Lista ligada de tipos ( dos parâmetros da função) */
-    type tipo;	/* Tipo de retorno da função ou tipo da variável */
+    type tipo;  /* Tipo de retorno da função ou tipo da variável */
     int funcao;
     struct _tg *next; /* Ponteiro para o próximo elemento */
     elemento_tabelal *local;
@@ -60,5 +61,5 @@ int checkHasReturn(nodeDefault *no);
 char * tiraId(char *str);
 void criaLocal(nodeDefault *no,elemento_tabelag * elemento);
 char * estupido(type c);
-
+void imprimeTiposAST(noTipo *tipos, int flag);
 
