@@ -404,12 +404,14 @@ int checkHasReturn(nodeDefault *no){
 /*
 Esta função vai receber o node do tipo FuncDecl e vai logo meter esta função na tabela global e criar a tabela local, com tudo lá dentro 
 */
-// Para tirar o "id()" da string
+// Para tirar o "id()" da string<
 char * tiraId(char *str){
-	char *aux;
+	char *aux,*aux2;
+	aux2 = (char*)malloc(sizeof(char)*300);
+	strcpy(aux2,str);
     aux = (char*)malloc(sizeof(char)*300);
     const char s[2] = "(";
-    aux=strtok(str,s);
+    aux=strtok(aux2,s);
     aux= strtok(NULL,s);
     aux[strlen(aux)-1]='\0';
     //printf("Valor %s\n",aux);

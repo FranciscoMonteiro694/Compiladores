@@ -2,16 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum { Terminal, Operadores, Statements, DecFuncoes, DecVariaveis, Raiz} nodeType;
-typedef struct node *lista;
-typedef struct node{//meta2 basicamete e a nossa arvore abstracta
-    char *string;
-    nodeType tipo;
-    lista filho;
-    lista irmao;
-    //listaTipos tipos;
-}nodeDefault;
-
 typedef enum { integer, boolean, float32, string, none} type;
 
 
@@ -21,6 +11,17 @@ typedef struct nodeT{
     type tipo;
     struct nodeT *next;
 }noTipo;
+typedef enum { Terminal, Operadores, Statements, DecFuncoes, DecVariaveis, Raiz} nodeType;
+typedef struct node *lista;
+typedef struct node{//meta2 basicamete e a nossa arvore abstracta
+    char *string;
+    nodeType tipo;
+    lista filho;
+    lista irmao;
+    listaTipos tipos;
+}nodeDefault;
+
+
 //“Name\t[ParamTypes]\tType[\tparam]”,
 //como ficam as funçoes chamadas dentro de funçoes pelos vistos nao se mete nada okkkkkkk
 typedef struct _tl{
