@@ -16,7 +16,7 @@
     int flagArvore=0;
     int flagErro=0;
     int flagSemantica=0;
-    
+    int imprimeASTanotada(nodeDefault *raiz,int flag,int depth);
     int imprimeTralha(nodeDefault *raiz,int depth);
     int limpaTralha(nodeDefault *raiz);
     nodeDefault * criaNoPai(nodeType tipo, char *str);
@@ -148,7 +148,8 @@ Program: PACKAGE ID SEMICOLON Declarations {
     if(flagSemantica==1){
         imprime_tabelaGlobal();
         imprimeTralha($$,0);
-        //teste1($$);
+        teste1($$);
+	imprimeASTanotada($$,0,0);
 
     }
     
@@ -606,6 +607,7 @@ nodeDefault * criaNoPai(nodeType tipo, char *str){
     ponteiro->irmao=NULL;
     ponteiro->string=str;
     ponteiro->tipo=tipo;
+    ponteiro->tipos=NULL;
     return ponteiro;
 }
 nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str){
@@ -636,6 +638,7 @@ int imprimeTralha(nodeDefault *raiz,int depth){
         printf("..");
     }
     printf("%s\n",raiz->string);
+
     if(raiz->filho!=NULL){
     imprimeTralha(raiz->filho,depth+1);
         iterador=raiz->filho->irmao;
@@ -828,101 +831,151 @@ int recursiva(nodeDefault *no,int local){
     //teoria so no body e que importa
     nodeDefault *aux;
     int flag=0;
+    printf("1\n");
     if(strcmp(no->string,"Call")==0){
+	printf("1.1\n");
         flag=1;
     }
-    aux=no->filho;
+    printf("2\n");
+    aux=no->filho; 
+    printf("3\n");
     if(aux==NULL){
+	printf("3.1\n");
         return 0;   
     }
     if(strcmp(aux->string,"VarDecl")==0){
         aux=aux->irmao;
     }
-    
+    printf("4\n");
     while(aux!=NULL){
         //acho que precisamos de um array para saber erros e tal do genero string*int
         checkaTerminais(aux,local,flag);
+	printf("saimoooooooo\n");
         recursiva(aux,local);
         aux=aux->irmao;
         flag=0;
     }
+    printf("1000\n");
     if(strcmp(no->string,"Eq")==0){
+	printf("EQ percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,boolean);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Or")==0){
+	printf("OR percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"And")==0){
+	 printf("AND percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+       
     }
     if(strcmp(no->string,"Ne")==0){
+	printf("NE percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Lt")==0){
+	 printf("LT percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+       
     }
     /*if do mal para saber se e multi divi etccccc acho que seria aqui Or(2) And(2) Eq(2) Ne(2) Lt(2) Gt(2) Le(2) Ge(2) Add(2) Sub(2) Mul(2) Div(2) Mod(2)
 Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
     if(strcmp(no->string,"Gt")==0){
+	printf("GT percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Le")==0){
+	printf("LE percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Ge")==0){
+	printf("GE percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Add")==0){
+	printf("ADD percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Sub")==0){
+	 printf("SUB percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+       
     }
     if(strcmp(no->string,"Mul")==0){
+	printf("MUL percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Div")==0){
+	printf("DIV percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Mod")==0){
+	printf("MOD percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Not")==0){
+	printf("NOT percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Minus")==0){
+	printf("MINUS percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+     
     }
     if(strcmp(no->string,"Plus")==0){
+	printf("PLUS percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     if(strcmp(no->string,"Assign")==0){
+	printf("ASSIGN percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
     }
+	//rever---------------------------------------------------------------
     if(strcmp(no->string,"Call")==0){
+	printf("CALL percorrer filho ja com o tipo e depois meter o tipo\n");
+	if(no->filho->tipos!=NULL){
+		printf("testeeeeee%s\n",estupido(percorreTabelaGlobal2(no->filho->string)));
+		no->tipos=insertTipo2(no->tipos,percorreTabelaGlobal2(no->filho->string));
+	}
+	else{
+	no->tipos=insertTipo2(no->tipos,percorreTabelaGlobal2(no->filho->string));
+	}
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
     }
     if(strcmp(no->string,"ParseArgs")==0){
+	printf("PARSE ARGS percorrer filho ja com o tipo e depois meter o tipo\n");
+	no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        printf("percorrer filho ja com o tipo e depois meter o tipo\n");
+        
     }
     //secalahr aqui em baixo duno
     return 0;
@@ -935,31 +988,67 @@ void checkaTerminais(nodeDefault *no,int local,int flag){
         printf("id-->%s\n",aux);
         if(flag==1){
             //temos funcao percorrer tabelas da maneira x   
-            printf("encotramos um id depois de um call\n"); 
+		 no->tipos=percorreTabelaGlobal(aux);
+            	printf("encotramos um id depois de um call\n"); 
         }
         else{
             printf("encotramos um id normal\n");
+	     no->tipos=insertTipo(no->tipos,percorreTabela(aux,local));
             //temos uma variavel percorrer da outra maneira
         }
-        percorreTabela(aux,local);
         //quando temos o id temos de ir sempre as tabelas acho eu
         //temos de ir ver as tabelas e adicionar a lista de tipos
     }
     if(strncmp("IntLit",aux,strlen("IntLit"))==0){
         printf("intlit\n");
+	no->tipos=insertTipo(no->tipos,"Int");
         //temos de adicionar ao no o tipo int
     }
     if(strncmp("RealLit",aux,strlen("RealLit"))==0){
+	no->tipos=insertTipo(no->tipos,"Float32");
         printf("realit\n");
         //temos de adicionar ao no o tipo float32
     }
     if(strncmp("StrLit",aux,strlen("StrLit"))==0){
         printf("strlit\n");
+	no->tipos=insertTipo(no->tipos,"String");
         //temos de adicionar ao no o tipo string
     }
 
     }
+noTipo* percorreTabelaGlobal(char* str){
+    elemento_tabelag * aux;
+    char* auxS;
+    aux=tg;
+    auxS=(char*)malloc(sizeof(char)*100);
+    auxS=tiraId(str);
+    //printf("tabela Global\n");
+    while(aux){
+        //printf("-%s\n",aux->name);
+        if(strcmp(aux->name,auxS)==0){
+            printf("encontramos Global\n"); 
+            return aux->tipos;
+        }
+        aux=aux->next;     
+    }
+}
 
+type percorreTabelaGlobal2(char* str){
+    elemento_tabelag * aux;
+    char* auxS;
+    aux=tg;
+    auxS=(char*)malloc(sizeof(char)*100);
+    auxS=tiraId(str);
+    //printf("tabela Global\n");
+    while(aux){
+        //printf("-%s\n",aux->name);
+        if(strcmp(aux->name,auxS)==0){
+            printf("encontramos Global\n"); 
+            return aux->tipo;
+        }
+        aux=aux->next;     
+    }
+}
 char* percorreTabela(char* str,int local){
     elemento_tabelag * aux;
     elemento_tabelal * aux2;
@@ -988,7 +1077,7 @@ char* percorreTabela(char* str,int local){
     while(aux2){    
         //printf("--%s\n",aux2->name);
         if(strcmp(aux2->name,auxS)==0){
-            printf("encontramos local\n");
+            printf("encontramos local %s\n",estupido(aux2->tipo));
             return estupido(aux2->tipo);
         }
         aux2=aux2->next;    
@@ -996,7 +1085,7 @@ char* percorreTabela(char* str,int local){
     return "";
     //nao encontramos nada
 }
-/*
+
 int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){
     nodeDefault *iterador;
     int i;
@@ -1006,14 +1095,20 @@ int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){
     printf("%s",raiz->string);
     // Quer dizer que tem notas, logo tem de as imprimir
     if(raiz->tipos!=NULL){
-        imprimeTiposAST(raiz->tipos,flag);
+	printf(" - ");
+        imprimeTiposAST(raiz->tipos,flag);	
     }
+    flag=0;
+    if(strcmp(raiz->string,"Call")==0){/*quando ha um call a impressao dos tipos e diferente,pois ficam entre parentises*/
+	flag=1;
+	}
     printf("\n");
     if(raiz->filho!=NULL){
-    imprimeASTanotada(raiz->filho,depth+1);
+    imprimeASTanotada(raiz->filho,flag,depth+1);
         iterador=raiz->filho->irmao;
+	flag=0;/*a funçao a ser chamada no call e sempre o filho o irmao ja nao e preciso*/
         while(iterador!=NULL){
-            imprimeASTanotada(iterador,depth+1);
+            imprimeASTanotada(iterador,flag,depth+1);
             iterador=iterador->irmao;
         }
     }
@@ -1021,7 +1116,7 @@ int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){
     return 0;
 
 }
-*/
+
 
 int main(int argc, char **argv) {
     /*
@@ -1057,4 +1152,5 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
+
 
