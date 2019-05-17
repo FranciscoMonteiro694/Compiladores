@@ -160,6 +160,29 @@ void insertTipos(char *funcNam, nodeDefault *no){
 
 /* Recebe a lista de tipos e insere um novo tipo na cauda*/
 /* Passagem de parâmetros pode estar mal*/
+noTipo *insertTipo2(noTipo *tipos,type tipo){
+	noTipo *iterador;
+	noTipo *novo;
+	
+	
+	novo=malloc(sizeof(noTipo));
+	iterador=tipos;
+	novo->tipo=tipo;
+	/* Se estiver vazia */
+	if(tipos==NULL){
+		/*printf("olaaaaa\n");*/
+		tipos=novo;
+	}
+	else{
+		while(iterador->next!=NULL){
+			iterador=iterador->next;
+		}
+		iterador->next=novo;
+	}
+	return tipos;
+
+}
+
 noTipo *insertTipo(noTipo *tipos,char *tipoo){
 	noTipo *iterador;
 	noTipo *novo;
@@ -169,6 +192,7 @@ noTipo *insertTipo(noTipo *tipos,char *tipoo){
 	iterador=tipos;
 
 	if(strcmp(tipoo,"Int")==0){
+		/*printf("noiceeee\n");*/
 		novo->tipo=integer;
 	}
 	else if(strcmp(tipoo,"Bool")==0){
@@ -184,6 +208,7 @@ noTipo *insertTipo(noTipo *tipos,char *tipoo){
 
 	/* Se estiver vazia */
 	if(tipos==NULL){
+		/*printf("olaaaaa\n");*/
 		tipos=novo;
 	}
 	else{
@@ -330,12 +355,20 @@ void imprimeTiposAST(noTipo *tipos, int flag){
 	noTipo *iterador;
 	iterador=tipos;
 	// Se for call tem de pôr parenteses
-	if(flag==1)
-		printf("(");
+	if(flag==1){
+		/*if(iterador!=NULL){
+			if(iterador->tipo==none){
+			}
+			else{
+				printf("(");
+			}
+		}*/
+			printf("(");
+			}
 	while(iterador!=NULL){
 		switch(iterador->tipo){
 		case none:
-			printf("none");
+			//printf("none");
 			break;
 		case integer:
 			printf("int");
@@ -529,6 +562,11 @@ void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
 	}
 }
 
+void adicionaTipo(char* tipo,nodeDefault *no){
+	insertTipo(no->tipos,tipo);
+
+
+}
 
 
 

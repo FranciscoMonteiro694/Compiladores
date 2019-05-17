@@ -63,4 +63,8 @@ char * tiraId(char *str);
 void criaLocal(nodeDefault *no,elemento_tabelag * elemento);
 char * estupido(type c);
 void imprimeTiposAST(noTipo *tipos, int flag);
+void adicionaTipo(char* tipo,nodeDefault *no);
+noTipo *insertTipo2(noTipo *tipos,type tipo);
+noTipo* percorreTabelaGlobal(char* str);
+type percorreTabelaGlobal2(char* str);
 
