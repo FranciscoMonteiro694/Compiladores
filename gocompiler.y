@@ -848,6 +848,7 @@ int recursiva(nodeDefault *no,int local){
     while(aux!=NULL){
         //acho que precisamos de um array para saber erros e tal do genero string*int
     if(strcmp(aux->string,"VarDecl")!=0){
+        printf("Estamos com string %s\n",no->string);
         checkaTerminais(aux,local,flag);
         recursiva(aux,local);
     }
@@ -987,15 +988,15 @@ void checkaTerminais(nodeDefault *no,int local,int flag){
     if(strncmp("Id",aux,strlen("Id"))==0){
         //printf("id-->%s\n",aux);
         if(flag==1){
-                //temos funcao percorrer tabelas da maneira x   
-         no->tipos=percorreTabelaGlobal(aux);
-                //printf("encotramos um id depois de um call\n"); 
+            //temos funcao percorrer tabelas da maneira x   
+            no->tipos=percorreTabelaGlobal(aux);
+            //printf("encotramos um id depois de um call\n"); 
         
         }
         else{
-           // printf("encotramos um id normal\n");
-         no->tipos=insertTipo2(no->tipos,percorreTabela(aux,local));
-//printf("plssss----->%s\n",estupido(no->tipos->tipo));
+            // printf("encotramos um id normal\n");
+            no->tipos=insertTipo2(no->tipos,percorreTabela(aux,local));
+            //printf("plssss----->%s\n",estupido(no->tipos->tipo));
             //temos uma variavel percorrer da outra maneira
         }
         //quando temos o id temos de ir sempre as tabelas acho eu
@@ -1055,6 +1056,9 @@ type percorreTabelaGlobal2(char* str){
     }
     return none;
 }
+// Esta estava antes
+// Vê primeiro a global e só depois a local 
+/*
 type percorreTabela(char* str,int local){
     elemento_tabelag * aux;
     elemento_tabelal * aux2;
@@ -1090,6 +1094,59 @@ type percorreTabela(char* str,int local){
     }
     return none;
     //nao encontramos nada
+}
+*/
+
+// Esta, ao contrário da de cima, vê primeiro na local e só depois na global
+type percorreTabela(char* str,int local){
+    elemento_tabelag * aux;
+    elemento_tabelal * aux2;
+    int i;
+    char* auxS;
+    aux=tg;
+    auxS=(char*)malloc(sizeof(char)*100);
+    auxS=tiraId(str);
+    // Ver local
+    aux=tg;
+    for(i=0;i<local;i++){
+        aux=aux->next;  
+    }
+    aux2=aux->local;
+    //printf("tabela local\n");
+    while(aux2){    
+        //printf("--%s\n",aux2->name);
+        if(strcmp(aux2->name,auxS)==0){
+            //printf("encontramos local %s\n",estupido(aux2->tipo));
+            // Se já tiver sido declarada
+            //if(isDeclared()==1){
+                return aux2->tipo;
+            //}
+            // Se não, procura na global
+            //else{
+                //break;
+            //}
+        }
+        aux2=aux2->next;    
+    }
+    
+    aux=tg;
+
+    //printf("tabela Global\n");
+    while(aux){
+        //printf("-%s\n",aux->name);
+        if(strcmp(aux->name,auxS)==0){
+            //printf("encontramos Global%s\n",estupido(aux->tipo)); 
+            return aux->tipo;
+        }
+        aux=aux->next;  
+        
+    }
+    return none;
+    //nao encontramos nada
+}
+// Funcao que vai ver se a variavél local já está declarada até ao momento em que esta foi chamada
+int isDeclared(){
+    return 0;
 }
 
 int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){

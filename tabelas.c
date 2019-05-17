@@ -3,7 +3,7 @@
 #include<stdio.h>
 #include"tabelas.h"
 
-//lex gocompiler.l && yacc -d gocompiler.y && cc -o f5 lex.yy.c y.tab.c tabelas.c 
+//lex gocompiler.l && yacc -d gocompiler.y && cc -o gocompiler lex.yy.c y.tab.c tabelas.c 
 
 extern elemento_tabelag* tg;//aquela cena do mal noice
 
