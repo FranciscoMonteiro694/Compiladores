@@ -498,17 +498,16 @@ elemento_tabelag* insertVarD(nodeDefault *no){//VarDecl ta a entrar um funcdec w
 }
 
 void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
+    //recebe o func dec
     nodeDefault *iterador,*iterador2,*iterador3;
-	//printf("iterador %s\n",no->string);
     iterador=no->filho;
-	//printf("iterador %s\n",iterador->string);
     while(iterador!=NULL){
-	//printf("a percored o iterador1 %s \n",iterador->string);
+	//vai ver o header da funcao se tem parametros e inutl acho eu este if
 	if(strcmp(iterador->string,"FuncHeader")==0){
-		if(strcmp(iterador->filho->irmao->string,"FuncParams")!=0){
+		if(strcmp(iterador->filho->irmao->string,"FuncParams")!=0){//o irmao do nome da funcao nao for fucparams que dizer que esta funçao retorna algo
 			elemento->local=insert_elLocal("return",iterador->filho->irmao->string,0,elemento->local);
 			iterador3=iterador->filho->irmao->irmao->filho;
-			while(iterador3!=NULL){
+			while(iterador3!=NULL){//meter os parametos
 			//printf("a percored o iterador3 %s \n",iterador3->string);
 			char*nomeFunc;
 			nomeFunc=(char*)malloc(sizeof(char)*50);
@@ -521,6 +520,7 @@ void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
 
 		}
 		else{
+		//nao retorna nada
 		elemento->local=insert_elLocal("return","none",0,elemento->local);
 		iterador3=iterador->filho->irmao->filho;
 		while(iterador3!=NULL){
@@ -550,6 +550,9 @@ void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
 				elemento->local=insert_elLocal(nomeFunc,iterador2->filho->string,0,elemento->local);
 			
 			}
+			else{
+				recursiva(iterador2,elemento);
+			}
 			iterador2=iterador2->irmao;
 
 		}
@@ -567,6 +570,7 @@ void adicionaTipo(char* tipo,nodeDefault *no){
 
 
 }
+
 
 
 

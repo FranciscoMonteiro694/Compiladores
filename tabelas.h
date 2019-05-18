@@ -68,3 +68,25 @@ noTipo *insertTipo2(noTipo *tipos,type tipo);
 noTipo* percorreTabelaGlobal(char* str);
 type percorreTabelaGlobal2(char* str);
 
+/**/
+    int imprimeASTanotada(nodeDefault *raiz,int flag,int depth);
+    int imprimeTralha(nodeDefault *raiz,int depth);
+    int limpaTralha(nodeDefault *raiz);
+    nodeDefault * criaNoPai(nodeType tipo, char *str);
+    nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str);
+    nodeDefault * adicionaIrmao(nodeDefault * atual,nodeType tipo, char *str);
+    int imprimeTralha(nodeDefault *raiz,int depth);
+    nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo);
+    nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo);
+    nodeDefault * adicionaIrmaoInicio(nodeDefault * atual,nodeDefault *novo);
+    nodeDefault * juntarCenas(nodeDefault * alvo,char* string);
+    char * juntaStrings(char *tipo,char *valor, char *parenteses);
+    int contaIrmao(nodeDefault * alvo);
+    int criaTabelas(nodeDefault *raiz);
+    int anota(nodeDefault *raiz);
+    void checkaTerminais(nodeDefault *no,elemento_tabelag * elemento,int flag);
+    int recursiva(nodeDefault *no,elemento_tabelag * elemento);
+    void teste1(nodeDefault *raiz);
+    type percorreTabela(char* str,elemento_tabelag * elemento);
+
+
