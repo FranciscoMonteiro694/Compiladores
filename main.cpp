@@ -12,6 +12,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+//  main.cpp
+//  Pratica2
+
+
 //--------------------------------- Definir cores
 #define BLUE     0.0, 0.0, 1.0, 1.0
 #define RED         1.0, 0.0, 0.0, 1.0
@@ -58,7 +62,18 @@ GLdouble Vx=0;
 GLdouble Vz=0;
 GLdouble Vy=0;
 GLUquadricObj*  bola = gluNewQuadric ( );
-int is_q_pressed;
+int is_1_pressed = 0;
+int is_2_pressed = 0;
+int is_3_pressed = 0;
+int is_4_pressed = 0;
+int is_5_pressed = 0;
+int is_6_pressed = 0;
+int is_7_pressed = 0;
+int is_8_pressed = 0;
+int is_9_pressed = 0;
+int is_0_pressed = 0;
+
+
 
 //=========================================================== FACES DA MESA
 GLboolean   frenteVisivel=1;
@@ -100,6 +115,7 @@ static GLfloat cores[]={
 
 void initTexturas();
 void initLights();
+void worker();
 //================================================================================
 //=========================================================================== INIT
 //================================================================================
@@ -332,7 +348,7 @@ void drawScene(){
     
     
     
-    //==================================== PAralelipipedo Amarelo
+
     
     
     
@@ -398,6 +414,9 @@ GLfloat norma(int x, int y, int z){
 
 void display(void){
     
+    // Função para tratar da rotação das teclas
+    worker();
+    
     //================================================================= APaga ecran/profundidade
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
@@ -436,53 +455,53 @@ void keyboard(unsigned char key, int x, int y){
     switch (key) {
         case '1':
             printf("Carreguei no 1\n");
-            rodar[0]=1;
+            is_1_pressed=1;
             glutPostRedisplay();
             break;
         case '2':
             printf("Carreguei no 2\n");
-            rodar[1]=1;
+            is_2_pressed=1;
             glutPostRedisplay();
             break;
             
         case '3':
             printf("Carreguei no 3\n");
-            rodar[2]=1;
+            is_3_pressed=1;
             glutPostRedisplay();
             break;
         case '4':
             printf("Carreguei no 4\n");
-            rodar[3]=1;
+            is_4_pressed=1;
             glutPostRedisplay();
             break;
         case '5':
             printf("Carreguei no 5\n");
-            rodar[4]=1;
+            is_5_pressed=1;
             glutPostRedisplay();
             break;
         case '6':
             printf("Carreguei no 6\n");
-            rodar[5]=1;
+            is_6_pressed=1;
             glutPostRedisplay();
             break;
         case '7':
             printf("Carreguei no 7\n");
-            rodar[6]=1;
+            is_7_pressed=1;
             glutPostRedisplay();
             break;
         case '8':
             printf("Carreguei no 8\n");
-            rodar[7]=1;
+            is_8_pressed=1;
             glutPostRedisplay();
             break;
         case '9':
             printf("Carreguei no 9\n");
-            rodar[8]=1;
+            is_9_pressed=1;
             glutPostRedisplay();
             break;
         case '0':
             printf("Carreguei no 0\n");
-            rodar[9]=1;
+            is_0_pressed=1;
             glutPostRedisplay();
             break;
         case 'f':
@@ -574,6 +593,61 @@ void teclasNotAscii(int key, int x, int y){
     glutPostRedisplay();
     
 }
+void keyboard2(unsigned char key, int x, int y)
+{
+    switch( key ) {
+        case '1':
+            is_1_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '2':
+            is_2_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '3':
+            is_3_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '4':
+            is_4_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '5':
+            is_5_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '6':
+            is_6_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '7':
+            is_7_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '8':
+            is_8_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '9':
+            is_9_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '0':
+            is_0_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+    }
+}
 
 
 //======================================================= MAIN
@@ -591,11 +665,56 @@ int main(int argc, char** argv){
     glutSpecialFunc(teclasNotAscii);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
-    //glutKeyboardUpFunc(KeyboardUpHandler);
+    glutKeyboardUpFunc(keyboard2);
     glutMainLoop();
     
     return 0;
 }
 
+void worker(){
+    if(is_1_pressed==1)
+        rodar[0]=1;
+    if(is_1_pressed==0)
+        rodar[0]=0;
+    if(is_2_pressed==1)
+        rodar[1]=1;
+    if(is_2_pressed==0)
+        rodar[1]=0;
+    if(is_3_pressed==1)
+        rodar[2]=1;
+    if(is_3_pressed==0)
+        rodar[2]=0;
+    if(is_4_pressed==1)
+        rodar[3]=1;
+    if(is_4_pressed==0)
+        rodar[3]=0;
+    if(is_5_pressed==1)
+        rodar[4]=1;
+    if(is_5_pressed==0)
+        rodar[4]=0;
+    if(is_6_pressed==1)
+        rodar[5]=1;
+    if(is_6_pressed==0)
+        rodar[5]=0;
+    if(is_7_pressed==1)
+        rodar[6]=1;
+    if(is_7_pressed==0)
+        rodar[6]=0;
+    if(is_8_pressed==1)
+        rodar[7]=1;
+    if(is_8_pressed==0)
+        rodar[7]=0;
+    if(is_9_pressed==1)
+        rodar[8]=1;
+    if(is_9_pressed==0)
+        rodar[8]=0;
+    if(is_0_pressed==1)
+        rodar[9]=1;
+    if(is_0_pressed==0)
+        rodar[9]=0;
+    
+    
+    
+}
 
 
