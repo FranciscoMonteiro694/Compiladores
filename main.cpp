@@ -209,7 +209,7 @@ void drawCubo2(GLdouble x ,GLdouble y,GLdouble z,int i){
     glPushMatrix();
     if(rodar[i]==1){
         
-        glRotatef (       90, -1, 0, 0);
+        glRotatef (       30, 0, 0, 1);
         //rodar[i]=0; // Com esta linha comentada, ele continua rodado
     }
     glTranslatef(x,y,z);
@@ -252,12 +252,16 @@ void drawCubo2(GLdouble x ,GLdouble y,GLdouble z,int i){
     glDisable(GL_TEXTURE_2D);
 }
 
-void drawCubo(GLdouble x ,GLdouble y,GLdouble z){
+void drawCubo(GLdouble x ,GLdouble y,GLdouble z,int i){
     glColor4f(BLACK);
     glBindTexture(GL_TEXTURE_2D,texture[2]);
     glColor4f(BLACK);
     glEnable(GL_TEXTURE_2D);
     glPushMatrix();
+    if(rodar[i]==1){
+        glRotatef (       30, 0, 0, 1);
+        //rodar[i]=0; // Com esta linha comentada, ele continua rodado
+    }
     glColor4f(BLACK);
     glTranslatef(x,y,z);
     glScalef(comprimentoTecla, alturaTecla, larguraTecla);
@@ -310,7 +314,7 @@ void drawScene(){
         drawCubo2(auxx,auxy,auxz,i);//Desenha normais
         if(pretas[i]==1){
             // Desenha pretas
-            drawCubo(auxx+comprimentoEscada-comprimentoTecla,auxy+alturaEscada+alturaTecla,auxz+(larguraEscada-larguraTecla));
+            drawCubo(auxx+comprimentoEscada-comprimentoTecla,auxy+alturaEscada+alturaTecla,auxz+(larguraEscada-larguraTecla),i);
         }
         
         auxx+=comprimentoEscada*2;
@@ -430,16 +434,55 @@ void keyboard(unsigned char key, int x, int y){
     float normaVetor;
     
     switch (key) {
-            // Teste para a rotação do degrau
-        case 'q':
-        case 'Q':
-            printf("Carreguei no Q\n");
+        case '1':
+            printf("Carreguei no 1\n");
+            rodar[0]=1;
+            glutPostRedisplay();
+            break;
+        case '2':
+            printf("Carreguei no 2\n");
+            rodar[1]=1;
+            glutPostRedisplay();
+            break;
+            
+        case '3':
+            printf("Carreguei no 3\n");
             rodar[2]=1;
             glutPostRedisplay();
             break;
-        case '1':
-            printf("Carreguei no 1\n");
+        case '4':
+            printf("Carreguei no 4\n");
             rodar[3]=1;
+            glutPostRedisplay();
+            break;
+        case '5':
+            printf("Carreguei no 5\n");
+            rodar[4]=1;
+            glutPostRedisplay();
+            break;
+        case '6':
+            printf("Carreguei no 6\n");
+            rodar[5]=1;
+            glutPostRedisplay();
+            break;
+        case '7':
+            printf("Carreguei no 7\n");
+            rodar[6]=1;
+            glutPostRedisplay();
+            break;
+        case '8':
+            printf("Carreguei no 8\n");
+            rodar[7]=1;
+            glutPostRedisplay();
+            break;
+        case '9':
+            printf("Carreguei no 9\n");
+            rodar[8]=1;
+            glutPostRedisplay();
+            break;
+        case '0':
+            printf("Carreguei no 0\n");
+            rodar[9]=1;
             glutPostRedisplay();
             break;
         case 'f':
@@ -553,10 +596,6 @@ int main(int argc, char** argv){
     
     return 0;
 }
-
-
-
-
 
 
 
