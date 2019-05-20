@@ -15,7 +15,6 @@
 //  main.cpp
 //  Pratica2
 
-
 //--------------------------------- Definir cores
 #define BLUE     0.0, 0.0, 1.0, 1.0
 #define RED         1.0, 0.0, 0.0, 1.0
@@ -89,7 +88,7 @@ GLfloat luzGlobalCorAmb[4]={intensidade,intensidade,intensidade,1.0};   //
 
 
 //…………………………………………………………………………………………………………………………………………… Lanterna (local) - FOCO
-GLint   ligaFoco=0;
+GLint   ligaLuz=1;
 GLfloat rFoco=1.1, aFoco=aVisao;
 GLfloat incH =0.0, incV=0.0;
 GLfloat incMaxH =0.5, incMaxV=0.35;
@@ -102,6 +101,11 @@ GLfloat focoCut   = 60.0;
 GLfloat focoCorDif[4] ={ 0.9, 0.9, 0.9, 1.0};
 GLfloat focoCorEsp[4] ={ 1.0, 1.0, 1.0, 1.0};
 
+
+GLfloat localPos[4]   = {20, 50, 20, 1.0};
+GLfloat localCorAmb[4]= { 1.0, 1.0, 1.0, 1.0};
+GLfloat localCorDif[4]= { 1.0, 1.0, 1.0, 1.0};
+GLfloat localCorEsp[4]= { 1.0, 1.0, 1.0, 1.0};
 
 GLfloat tam=2.0; //est„o com largura de 800
 static GLfloat vertices[]={
@@ -135,7 +139,10 @@ void inicializa(void)
     glEnableClientState(GL_NORMAL_ARRAY);
     glColorPointer(3, GL_FLOAT, 0, cores);
     glEnableClientState(GL_COLOR_ARRAY);
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     initTexturas();
+    glEnable(GL_LIGHTING); //Ativar esta linha deixa tudo a preto
+    //glEnable(GL_LIGHT0);
     initLights();
     
 }
@@ -143,19 +150,15 @@ void inicializa(void)
 //========================================================= ILUMINACAO
 void initLights(void){
     //…………………………………………………………………………………………………………………………………………… Ambiente
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzGlobalCorAmb);
-    //…………………………………………………………………………………………………………………………………………… Foco
-    glLightfv(GL_LIGHT1, GL_POSITION,      focoPini );
-    glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION,focoDir );
-    glLightf (GL_LIGHT1, GL_SPOT_EXPONENT ,focoExp);
-    glLightf (GL_LIGHT1, GL_SPOT_CUTOFF,   focoCut);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE,       focoCorDif );
-    glLightfv(GL_LIGHT1, GL_SPECULAR,      focoCorEsp  );
     
-    if (ligaFoco)
-        glEnable(GL_LIGHT1);
-    else
-        glDisable(GL_LIGHT1);
+    //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzGlobalCorAmb);
+    
+    glLightfv(GL_LIGHT0, GL_POSITION,      localPos );
+    glLightfv(GL_LIGHT0, GL_AMBIENT,       localCorAmb );
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,       localCorDif );
+    glLightfv(GL_LIGHT0, GL_SPECULAR,      localCorEsp );
+
+
     
 }
 
@@ -225,7 +228,7 @@ void drawCubo2(GLdouble x ,GLdouble y,GLdouble z,int i){
     glPushMatrix();
     if(rodar[i]==1){
         
-        glRotatef (       30, 0, 0, 1);
+        glRotatef (       10, -1, 0, 0);
         //rodar[i]=0; // Com esta linha comentada, ele continua rodado
     }
     glTranslatef(x,y,z);
@@ -275,7 +278,7 @@ void drawCubo(GLdouble x ,GLdouble y,GLdouble z,int i){
     glEnable(GL_TEXTURE_2D);
     glPushMatrix();
     if(rodar[i]==1){
-        glRotatef (       30, 0, 0, 1);
+        glRotatef (       10, -1, 0, 0);
         //rodar[i]=0; // Com esta linha comentada, ele continua rodado
     }
     glColor4f(BLACK);
@@ -442,6 +445,13 @@ void display(void){
     //ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖObjectos/modelos
     drawEixos();
     drawScene();
+    if (ligaLuz)
+        glEnable(GL_LIGHT0);
+    else
+        glDisable(GL_LIGHT0);
+    
+    initLights();
+    
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Actualizacao
     glutSwapBuffers();
@@ -553,6 +563,12 @@ void keyboard(unsigned char key, int x, int y){
             glutPostRedisplay();
             break;
             //--------------------------- Escape
+        case 'l':
+        case 'L':
+            printf("Carreguei no L\n");
+            ligaLuz=!ligaLuz;
+            glutPostRedisplay();
+            break;
         case 27:
             exit(0);
             break;
@@ -574,12 +590,6 @@ void teclasNotAscii(int key, int x, int y){
     if(key == GLUT_KEY_DOWN){
         ty-=rVisao*sin(incVisao);
     }
-    
-    //    if (obsP[1]>yC)
-    //        obsP[1]=yC;
-    //    if (obsP[1]<-yC)
-    //        obsP[1]=-yC;
-    
     if(key == GLUT_KEY_LEFT)
         aVisao = (aVisao - 0.3) ;
     if(key == GLUT_KEY_RIGHT)
