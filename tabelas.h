@@ -31,6 +31,7 @@ typedef struct _tl{
     int param; //se e parametro ou nao (pode se omitirrrr)
     type tipo;  /* Tipo de retorno da função ou tipo da variável */
     struct _tl *next;
+    int flag; // Flag para saber se determinada variavel foi usada ou não, 2 se foi, 0 se não, 1 é uma função 
 }elemento_tabelal;
 //fazer funçoes para inseir na tabela local etc e depois associar a global
 
@@ -91,4 +92,5 @@ type percorreTabelaGlobal2(char* str);
     void teste1(nodeDefault *raiz);
     type percorreTabela(char* str,elemento_tabelag * elemento);
     int procuraElemento(char *str,elemento_tabelag * elemento);
+    int procuraEl(char *nomeVariavel,char* tipo,elemento_tabelal * local);
 

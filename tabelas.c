@@ -447,6 +447,8 @@ elemento_tabelag *search_el(char *str)
 			return aux;
 	return NULL;
 }
+
+
 // Procura um elemento na tabela local, 
 
 // Função que verifica se uma função tem tipo de retorno, devolve 1 se tiver
@@ -527,7 +529,45 @@ elemento_tabelag* insertVarD(nodeDefault *no){//VarDecl ta a entrar um funcdec w
 	
 
 }
-
+// Função que procura o VarDecl de uma variavel
+// Primeiro localmente e depois globalmente
+// Se retornar 1 é suposto imprimir o erro depois
+int procuraEl(char *nomeVariavel,char* tipo,elemento_tabelal * local){
+	elemento_tabelal *aux;
+	elemento_tabelag *aux2;
+	aux=local;
+	// Percorre local
+	while(aux!=NULL){
+		// Se encontrou
+		if(strcmp(nomeVariavel,aux->name)==0){
+			return 1;
+		}
+		aux=aux->next;
+	}
+	// Percorre global
+	aux2=tg;
+	while(aux2!=NULL){
+		// se encontrou
+		if(strcmp(nomeVariavel,aux2->name)==0){
+			if(strcmp(tipo,"Int")==0 && aux2->tipo==integer ){
+				return 1;
+			}
+			if(strcmp(tipo,"Bool")==0 && aux2->tipo==boolean ){
+				return 1;
+			}
+			if(strcmp(tipo,"Float32")==0 && aux2->tipo==float32 ){
+				return 1;
+			}
+			if(strcmp(tipo,"String")==0 && aux2->tipo==string ){
+				return 1;
+			}
+			return 0;
+		}
+		aux2=aux2->next;
+	}
+	return 0;
+	
+}
 void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
     //recebe o func dec
     nodeDefault *iterador,*iterador2,*iterador3;
@@ -578,7 +618,16 @@ void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
 				nomeFunc=(char*)malloc(sizeof(char)*50);
 				//printf("Nome da funcao %s\n",aux->string);
 				strcpy(nomeFunc,tiraId(iterador2->filho->irmao->string));
+				//se não existir nenhuma
+				//printf("Tipo da variavel %s\n",iterador2->filho->string);
+				if(procuraEl(nomeFunc,iterador2->filho->string,elemento->local)==1){
+					printf("Line %d, column %d: Symbol %s already defined\n",iterador2->filho->irmao->linha,iterador2->filho->irmao->coluna,nomeFunc);
+
+				}
+					else{
+				
 				elemento->local=insert_elLocal(nomeFunc,iterador2->filho->string,0,elemento->local);
+				}
 			
 			}
 			else{
