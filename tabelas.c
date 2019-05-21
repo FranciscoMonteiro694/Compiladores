@@ -76,6 +76,13 @@ elemento_tabelal *insert_elLocal(char *str, char* t,int param,elemento_tabelal *
 	else if(strcmp(t,"none")==0){
 		newSymbol->tipo=none;
 	}
+	// Se não for return e a flag de parametros estiver a 0 quer dizer que é a declaração de uma variavel
+	if (strcmp(str,"return")!=0 && param==0){
+		newSymbol->used=0;
+	}
+	else{
+		newSymbol->used=2;// so para nao estoirar quando se for ver os erros
+	}
 	//o tipo e aquela cena do mal do enum
 	//ja metemos o indetificador e o tipo no no agora e so ligar i guess
 	newSymbol->param=param;//nao sao usados
@@ -416,27 +423,76 @@ elemento_tabelag *insertParamTypes(char *nomefuncao, nodeDefault *no){
 
 int procuraElemento(char *str,elemento_tabelag * elemento){
 	//printf("Elemento a ser procurado %s \n",str);
-	elemento_tabelag *aux;
-	elemento_tabelal * aux2;
-	/* Procura na local */
-	aux2=elemento->local;
-	while(aux2!=NULL){
-		if(strcmp(str,aux2->name)==0)
-			return 1;
-		aux2=aux2->next;
+	if (strncmp(str, "Id(", 3)==0){
+		elemento_tabelag *aux;
+		elemento_tabelal * aux2;
+		/* Procura na local */
+		aux2=elemento->local;
+		while(aux2!=NULL){
+			if(strcmp(tiraId(str),aux2->name)==0)
+				return 1;
+			aux2=aux2->next;
+		}
+
+		aux=tg;
+		while(aux!=NULL){
+			if(strcmp(tiraId(str),aux->name)==0)
+				return 1;
+			aux=aux->next;
+		}
+
+		return 0;
 	}
-
-	aux=tg;
-	while(aux!=NULL){
-		if(strcmp(str,aux->name)==0)
-			return 1;
-		aux=aux->next;
+	else{
+		return 1;
 	}
-	return 0;
-
-
 }
+// Funcao que recebe um IntLit e caso ele comece por 0, verifica se é um octal correcto
+// Devolve 1 se for, 0 caso não seja octal , -1 caso esteja incorrecto
+int verificaOctal(char *numero){
+	int iterador;
+	iterador=7;
+	//Se for Octal
+	if(strncmp(numero, "IntLit(0", 8)==0){
+		
+		// Enquanto não chegar ao fim da string
+		while(numero[iterador]!='\0'){
+			if(numero[iterador]=='8' || numero[iterador]=='9'){
+				//printf("%s é octal incorrecto\n",numero);
+				return -1;
+			}
+			iterador++;
+		}
+		//printf("%s é octal \n",numero);
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
+// int procuraElemento(nodeDefault *no,elemento_tabelag * elemento){
+// 	//printf("Elemento a ser procurado %s \n",str);
 
+// 	elemento_tabelag *aux;
+// 	elemento_tabelal * aux2;
+// 	/* Procura na local */
+// 	aux2=elemento->local;
+// 	while(aux2!=NULL){
+// 		if(strcmp(str,aux2->name)==0)
+// 			return 1;
+// 		aux2=aux2->next;
+// 	}
+
+// 	aux=tg;
+// 	while(aux!=NULL){
+// 		if(strcmp(str,aux->name)==0)
+// 			return 1;
+// 		aux=aux->next;
+// 	}
+// 	return 0;
+
+
+// }
 //Procura um identificador, devolve 0 caso nao exista
 
 elemento_tabelag *search_el(char *str)
@@ -480,6 +536,7 @@ char * tiraId(char *str){
     return aux;
 }
 
+
 elemento_tabelag* insertFuncaoT(nodeDefault *no){// FuncDecl
 	// Insere o nome da função na tabela global
 	// Se tiver tipo de retorno
@@ -507,6 +564,21 @@ elemento_tabelag* insertFuncaoT(nodeDefault *no){// FuncDecl
 
 	
 	return newel;
+}
+// Função que recebe uma variavel local e mete a flag used a 1
+void makeUsed(char *nomeVariavel,elemento_tabelag * elemento){
+	elemento_tabelal *aux;
+	aux=elemento->local;
+	while(aux!=NULL){
+		// Se encontrou
+		if(strcmp(nomeVariavel,aux->name)==0){
+			if(aux->used==0){
+				aux->used=1;
+				break;
+			}
+		}
+		aux=aux->next;
+	}
 }
 
 elemento_tabelag* insertVarD(nodeDefault *no){//VarDecl ta a entrar um funcdec wtf

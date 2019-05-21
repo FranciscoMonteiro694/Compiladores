@@ -131,8 +131,7 @@ Program: PACKAGE ID SEMICOLON Declarations {
         imprime_tabelaGlobal();
        // imprimeTralha($$,0);
         //teste1($$);
-    imprimeASTanotada($$,0,0);
-
+        imprimeASTanotada($$,0,0);
     }
     
 }
@@ -847,7 +846,8 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
     }
     if(strcmp(no->string,"Eq")==0){
     //printf("EQ percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    makeUsed(tiraId(no->filho->string),elemento);
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -856,8 +856,9 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
         
     }
     if(strcmp(no->string,"Or")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("OR percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -865,8 +866,9 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
     }
     }
     if(strcmp(no->string,"And")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     // printf("AND percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -875,8 +877,9 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
        
     }
     if(strcmp(no->string,"Ne")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("NE percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -885,8 +888,9 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
         
     }
     if(strcmp(no->string,"Lt")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
      //printf("LT percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -897,8 +901,9 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
     /*if do mal para saber se e multi divi etccccc acho que seria aqui Or(2) And(2) Eq(2) Ne(2) Lt(2) Gt(2) Le(2) Ge(2) Add(2) Sub(2) Mul(2) Div(2) Mod(2)
 Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
     if(strcmp(no->string,"Gt")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("GT percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -907,8 +912,9 @@ Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
         
     }
     if(strcmp(no->string,"Le")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("LE percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -917,8 +923,9 @@ Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
         
     }
     if(strcmp(no->string,"Ge")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("GE percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
@@ -928,8 +935,9 @@ Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
         
     }
     if(strcmp(no->string,"Add")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("ADD percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        if( procuraElemento(no->filho->string,elemento) == 1){
             no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
         }
@@ -938,8 +946,9 @@ Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
         }
     }
     if(strcmp(no->string,"Sub")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
      //printf("SUB percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        if( procuraElemento(no->filho->string,elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
     }
         //percorrer filho ja com o tipo e depois meter o tipo
@@ -949,8 +958,9 @@ Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
        
     }
     if(strcmp(no->string,"Mul")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("MUL percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        if( procuraElemento(no->filho->string,elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
 }
         //percorrer filho ja com o tipo e depois meter o tipo
@@ -960,8 +970,9 @@ else{
         
     }
     if(strcmp(no->string,"Div")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("DIV percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        if( procuraElemento(no->filho->string,elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
 }
@@ -971,8 +982,9 @@ else{
         
     }
     if(strcmp(no->string,"Mod")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("MOD percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        if( procuraElemento(no->filho->string,elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
 }
         //percorrer filho ja com o tipo e depois meter o tipo
@@ -981,8 +993,9 @@ else{
         }
     }
     if(strcmp(no->string,"Not")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("NOT percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        if( procuraElemento(no->filho->string,elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
 }
         //percorrer filho ja com o tipo e depois meter o tipo
@@ -991,8 +1004,9 @@ else{
         }
     }
     if(strcmp(no->string,"Minus")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("MINUS percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        if( procuraElemento(no->filho->string,elemento) == 1){
             no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
     }
 else{
@@ -1003,8 +1017,9 @@ else{
      
     }
     if(strcmp(no->string,"Plus")==0){
+        makeUsed(tiraId(no->filho->string),elemento);
     //printf("PLUS percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
     }
@@ -1013,8 +1028,14 @@ else{
     }
     }
     if(strcmp(no->string,"Assign")==0){
+        //Verificação do octal
+    if(verificaOctal(no->filho->irmao->string)==-1){
+        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    }
+    makeUsed(tiraId(no->filho->string),elemento);
+
     //printf("ASSIGN percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+    if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
     }
@@ -1195,7 +1216,22 @@ int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){
     return 0;
 
 }
+void imprimeDeclaredNotUsed(){
+    elemento_tabelag *aux;
+    elemento_tabelal *aux2;
+    aux=tg;
+    while(aux!=NULL){
+        aux2=aux->local;
+        while(aux2!=NULL){
+            if(strcmp(aux2->name,"return")!=0 && aux2->used==0 && aux2->param!=1){
+                printf("Variavel declarada mas não usada %s \n",aux2->name);
+            }
+            aux2=aux2->next;
 
+        }
+        aux=aux->next;
+    }
+}
 
 int main(int argc, char **argv) {
     /*
