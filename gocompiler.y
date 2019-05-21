@@ -7,6 +7,7 @@
     extern int yydebug;
     extern int numcolunas;
     extern int yylineno;
+    extern int yyleng;
     extern int flagString;
     extern char s[500];
     extern char* yytext;
@@ -583,12 +584,15 @@ char * juntaStrings(char *tipo,char *valor, char *parenteses){
 nodeDefault * criaNoPai(nodeType tipo, char *str){
     nodeDefault *ponteiro;
     if ((ponteiro=malloc(sizeof(nodeDefault)))== NULL)
-        printf("Estoirou!\n");
+        printf("Estoirou no criaNoPai!\n");
     ponteiro->filho=NULL;
     ponteiro->irmao=NULL;
     ponteiro->string=str;
     ponteiro->tipo=tipo;
     ponteiro->tipos=NULL;
+    ponteiro->linha=yylineno;
+    ponteiro->coluna=numcolunas-yyleng;
+
     return ponteiro;
 }
 nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str){
@@ -843,106 +847,180 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
     }
     if(strcmp(no->string,"Eq")==0){
     //printf("EQ percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
-        //percorrer filho ja com o tipo e depois meter o tipo
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
         
     }
     if(strcmp(no->string,"Or")==0){
     //printf("OR percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
-        //percorrer filho ja com o tipo e depois meter o tipo
-        
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
     }
     if(strcmp(no->string,"And")==0){
     // printf("AND percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
-        //percorrer filho ja com o tipo e depois meter o tipo
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
        
     }
     if(strcmp(no->string,"Ne")==0){
     //printf("NE percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
-        //percorrer filho ja com o tipo e depois meter o tipo
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
         
     }
     if(strcmp(no->string,"Lt")==0){
      //printf("LT percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
-        //percorrer filho ja com o tipo e depois meter o tipo
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
        
     }
     /*if do mal para saber se e multi divi etccccc acho que seria aqui Or(2) And(2) Eq(2) Ne(2) Lt(2) Gt(2) Le(2) Ge(2) Add(2) Sub(2) Mul(2) Div(2) Mod(2)
 Not(1) Minus(1) Plus(1) Assign(2) Call(>=1) parseArgs call*/
     if(strcmp(no->string,"Gt")==0){
     //printf("GT percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
-        //percorrer filho ja com o tipo e depois meter o tipo
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
         
     }
     if(strcmp(no->string,"Le")==0){
     //printf("LE percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
-        //percorrer filho ja com o tipo e depois meter o tipo
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
         
     }
     if(strcmp(no->string,"Ge")==0){
     //printf("GE percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,boolean);
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,boolean);
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
         //percorrer filho ja com o tipo e depois meter o tipo
         
     }
     if(strcmp(no->string,"Add")==0){
     //printf("ADD percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+            no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        
+        }
+        else{
+            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        }
     }
     if(strcmp(no->string,"Sub")==0){
      //printf("SUB percorrer filho ja com o tipo e depois meter o tipo\n");
+        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+    }
         //percorrer filho ja com o tipo e depois meter o tipo
+    else{
+            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
        
     }
     if(strcmp(no->string,"Mul")==0){
     //printf("MUL percorrer filho ja com o tipo e depois meter o tipo\n");
+        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+}
         //percorrer filho ja com o tipo e depois meter o tipo
+else{
+            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        }
         
     }
     if(strcmp(no->string,"Div")==0){
     //printf("DIV percorrer filho ja com o tipo e depois meter o tipo\n");
+        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
+}
+else{
+            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        }
         
     }
     if(strcmp(no->string,"Mod")==0){
     //printf("MOD percorrer filho ja com o tipo e depois meter o tipo\n");
+        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+}
         //percorrer filho ja com o tipo e depois meter o tipo
-        
+        else{
+            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        }
     }
     if(strcmp(no->string,"Not")==0){
     //printf("NOT percorrer filho ja com o tipo e depois meter o tipo\n");
+        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+}
         //percorrer filho ja com o tipo e depois meter o tipo
-        
+        else{
+            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        }
     }
     if(strcmp(no->string,"Minus")==0){
     //printf("MINUS percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+            no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+    }
+else{
+            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        }
+
         //percorrer filho ja com o tipo e depois meter o tipo
      
     }
     if(strcmp(no->string,"Plus")==0){
     //printf("PLUS percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
-        
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
     }
     if(strcmp(no->string,"Assign")==0){
     //printf("ASSIGN percorrer filho ja com o tipo e depois meter o tipo\n");
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+    if( procuraElemento(tiraId(no->filho->string),elemento) == 1){
+        no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
+    }
+    else{
+        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    }
     }
     //rever---------------------------------------------------------------
     if(strcmp(no->string,"Call")==0){

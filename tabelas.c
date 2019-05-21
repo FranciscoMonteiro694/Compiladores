@@ -410,6 +410,32 @@ elemento_tabelag *insertParamTypes(char *nomefuncao, nodeDefault *no){
 
 }
 
+// Procura um elemento na tabela local, e depois na global
+// Para fazer os erros
+// Devolve 1 se encontrar, 0 caso contrário
+
+int procuraElemento(char *str,elemento_tabelag * elemento){
+	//printf("Elemento a ser procurado %s \n",str);
+	elemento_tabelag *aux;
+	elemento_tabelal * aux2;
+	/* Procura na local */
+	aux2=elemento->local;
+	while(aux2!=NULL){
+		if(strcmp(str,aux2->name)==0)
+			return 1;
+		aux2=aux2->next;
+	}
+
+	aux=tg;
+	while(aux!=NULL){
+		if(strcmp(str,aux->name)==0)
+			return 1;
+		aux=aux->next;
+	}
+	return 0;
+
+
+}
 
 //Procura um identificador, devolve 0 caso nao exista
 
@@ -421,6 +447,7 @@ elemento_tabelag *search_el(char *str)
 			return aux;
 	return NULL;
 }
+// Procura um elemento na tabela local, 
 
 // Função que verifica se uma função tem tipo de retorno, devolve 1 se tiver
 // Recebe o irmão mais da esquerda (nome da funcao)
@@ -492,8 +519,10 @@ elemento_tabelag* insertVarD(nodeDefault *no){//VarDecl ta a entrar um funcdec w
 	printf("teste %s\n",aux->filho->irmao->string);*/
 	//falta verificaçoes mas wahteveeeer
 	 newel=insert_el(nomeFunc,aux->filho->string,0);
-	 if(newel==NULL)
-	 	printf("Symbol %s already defined\n",tiraId(aux->filho->irmao->string));
+	 if(newel==NULL){
+	 	printf("Line %d, column %d: Symbol %s already defined\n",aux->filho->irmao->linha,aux->filho->irmao->coluna,tiraId(aux->filho->irmao->string));
+	 	printf("Valor %s \n",aux->filho->irmao->string);
+	 }
 	return newel;
 	
 

@@ -18,6 +18,8 @@ typedef struct node{//meta2 basicamete e a nossa arvore abstracta
     nodeType tipo;
     lista filho;
     lista irmao;
+    int linha;
+    int coluna;
     listaTipos tipos;
 }nodeDefault;
 
@@ -88,4 +90,5 @@ type percorreTabelaGlobal2(char* str);
     int recursiva(nodeDefault *no,elemento_tabelag * elemento);
     void teste1(nodeDefault *raiz);
     type percorreTabela(char* str,elemento_tabelag * elemento);
+    int procuraElemento(char *str,elemento_tabelag * elemento);
 
