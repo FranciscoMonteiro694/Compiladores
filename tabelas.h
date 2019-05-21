@@ -81,5 +81,8 @@ int anota(nodeDefault *raiz);
 void checkaTerminais(nodeDefault *no,elemento_tabelag * elemento,int flag);
 int recursiva(nodeDefault *no,elemento_tabelag * elemento);
 type percorreTabela(char* str,elemento_tabelag * elemento);
+elemento_tabelag* percorreTabelaGlobal3(char* str);
+
+
 
 

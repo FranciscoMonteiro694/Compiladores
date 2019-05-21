@@ -476,11 +476,22 @@ int criaTabelas(nodeDefault *raiz){
     if(strcmp(iterador->string,"FuncDecl")==0){
 	//Inserir a funcao na tabela global e criar a sua tabela local
         aux=insertFuncaoT(iterador);
-        criaLocal(iterador,aux);
+        //criaLocal(iterador,aux);
         }
     if(strcmp(iterador->string,"VarDecl")==0){
 	//Variaveis sao mais simples(Nao ha ca tabelas locais)
         insertVarD(iterador);
+        }
+    iterador=iterador->irmao;
+    }
+    iterador=raiz->filho;
+    while(iterador!=NULL){
+    //Um programa resume-se a Funcoes e Variaveis
+    if(strcmp(iterador->string,"FuncDecl")==0){
+	//Inserir a funcao na tabela global e criar a sua tabela local
+        //aux=insertFuncaoT(iterador);
+        aux=percorreTabelaGlobal3((iterador->filho->filho->string));
+        criaLocal(iterador,aux);
         }
     iterador=iterador->irmao;
     }
@@ -622,13 +633,6 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
     if(strcmp(no->string,"Call")==0){
 	//printf("CALL percorrer filho ja com o tipo e depois meter o tipo\n");
 	no->tipos=insertTipo2(no->tipos,percorreTabelaGlobal2(no->filho->string));
-	/*if(no->filho->tipos!=NULL){
-		no->tipos=insertTipo2(no->tipos,percorreTabelaGlobal2(no->filho->string));
-	}
-	else{
-	no->tipos=insertTipo2(no->tipos,percorreTabelaGlobal2(no->filho->string));
-	}*/
-        //percorrer filho ja com o tipo e depois meter o tipo
     }
     if(strcmp(no->string,"ParseArgs")==0){
 	//printf("PARSE ARGS percorrer filho ja com o tipo e depois meter o tipo\n");
@@ -691,12 +695,27 @@ type percorreTabelaGlobal2(char* str){
     auxS=(char*)malloc(sizeof(char)*100);
     auxS=tiraId(str);
     while(aux){
-        if(strcmp(aux->name,auxS)==0){
+        if(strcmp(aux->name,auxS)==0&&aux->funcao==1){
             return aux->tipo;
         }
         aux=aux->next;     
     }
 	return none;
+}
+
+elemento_tabelag* percorreTabelaGlobal3(char* str){
+    elemento_tabelag * aux;
+    char* auxS;
+    aux=tg;
+    auxS=(char*)malloc(sizeof(char)*100);
+    auxS=tiraId(str);
+    while(aux){
+        if(strcmp(aux->name,auxS)==0&&aux->funcao==1){
+            return aux;
+        }
+        aux=aux->next;     
+    }
+	return aux;
 }
 //funcao que vai procurar uma variavel na tabela local e caso nao encotre procura na tabela global
 //retorna o tipo da variavel
@@ -737,6 +756,7 @@ int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){
     if(raiz->tipos!=NULL){
 	//dar double check-------------------------------------------------------------------------AQUI
 	if(strcmp(raiz->string,"Call")==0&&raiz->tipos->tipo==none){
+	
 	}
 	else{
 	printf(" - ");
@@ -769,6 +789,7 @@ int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){
     return 0;
 
 }
+
 
 
 
