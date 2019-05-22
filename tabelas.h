@@ -18,9 +18,9 @@ typedef struct node{//meta2 basicamete e a nossa arvore abstracta
     nodeType tipo;
     lista filho;
     lista irmao;
-    int linha;
-    int coluna;
     listaTipos tipos;
+    int coluna;
+    int linha;
 }nodeDefault;
 
 
@@ -31,7 +31,7 @@ typedef struct _tl{
     int param; //se e parametro ou nao (pode se omitirrrr)
     type tipo;  /* Tipo de retorno da função ou tipo da variável */
     struct _tl *next;
-    int used; // Flag para saber se determinada variavel foi usada ou não, 1 se foi, 0 se não
+    int used;
 }elemento_tabelal;
 //fazer funçoes para inseir na tabela local etc e depois associar a global
 
@@ -47,16 +47,12 @@ typedef struct _tg{
 
 
 
-
 elemento_tabelag *insert_el(char *str, char* t,int func);
 elemento_tabelal *insert_elLocal(char *str, char* t,int param,elemento_tabelal * lista_local);
-
 void imprime_tabelaGlobal();
 void imprime_tabelaLocal(elemento_tabelal * lista_local,char* s);
 void imprimeTipos(elemento_tabelag *tabela);
 noTipo *insertTipo(noTipo *tipos,char *tipoo);
-elemento_tabelag *insertParamTypes(char *nomefuncao, nodeDefault *no);
-elemento_tabelag *insert_elNode(char *str, nodeDefault *no);
 elemento_tabelag *search_el(char *str);
 void insertTipos(char *funcNam, nodeDefault *no);
 elemento_tabelag* insertFuncaoT(nodeDefault *no);
@@ -66,34 +62,37 @@ char * tiraId(char *str);
 void criaLocal(nodeDefault *no,elemento_tabelag * elemento);
 char * estupido(type c);
 void imprimeTiposAST(noTipo *tipos, int flag);
-void adicionaTipo(char* tipo,nodeDefault *no);
 noTipo *insertTipo2(noTipo *tipos,type tipo);
 noTipo* percorreTabelaGlobal(char* str);
 type percorreTabelaGlobal2(char* str);
-
 /**/
-    int imprimeASTanotada(nodeDefault *raiz,int flag,int depth);
-    int imprimeTralha(nodeDefault *raiz,int depth);
-    int limpaTralha(nodeDefault *raiz);
-    nodeDefault * criaNoPai(nodeType tipo, char *str);
-    nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str);
-    nodeDefault * adicionaIrmao(nodeDefault * atual,nodeType tipo, char *str);
-    int imprimeTralha(nodeDefault *raiz,int depth);
-    nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo);
-    nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo);
-    nodeDefault * adicionaIrmaoInicio(nodeDefault * atual,nodeDefault *novo);
-    nodeDefault * juntarCenas(nodeDefault * alvo,char* string);
-    char * juntaStrings(char *tipo,char *valor, char *parenteses);
-    int contaIrmao(nodeDefault * alvo);
-    int criaTabelas(nodeDefault *raiz);
-    int anota(nodeDefault *raiz);
-    void checkaTerminais(nodeDefault *no,elemento_tabelag * elemento,int flag);
-    int recursiva(nodeDefault *no,elemento_tabelag * elemento);
-    void teste1(nodeDefault *raiz);
-    type percorreTabela(char* str,elemento_tabelag * elemento);
-    int procuraElemento(char *str,elemento_tabelag * elemento);
-    int procuraEl(char *nomeVariavel,char* tipo,elemento_tabelal * local);
-    void makeUsed(char *nomeVariavel,elemento_tabelag * elemento);
-    void imprimeDeclaredNotUsed();
-    int verificaOctal(char *numero);
-    int procuraFuncaoGlobal(char* str);
+int imprimeASTanotada(nodeDefault *raiz,int flag,int depth);
+int imprimeTralha(nodeDefault *raiz,int depth);
+int limpaTralha(nodeDefault *raiz);
+nodeDefault * criaNoPai(nodeType tipo, char *str);
+nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str);
+nodeDefault * adicionaIrmao(nodeDefault * atual,nodeType tipo, char *str);
+int imprimeTralha(nodeDefault *raiz,int depth);
+nodeDefault * adicionaIrmao2(nodeDefault * atual,nodeDefault *novo);
+nodeDefault * adicionaFilho2(nodeDefault * pai,nodeDefault *novo);
+nodeDefault * adicionaIrmaoInicio(nodeDefault * atual,nodeDefault *novo);
+nodeDefault * juntarCenas(nodeDefault * alvo,char* string);
+char * juntaStrings(char *tipo,char *valor, char *parenteses);
+int contaIrmao(nodeDefault * alvo);
+int criaTabelas(nodeDefault *raiz);
+int anota(nodeDefault *raiz);
+void checkaTerminais(nodeDefault *no,elemento_tabelag * elemento,int flag);
+int recursiva(nodeDefault *no,elemento_tabelag * elemento);
+type percorreTabela(char* str,elemento_tabelag * elemento);
+elemento_tabelag* percorreTabelaGlobal3(char* str);
+int procuraEl(char *nomeVariavel,char* tipo,elemento_tabelal * local);
+void makeUsed(char *nomeVariavel,elemento_tabelag * elemento);
+int procuraElemento(char *str,elemento_tabelag * elemento);
+int procuraFuncaoGlobal(char* str);
+int verificaOctal(char *numero);
+void createFile();
+char * converteLLVM(type tipo);
+char * juntaParametros(listaTipos tipos);
+
+
+
