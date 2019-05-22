@@ -7,6 +7,7 @@
     extern int yydebug;
     extern int numcolunas;
     extern int yylineno;
+    extern int yyleng;
     extern int flagString;
     extern char s[500];
     extern char* yytext;
@@ -129,6 +130,7 @@ Program: PACKAGE ID SEMICOLON Declarations {
     if(flagSemantica==1){
         imprime_tabelaGlobal();
 	imprimeASTanotada($$,0,0);
+	//createFile();
 
     }
     
@@ -576,6 +578,8 @@ nodeDefault * criaNoPai(nodeType tipo, char *str){
     ponteiro->string=str;
     ponteiro->tipo=tipo;
     ponteiro->tipos=NULL;
+    ponteiro->linha=yylineno;
+    ponteiro->coluna=numcolunas-yyleng;
     return ponteiro;
 }
 nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str){

@@ -19,6 +19,8 @@ typedef struct node{//meta2 basicamete e a nossa arvore abstracta
     lista filho;
     lista irmao;
     listaTipos tipos;
+    int coluna;
+    int linha;
 }nodeDefault;
 
 
@@ -29,6 +31,7 @@ typedef struct _tl{
     int param; //se e parametro ou nao (pode se omitirrrr)
     type tipo;  /* Tipo de retorno da função ou tipo da variável */
     struct _tl *next;
+    int used;
 }elemento_tabelal;
 //fazer funçoes para inseir na tabela local etc e depois associar a global
 
@@ -82,6 +85,14 @@ void checkaTerminais(nodeDefault *no,elemento_tabelag * elemento,int flag);
 int recursiva(nodeDefault *no,elemento_tabelag * elemento);
 type percorreTabela(char* str,elemento_tabelag * elemento);
 elemento_tabelag* percorreTabelaGlobal3(char* str);
+int procuraEl(char *nomeVariavel,char* tipo,elemento_tabelal * local);
+void makeUsed(char *nomeVariavel,elemento_tabelag * elemento);
+int procuraElemento(char *str,elemento_tabelag * elemento);
+int procuraFuncaoGlobal(char* str);
+int verificaOctal(char *numero);
+void createFile();
+char * converteLLVM(type tipo);
+char * juntaParametros(listaTipos tipos);
 
 
 
