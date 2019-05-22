@@ -96,4 +96,4 @@ type percorreTabelaGlobal2(char* str);
     void makeUsed(char *nomeVariavel,elemento_tabelag * elemento);
     void imprimeDeclaredNotUsed();
     int verificaOctal(char *numero);
-
+    int procuraFuncaoGlobal(char* str);

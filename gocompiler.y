@@ -1059,6 +1059,11 @@ else{
     //rever---------------------------------------------------------------
     if(strcmp(no->string,"Call")==0){
     //printf("CALL percorrer filho ja com o tipo e depois meter o tipo\n");
+        //printf("Valor do filho do nó Call %s \n",no->filho->string);
+    if(procuraFuncaoGlobal(no->filho->string)==0){
+        printf("Line %d, column %d: Cannot find symbol %s()\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+
+    }    
     if(no->filho->tipos!=NULL){
         //printf("testeeeeee%s\n",estupido(percorreTabelaGlobal2(no->filho->string)));
         no->tipos=insertTipo2(no->tipos,percorreTabelaGlobal2(no->filho->string));
@@ -1136,6 +1141,23 @@ noTipo* percorreTabelaGlobal(char* str){
    return hmmm;
 }
 
+int procuraFuncaoGlobal(char* str){
+    elemento_tabelag * aux;
+    char* auxS;
+    aux=tg;
+    auxS=(char*)malloc(sizeof(char)*100);
+    auxS=tiraId(str);
+    //printf("tabela Global\n");
+    while(aux){
+        //printf("-%s\n",aux->name);
+        if(strcmp(aux->name,auxS)==0 && aux->funcao==1){
+            printf("Encontramos a funcao %s na tabela global\n",estupido(aux->tipo)); 
+            return 1;
+        }
+        aux=aux->next;     
+    }
+    return 0;
+}
 type percorreTabelaGlobal2(char* str){
     elemento_tabelag * aux;
     char* auxS;
@@ -1280,4 +1302,3 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-

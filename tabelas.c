@@ -595,7 +595,7 @@ elemento_tabelag* insertVarD(nodeDefault *no){//VarDecl ta a entrar um funcdec w
 	 newel=insert_el(nomeFunc,aux->filho->string,0);
 	 if(newel==NULL){
 	 	printf("Line %d, column %d: Symbol %s already defined\n",aux->filho->irmao->linha,aux->filho->irmao->coluna,tiraId(aux->filho->irmao->string));
-	 	printf("Valor %s \n",aux->filho->irmao->string);
+	 	//printf("Valor %s \n",aux->filho->irmao->string);
 	 }
 	return newel;
 	
@@ -722,7 +722,6 @@ void adicionaTipo(char* tipo,nodeDefault *no){
 
 
 }
-
 
 
 
