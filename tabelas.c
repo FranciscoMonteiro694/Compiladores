@@ -618,25 +618,25 @@ int procuraEl(char *nomeVariavel,char* tipo,elemento_tabelal * local){
 	}
 	// Percorre global
 	aux2=tg;
-	while(aux2!=NULL){
-		// se encontrou
-		if(strcmp(nomeVariavel,aux2->name)==0){
-			if(strcmp(tipo,"Int")==0 && aux2->tipo==integer ){
-				return 1;
-			}
-			if(strcmp(tipo,"Bool")==0 && aux2->tipo==boolean ){
-				return 1;
-			}
-			if(strcmp(tipo,"Float32")==0 && aux2->tipo==float32 ){
-				return 1;
-			}
-			if(strcmp(tipo,"String")==0 && aux2->tipo==string ){
-				return 1;
-			}
-			return 0;
-		}
-		aux2=aux2->next;
-	}
+	// while(aux2!=NULL){
+	// 	// se encontrou
+	// 	if(strcmp(nomeVariavel,aux2->name)==0){
+	// 		if(strcmp(tipo,"Int")==0 && aux2->tipo==integer ){
+	// 			return 1;
+	// 		}
+	// 		if(strcmp(tipo,"Bool")==0 && aux2->tipo==boolean ){
+	// 			return 1;
+	// 		}
+	// 		if(strcmp(tipo,"Float32")==0 && aux2->tipo==float32 ){
+	// 			return 1;
+	// 		}
+	// 		if(strcmp(tipo,"String")==0 && aux2->tipo==string ){
+	// 			return 1;
+	// 		}
+	// 		return 0;
+	// 	}
+	// 	aux2=aux2->next;
+	// }
 	return 0;
 	
 }

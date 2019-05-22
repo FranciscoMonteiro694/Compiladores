@@ -180,7 +180,8 @@ VarSpec: ID teste Type {
     else{
         $$=criaNoPai(DecVariaveis,"VarDecl");
         adicionaFilho2($$,$3);
-       adicionaIrmao2($$->filho,criaNoPai(Terminal,juntaStrings("Id(",$1,")")));
+        adicionaIrmao2($$->filho,criaNoPai(Terminal,juntaStrings("Id(",$1,")")));
+
     }
     };
     ;
@@ -594,6 +595,18 @@ nodeDefault * criaNoPai(nodeType tipo, char *str){
 
     return ponteiro;
 }
+// nodeDefault * criaNoPai(nodeType tipo, char *str,int linhas,int colunas){
+//     nodeDefault *ponteiro;
+//     if ((ponteiro=malloc(sizeof(nodeDefault)))== NULL)
+//         printf("Estoirou no criaNoPai!\n");
+//     ponteiro->filho=NULL;
+//     ponteiro->irmao=NULL;
+//     ponteiro->string=str;
+//     ponteiro->tipo=tipo;
+//     ponteiro->tipos=NULL;
+//     ponteiro->linha=linhas;
+//     ponteiro->coluna=colunas;
+// }
 nodeDefault * adicionaFilho(nodeDefault * pai,nodeType tipo, char *str){
     nodeDefault *novo;
     novo=criaNoPai(tipo, str);
