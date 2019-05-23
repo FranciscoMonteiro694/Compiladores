@@ -129,8 +129,8 @@ Program: PACKAGE ID SEMICOLON Declarations {
     //anota
     if(flagSemantica==1){
         imprime_tabelaGlobal();
-	imprimeASTanotada($$,0,0);
-	//createFile();
+    imprimeASTanotada($$,0,0);
+    //createFile();
 
     }
     
@@ -251,7 +251,7 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
         adicionaIrmao2(aux->filho,$5);//dar double checkkkkk
     
         adicionaIrmao2($$->filho,$6);
-    	adicionaIrmao2(aux->filho,criaNoPai(DecFuncoes,"FuncParams"));  
+        adicionaIrmao2(aux->filho,criaNoPai(DecFuncoes,"FuncParams"));  
     }
     ;
 Parameters: ID Type AuxParameters {

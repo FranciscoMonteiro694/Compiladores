@@ -88,12 +88,15 @@ elemento_tabelag* percorreTabelaGlobal3(char* str);
 int procuraEl(char *nomeVariavel,char* tipo,elemento_tabelal * local);
 void makeUsed(char *nomeVariavel,elemento_tabelag * elemento);
 int procuraElemento(char *str,elemento_tabelag * elemento);
-int procuraFuncaoGlobal(char* str);
+int procuraFuncaoGlobal(char* str,noTipo *tipos);
 int verificaOctal(char *numero);
 void createFile();
 char * converteLLVM(type tipo);
 char * juntaParametros(listaTipos tipos);
+nodeDefault *procuraBody(nodeDefault *raiz,char *nome);
 
+void declaraV(FILE*fptr,elemento_tabelal * lista_local);
+int comparaTipos(noTipo *tipos1,noTipo *tipos2);
 
 
 
