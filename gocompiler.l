@@ -17,6 +17,7 @@ Tanto as linhas como as colunas são numeradas a partir de 1
 */
 %{
 #include "y.tab.h"
+#include "tabelas.h"
 	extern int flagLex;
 %}
 %{
@@ -135,7 +136,7 @@ aux {INTLIT}$
 {FUNC} {if (flagLex==1){printf("FUNC\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return FUNC;}
 {CMDARGS} {if (flagLex==1){printf("CMDARGS\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return CMDARGS;}
 {PACKAGE} {if (flagLex==1){printf("PACKAGE\n");}numcolunas+=yyleng;flag_semicolon=0;yylval.string =(char*)strdup(yytext);return PACKAGE;} 
-{alfa}+({numero}|{alfa})* {if (flagLex==1){printf("ID(%s)\n",&yytext[0]);}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return ID;}
+{alfa}+({numero}|{alfa})* {if (flagLex==1){printf("ID(%s)\n",&yytext[0]);}yylval.p=criaAuxiliar((char*)strdup(yytext),numcolunas);numcolunas+=yyleng;flag_semicolon=1;return ID;}
 {REALLIT} {if (flagLex==1){printf("REALLIT(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return REALLIT;}
 {INTLIT} {if (flagLex==1){printf("INTLIT(%s)\n",yytext);}numcolunas+=yyleng;flag_semicolon=1;yylval.string =(char*)strdup(yytext);return INTLIT;}
 
@@ -180,7 +181,6 @@ int yywrap()
 {
 return 1;
 }
-
 
 
 
