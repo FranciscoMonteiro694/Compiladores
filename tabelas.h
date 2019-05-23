@@ -103,5 +103,7 @@ void declaraV(FILE*fptr,elemento_tabelal * lista_local);
 int comparaTipos(noTipo *tipos1,noTipo *tipos2);
 noAux * criaAuxiliar(char *string, int coluna);
 nodeDefault * criaNoPai2(nodeType tipo, char *str,int coluna);
+noTipo* percorreIrmaos(nodeDefault *no);
+char * juntaParametros2(listaTipos tipos);
 
 

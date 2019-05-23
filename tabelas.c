@@ -540,7 +540,9 @@ int criaTabelas(nodeDefault *raiz){
 	//Inserir a funcao na tabela global e criar a sua tabela local
         //aux=insertFuncaoT(iterador);
         aux=percorreTabelaGlobal3((iterador->filho->filho->string));
-        criaLocal(iterador,aux);
+        if(aux!=NULL){
+        	criaLocal(iterador,aux);
+        }
         }
     iterador=iterador->irmao;
     }
@@ -812,16 +814,15 @@ else{
     }
     //rever---------------------------------------------------------------
     if(strcmp(no->string,"Call")==0){
+	no->filho->tipos=percorreIrmaos(no->filho);
+
 	//printf("CALL percorrer filho ja com o tipo e depois meter o tipo\n");
-    // if(procuraFuncaoGlobal(no->filho->string,no->filho->tipos)==0){
+    if(procuraFuncaoGlobal(no->filho->string,no->filho->tipos)==0){
     // 	//Ver se a funcao é chamada com argumentos
-    // 	if(no->filho->irmao!=NULL){
-    // 		printf("Line %d, column %d: Cannot find symbol %s(undef)\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-    // 	}
-    // 	else{
-    //     	printf("Line %d, column %d: Cannot find symbol %s()\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-    // 	}
-    // } 
+     		printf("Line %d, column %d: Cannot find symbol %s(%s)\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string),juntaParametros2(no->filho->tipos));
+
+    } 
+    //Não mexer 
 	no->tipos=insertTipo2(no->tipos,percorreTabelaGlobal2(no->filho->string));
 	//printf("Depois do call\n");
     }
@@ -837,13 +838,44 @@ else{
 //Funcao que atribui tipos aos nos "Terminais" na AST
 //A flag apenas indica se o nó anterio,ou melhor dizendo pai,for um no do tipo call que nesto caso sera tratado de maneira diferente
 //elemento é um pinteiro para o elemento da tabela global que tamos a analisar
+
+
+noTipo* percorreIrmaos(nodeDefault *no){
+    nodeDefault *iterador;
+    iterador = no->irmao;
+    while(iterador!=NULL){
+
+    	no->tipos=insertTipo2(no->tipos,iterador->tipos->tipo);
+    	iterador=iterador->irmao;
+    }
+    return no->tipos;
+
+}
+
+
+char * juntaParametros2(listaTipos tipos){
+	char * resultado;
+
+	noTipo*aux;
+	aux=tipos;
+	
+	resultado=(char*)malloc(sizeof(char)*100);
+	strcpy(resultado,"");
+	while(aux){
+		strcat(resultado,estupido(aux->tipo));
+		aux=aux->next;
+	}
+	resultado[strlen(resultado)-1]='\0';
+	return resultado;
+}
+
 void checkaTerminais(nodeDefault *no,elemento_tabelag * elemento,int flag){
     char* aux;
     aux=no->string;
     if(strncmp("Id",aux,strlen("Id"))==0){
         if(flag==1){//Se o id que encontramos tiver como pai uma call,quer dizer que é o nome de uma funcao, e que os seus tipos de parametros teram na tabela global
 		 //if(procuraFuncaoGlobal(no->filho->string,no->filho->tipos)==0){
-		 no->tipos=percorreTabelaGlobal(aux);
+		 //no->tipos=percorreTabelaGlobal(aux);
 		 //erros de funcoes nao declaradas
         }
         else{
