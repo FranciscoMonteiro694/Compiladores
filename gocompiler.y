@@ -11,6 +11,7 @@
     extern int flagString;
     extern char s[500];
     extern char* yytext;
+    int contadorErros;
     int yylex(void);
     void yyerror (char *st);
 
@@ -127,12 +128,14 @@ Program: PACKAGE ID SEMICOLON Declarations {
     }
         
     }
-    
+    criaTabelas($$);
     //anota
     if(flagSemantica==1){
-        criaTabelas($$);
-        imprime_tabelaGlobal();
-        imprimeASTanotada($$,0,0);
+        
+        if(contadorErros==0){
+            imprime_tabelaGlobal();
+            imprimeASTanotada($$,0,0);
+        }
     //createFile();
 
     }
@@ -702,6 +705,7 @@ int main(int argc, char **argv) {
     /*
     yydebug=1;
     */
+    contadorErros=0;
     if(argc>1){
         if (strcmp(argv[1],"-l")==0){
     flagArvore=0;
