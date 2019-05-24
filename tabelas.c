@@ -11,15 +11,70 @@
 //lex gocompiler.l && yacc -d gocompiler.y && cc -o f5 lex.yy.c y.tab.c tabelas.c 
 
 extern elemento_tabelag* tg;//tabela global
+extern noErro * erros;// lista de erros
 extern int contadorErros;// Contador de erros semânticos
+char cenas[100];
+
+noErro * criaErro(char *string, int linha,int coluna){
+	noErro *aux;
+	aux=(noErro*)malloc(sizeof(noErro));
+	strcpy(aux->string,string);
+	aux->coluna=coluna;
+	aux->linha=linha;
+	return aux;
+}
+
+noErro * inserirErro(noErro * inicio, char * string , int linha , int coluna){
+	noErro * novo;
+	noErro * actual;
+	noErro * seguinte;
+	novo = criaErro(string,linha,coluna);
+	if(inicio==NULL){
+		return novo;
+	}
+	actual=inicio;
+	seguinte=inicio->next;
+	if(novo->linha < actual->linha){
+		novo->next=actual;
+		return novo;
+	}
+
+	while(seguinte!=NULL){
+		if((novo->linha > actual->linha && novo->linha < seguinte->linha) ||
+		 	(novo->linha == actual->linha && novo->linha == seguinte->linha && novo->coluna > actual->coluna && novo->coluna < seguinte->coluna )
+		 	)
+		{
+		actual->next=novo;
+		novo->next=seguinte;
+		return inicio;
+
+		}
+
+		actual=actual->next;
+		seguinte=seguinte->next;
+	}
+	actual->next=novo;
+	return inicio;
+
+}	
+
+void imprimeListaErros(noErro * inicio){
+	//printf("Conteudo da lista de erros\n");
+	noErro *iterador;
+	iterador = inicio;
+	while(iterador!=NULL){
+		printf("Line %d, column %d: %s",iterador->linha,iterador->coluna,iterador->string);
+		iterador=iterador->next;
+	}
+}
 
 
-
-noAux * criaAuxiliar(char *string, int coluna){
+noAux * criaAuxiliar(char *string, int coluna,int linha){
 	noAux *aux;
 	aux=(noAux*)malloc(sizeof(noAux));
 	aux->string=string;
 	aux->coluna=coluna;
+	aux->linha=linha;
 	return aux;
 }
 
@@ -395,6 +450,7 @@ elemento_tabelag* insertFuncaoT(nodeDefault *no){// FuncDecl
 	// Insere o nome da função na tabela global
 	// Se tiver tipo de retorno
 	elemento_tabelag* newel;
+
 	nodeDefault *aux;
 	aux=no->filho->filho;//Nome da função
 	char * nomeFunc;
@@ -403,8 +459,10 @@ elemento_tabelag* insertFuncaoT(nodeDefault *no){// FuncDecl
 	if (checkHasReturn(aux)==1){//funcao que ve se a funcDecl retorna algum tipo de valor
 		newel=insert_el(nomeFunc,aux->irmao->string,1);
 		if(newel==NULL){
-			printf("Line %d, column %d: Symbol %s already defined\n",aux->linha,aux->coluna,tiraId(aux->string));
+			sprintf(cenas,"Symbol %s already defined\n",tiraId(aux->string));
+			erros=inserirErro(erros,cenas,aux->linha ,aux->coluna);
 			contadorErros++;
+			//printf("Line %d, column %d: Symbol %s already defined\n",aux->linha,aux->coluna,tiraId(aux->string));
 			return NULL;
 		}
 		else{
@@ -415,8 +473,10 @@ elemento_tabelag* insertFuncaoT(nodeDefault *no){// FuncDecl
 	else{//caso nao retorne nada
 		newel=insert_el(nomeFunc,"none",1);
 		if(newel==NULL){
-			printf("Line %d, column %d: Symbol %s already defined\n",aux->linha,aux->coluna,tiraId(aux->string));
+			sprintf(cenas,"Symbol %s already defined\n",tiraId(aux->string));
+			erros=inserirErro(erros,cenas,aux->linha ,aux->coluna);
 			contadorErros++;
+			//printf("Line %d, column %d: Symbol %s already defined\n",aux->linha,aux->coluna,tiraId(aux->string));
 			return NULL;
 		}
 		else{
@@ -439,7 +499,9 @@ elemento_tabelag* insertVarD(nodeDefault *no){
 	strcpy(nomeFunc,tiraId(aux->filho->irmao->string));//nome da variavel
 	newel=insert_el(nomeFunc,aux->filho->string,0);//aux->filho é o tipo da variavel
 	if(newel==NULL){
-	 	printf("Line %d, column %d: Symbol %s already defined\n",aux->filho->irmao->linha,aux->filho->irmao->coluna,tiraId(aux->filho->irmao->string));
+		sprintf(cenas,"Symbol %s already defined\n",tiraId(aux->filho->irmao->string));
+		erros=inserirErro(erros,cenas,aux->filho->irmao->linha,aux->filho->irmao->coluna);
+	 	//printf("Line %d, column %d: ",aux->filho->irmao->linha,aux->filho->irmao->coluna,tiraId(aux->filho->irmao->string));
 	 	contadorErros++;
 	 	//printf("Valor %s \n",aux->filho->irmao->string);
 	 }
@@ -487,7 +549,9 @@ void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
 				nomeFunc=(char*)malloc(sizeof(char)*50);
 				strcpy(nomeFunc,tiraId(iterador2->filho->irmao->string));
 				if(procuraEl(nomeFunc,iterador2->filho->string,elemento->local)==1){
-					printf("Line %d, column %d: Symbol %s already defined\n",iterador2->filho->irmao->linha,iterador2->filho->irmao->coluna,nomeFunc);
+					sprintf(cenas,"Symbol %s already defined\n",nomeFunc);
+					erros=inserirErro(erros,cenas,iterador2->filho->irmao->linha,iterador2->filho->irmao->coluna);
+					//printf("Line %d, column %d: Symbol %s already defined\n",iterador2->filho->irmao->linha,iterador2->filho->irmao->coluna,nomeFunc);
 					contadorErros++;
 
 				}
@@ -541,7 +605,8 @@ int criaTabelas(nodeDefault *raiz){
         //aux=insertFuncaoT(iterador);
         aux=percorreTabelaGlobal3((iterador->filho->filho->string));
         if(aux!=NULL){
-        	criaLocal(iterador,aux);
+        		criaLocal(iterador,aux);
+
         }
         }
     iterador=iterador->irmao;
@@ -582,14 +647,18 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
     //printf("5 %s\n",no->string);
     if(strcmp(no->string,"Eq")==0){
     	if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+       // printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
    
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }    
     }
@@ -598,7 +667,9 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
     }
@@ -607,76 +678,98 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
        
     }
     if(strcmp(no->string,"Ne")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }    
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
         
     }
     if(strcmp(no->string,"Lt")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+       // printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
      	//printf("LT percorrer filho ja com o tipo e depois meter o tipo\n");
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
        
     }
     if(strcmp(no->string,"Gt")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("GT percorrer filho ja com o tipo e depois meter o tipo\n");
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
         
     }
     if(strcmp(no->string,"Le")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("LE percorrer filho ja com o tipo e depois meter o tipo\n");
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
         
     }
     if(strcmp(no->string,"Ge")==0){
     	if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("GE percorrer filho ja com o tipo e depois meter o tipo\n");
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,boolean);
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
         //percorrer filho ja com o tipo e depois meter o tipo
@@ -684,7 +777,9 @@ if(verificaOctal(no->filho->irmao->string)==-1){
     }
     if(strcmp(no->string,"Add")==0){
     	if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("ADD percorrer filho ja com o tipo e depois meter o tipo\n");
         if( procuraElemento(no->filho->string,elemento) == 1){
@@ -692,13 +787,17 @@ if(verificaOctal(no->filho->irmao->string)==-1){
         //percorrer filho ja com o tipo e depois meter o tipo
         }
         else{
-            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+			erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
     }
     if(strcmp(no->string,"Sub")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
      	//printf("SUB percorrer filho ja com o tipo e depois meter o tipo\n");
         if( procuraElemento(no->filho->string,elemento) == 1){
@@ -706,14 +805,18 @@ if(verificaOctal(no->filho->irmao->string)==-1){
     }
         //percorrer filho ja com o tipo e depois meter o tipo
     else{
-            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
     }
        
     }
     if(strcmp(no->string,"Mul")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("MUL percorrer filho ja com o tipo e depois meter o tipo\n");
         if( procuraElemento(no->filho->string,elemento) == 1){
@@ -721,29 +824,37 @@ if(verificaOctal(no->filho->irmao->string)==-1){
 }
         //percorrer filho ja com o tipo e depois meter o tipo
 else{
-            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
         
     }
     if(strcmp(no->string,"Div")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("DIV percorrer filho ja com o tipo e depois meter o tipo\n");
         if( procuraElemento(no->filho->string,elemento) == 1){
     no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
 }
-else{
-            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+else{	
+		sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
         
     }
     if(strcmp(no->string,"Mod")==0){
     	if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("MOD percorrer filho ja com o tipo e depois meter o tipo\n");
         if( procuraElemento(no->filho->string,elemento) == 1){
@@ -751,7 +862,9 @@ else{
 }
         //percorrer filho ja com o tipo e depois meter o tipo
         else{
-            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+           // printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
     }
@@ -762,20 +875,26 @@ else{
 }
         //percorrer filho ja com o tipo e depois meter o tipo
         else{
-            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+        	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
     }
     if(strcmp(no->string,"Minus")==0){
     	if(verificaOctal(no->filho->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
     }
     	//printf("MINUS percorrer filho ja com o tipo e depois meter o tipo\n");
         if( procuraElemento(no->filho->string,elemento) == 1){
             no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
     }
 else{
-            printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+			erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
 
@@ -784,7 +903,9 @@ else{
     }
     if(strcmp(no->string,"Plus")==0){
     if(verificaOctal(no->filho->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
     }
     	//printf("PLUS percorrer filho ja com o tipo e depois meter o tipo\n");
     if( procuraElemento(no->filho->string,elemento) == 1){
@@ -792,7 +913,9 @@ else{
         //percorrer filho ja com o tipo e depois meter o tipo
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
     }
@@ -801,14 +924,18 @@ else{
 	// printf("ASSIGN percorrer filho ja com o tipo e depois meter o tipo\n");
         //Verificação do octal
     if(verificaOctal(no->filho->irmao->string)==-1){
-        printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
     }
     else{
-        printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
     }
@@ -819,7 +946,9 @@ else{
 	//printf("CALL percorrer filho ja com o tipo e depois meter o tipo\n");
     if(procuraFuncaoGlobal(no->filho->string,no->filho->tipos)==0){
     // 	//Ver se a funcao é chamada com argumentos
-     		printf("Line %d, column %d: Cannot find symbol %s(%s)\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string),juntaParametros2(no->filho->tipos));
+    		sprintf(cenas,"Cannot find symbol %s(%s)\n",tiraId(no->filho->string),juntaParametros2(no->filho->tipos));
+			erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+     		//printf("Line %d, column %d: Cannot find symbol %s(%s)\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string),juntaParametros2(no->filho->tipos));
 
     } 
     //Não mexer 
@@ -942,6 +1071,23 @@ elemento_tabelag* percorreTabelaGlobal3(char* str){
         aux=aux->next;     
     }
 	return aux;
+}
+int percorreTabelaGlobal4(char* str){
+	int acumulador;
+    elemento_tabelag * aux;
+    char* auxS;
+    acumulador=0;
+    aux=tg;
+    auxS=(char*)malloc(sizeof(char)*100);
+    auxS=tiraId(str);
+    while(aux){
+        if(strcmp(aux->name,auxS)==0&&aux->funcao==1){
+            return acumulador;
+        }
+        aux=aux->next;
+        acumulador++;     
+    }
+	return -1;
 }
 //funcao que vai procurar uma variavel na tabela local e caso nao encotre procura na tabela global
 //retorna o tipo da variavel

@@ -11,6 +11,7 @@
     extern int flagString;
     extern char s[500];
     extern char* yytext;
+    noErro * erros=NULL;
     int contadorErros;
     int yylex(void);
     void yyerror (char *st);
@@ -129,6 +130,7 @@ Program: PACKAGE ID SEMICOLON Declarations {
         
     }
     criaTabelas($$);
+    imprimeListaErros(erros);
     //anota
     if(flagSemantica==1){
         
@@ -136,6 +138,7 @@ Program: PACKAGE ID SEMICOLON Declarations {
             imprime_tabelaGlobal();
             imprimeASTanotada($$,0,0);
         }
+
     //createFile();
 
     }
@@ -178,7 +181,7 @@ VarDeclaration: VAR VarSpec {
 
 VarSpec: ID teste Type { 
     if($2!=NULL){
-        $$=adicionaIrmaoInicio($2,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna));
+        $$=adicionaIrmaoInicio($2,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha));
         $$=juntarCenas($$,$3->string);
         
 
@@ -186,7 +189,7 @@ VarSpec: ID teste Type {
     else{
         $$=criaNoPai(DecVariaveis,"VarDecl");
         adicionaFilho2($$,$3);
-       adicionaIrmao2($$->filho,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna));
+       adicionaIrmao2($$->filho,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha));
     }
     };
     ;
@@ -194,10 +197,10 @@ VarSpec: ID teste Type {
 teste: teste COMMA ID {
     if($1!=NULL){
         $$=$1;
-        adicionaIrmao2($$,criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna));
+        adicionaIrmao2($$,criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna,$3->linha));
     }
     else{
-          $$=criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna);
+          $$=criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna,$3->linha);
     }
 }
     |   /* empty */ {$$=NULL;}
@@ -214,7 +217,7 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
     $$=criaNoPai(DecFuncoes,"FuncDecl");
     aux=criaNoPai(DecFuncoes,"FuncHeader");
     adicionaFilho2($$,aux);
-     aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna);
+     aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna,$2->linha);
     adicionaFilho2(aux,aux2);
     aux3=criaNoPai(DecFuncoes,"FuncParams");
     adicionaIrmao2(aux->filho,aux3);
@@ -227,7 +230,7 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
         $$=criaNoPai(DecFuncoes,"FuncDecl");
         aux=criaNoPai(DecFuncoes,"FuncHeader");
         adicionaFilho2($$,aux);
-        aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna);
+        aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna,$2->linha);
         adicionaFilho2(aux,aux2);
         adicionaIrmao2(aux->filho,$4);
         adicionaIrmao2($$->filho,$6);
@@ -240,7 +243,7 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
         $$=criaNoPai(DecFuncoes,"FuncDecl");
         aux=criaNoPai(DecFuncoes,"FuncHeader");
         adicionaFilho2($$,aux);
-        aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna);
+        aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna,$2->linha);
         adicionaFilho2(aux,aux2);
         adicionaIrmao2(aux->filho,$6);
         adicionaIrmao2(aux->filho,$4);
@@ -251,7 +254,7 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
         $$=criaNoPai(DecFuncoes,"FuncDecl");
         aux=criaNoPai(DecFuncoes,"FuncHeader");
         adicionaFilho2($$,aux);
-        aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna);
+        aux2=criaNoPai2(Terminal,juntaStrings("Id(",$2->string,")"),$2->coluna,$2->linha);
         adicionaFilho2(aux,aux2);
     
         adicionaIrmao2(aux->filho,$5);//dar double checkkkkk
@@ -263,7 +266,7 @@ FuncDeclaration: FUNC ID LPAR RPAR FuncBody {
 Parameters: ID Type AuxParameters {
     if ($3!=NULL){
         nodeDefault *aux1,*aux2;
-        aux1=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna);
+        aux1=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha);
         aux2=criaNoPai(DecFuncoes,"ParamDecl");
         adicionaFilho2(aux2,$2);
         adicionaIrmao2(aux2->filho,aux1);
@@ -276,7 +279,7 @@ Parameters: ID Type AuxParameters {
     }
     else{
         nodeDefault *aux1,*aux2;
-         aux1=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna);
+         aux1=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha);
         aux2=criaNoPai(DecFuncoes,"ParamDecl");
         adicionaFilho2(aux2,$2);
         adicionaIrmao2(aux2->filho,aux1);
@@ -290,7 +293,7 @@ AuxParameters: AuxParameters COMMA ID Type {
     if($1!=NULL){
         $$=$1;
         nodeDefault *aux1,*aux2;
-        aux1=criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna);
+        aux1=criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna,$3->linha);
         aux2=criaNoPai(DecFuncoes,"ParamDecl");
         adicionaFilho2(aux2,$4);
         adicionaIrmao2(aux2->filho,aux1);
@@ -298,7 +301,7 @@ AuxParameters: AuxParameters COMMA ID Type {
     }
     else{
         nodeDefault *aux1,*aux2;
-        aux1=criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna);
+        aux1=criaNoPai2(Terminal,juntaStrings("Id(",$3->string,")"),$3->coluna,$3->linha);
         aux2=criaNoPai(DecFuncoes,"ParamDecl");
         adicionaFilho2(aux2,$4);
         adicionaIrmao2(aux2->filho,aux1);
@@ -392,7 +395,7 @@ Statement: PRINT LPAR Expr RPAR {$$=criaNoPai(Statements,"Print");adicionaFilho2
     }
     |   ID ASSIGN Expr {
             $$=criaNoPai(Operadores,"Assign");
-            adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna));
+            adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha));
             adicionaIrmao2($$->filho,$3);
 }
     |   IF Expr LBRACE AuxStatement1 RBRACE {
@@ -491,24 +494,24 @@ AuxStatement1: AuxStatement1 Statement SEMICOLON {
 
 ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR {
     $$=criaNoPai(Statements,"ParseArgs");
-    adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna));
+    adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha));
     adicionaIrmao2($$->filho,$9);
 }
     |   ID COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR {$$=NULL;}
     ;
 
 FuncInvocation: ID LPAR error RPAR {$$=NULL;}
-    |   ID LPAR RPAR {$$=criaNoPai(Statements,"Call");adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna));} /* Não sabemos o Type a pôr aqui */ 
+    |   ID LPAR RPAR {$$=criaNoPai(Statements,"Call");adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha));} /* Não sabemos o Type a pôr aqui */ 
     |   ID LPAR Expr AuxFuncInvocation RPAR {
         if($4!=NULL){
             $$=criaNoPai(Statements,"Call");
-            adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna));
+            adicionaFilho2($$,criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha));
         adicionaIrmao2($3,$4);
             adicionaIrmao2($$->filho,$3);
     }
     else{
         nodeDefault *aux;
-        aux=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna);
+        aux=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha);
         $$=criaNoPai(Statements,"Call");
         adicionaIrmao2(aux,$3);
         adicionaFilho2($$,aux);
@@ -522,7 +525,7 @@ AuxFuncInvocation: AuxFuncInvocation COMMA Expr {if($1!=NULL){$$=$1;adicionaIrma
     ;
 
 Expr: Expr OR Expr {$$=criaNoPai(Operadores,"Or");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   ID {$$=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna);}
+    |   ID {$$=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha);}
     |   REALLIT {$$=criaNoPai(Terminal,juntaStrings("RealLit(",$1,")"));}
     |   INTLIT {$$=criaNoPai(Terminal,juntaStrings("IntLit(",$1,")"));}
     |   Expr AND Expr {$$=criaNoPai(Operadores,"And");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
@@ -589,7 +592,7 @@ nodeDefault * criaNoPai(nodeType tipo, char *str){
     return ponteiro;
 }
 
-nodeDefault * criaNoPai2(nodeType tipo, char *str,int coluna){
+nodeDefault * criaNoPai2(nodeType tipo, char *str,int coluna,int linha){
     nodeDefault *ponteiro;
     if ((ponteiro=malloc(sizeof(nodeDefault)))== NULL)
         printf("Estoirou!\n");
@@ -598,7 +601,7 @@ nodeDefault * criaNoPai2(nodeType tipo, char *str,int coluna){
     ponteiro->string=str;
     ponteiro->tipo=tipo;
     ponteiro->tipos=NULL;
-    ponteiro->linha=yylineno;
+    ponteiro->linha=linha;
     ponteiro->coluna=coluna;
     return ponteiro;
 }
@@ -670,12 +673,12 @@ nodeDefault * juntarCenas(nodeDefault * alvo,char* string){
     iterador=alvo;
     final=criaNoPai(DecVariaveis,"VarDecl");
     adicionaFilho2(final,criaNoPai(Terminal,string));
-    adicionaIrmao2(final->filho,criaNoPai2(Terminal,alvo->string,alvo->coluna));
+    adicionaIrmao2(final->filho,criaNoPai2(Terminal,alvo->string,alvo->coluna,alvo->linha));
     iterador=iterador->irmao;
     while(iterador!=NULL){
         aux=criaNoPai(DecVariaveis,"VarDecl");
         adicionaFilho2(aux,criaNoPai(Terminal,string));
-        adicionaIrmao2(aux->filho,criaNoPai2(Terminal,iterador->string,iterador->coluna));
+        adicionaIrmao2(aux->filho,criaNoPai2(Terminal,iterador->string,iterador->coluna,iterador->linha));
 
         adicionaIrmao2(final,aux);
         iterador=iterador->irmao;

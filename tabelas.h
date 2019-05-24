@@ -6,9 +6,18 @@ typedef enum { integer, boolean, float32, string, none} type;
 
 // Estrutura para ajudar a fazer as colunas e as linhas para a meta#3;
 typedef struct nodeAuxiliar{
-    char *string;
+    char*string;
     int coluna;
+    int linha;
 }noAux;
+
+typedef struct nodeE *listaErros;
+typedef struct nodeE{
+    char string[100];
+    int linha;
+    int coluna;
+    struct nodeE *next;
+}noErro;
 
 typedef struct nodeT *listaTipos;//lista de tipos para a tabela global definida em baixo
 typedef struct nodeT{
@@ -101,9 +110,12 @@ nodeDefault *procuraBody(nodeDefault *raiz,char *nome);
 
 void declaraV(FILE*fptr,elemento_tabelal * lista_local);
 int comparaTipos(noTipo *tipos1,noTipo *tipos2);
-noAux * criaAuxiliar(char *string, int coluna);
-nodeDefault * criaNoPai2(nodeType tipo, char *str,int coluna);
+noAux * criaAuxiliar(char *string, int coluna,int linha);
+nodeDefault * criaNoPai2(nodeType tipo, char *str,int coluna,int linha);
 noTipo* percorreIrmaos(nodeDefault *no);
 char * juntaParametros2(listaTipos tipos);
-
+int percorreTabelaGlobal4(char* str);
+noErro * criaErro(char *string, int linha,int coluna);
+noErro * inserirErro(noErro * inicio, char * string , int linha , int coluna);
+void imprimeListaErros(noErro * inicio);
 
