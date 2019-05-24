@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum { integer, boolean, float32, string, none} type;
+typedef enum { integer, boolean, float32, string, none,undef} type;
 
 // Estrutura para ajudar a fazer as colunas e as linhas para a meta#3;
 typedef struct nodeAuxiliar{
@@ -125,3 +125,5 @@ void getLinhaColuna(int *linhaColuna,char *nomeFunc,char *nomeVariavel, nodeDefa
 elemento_tabelal *insert_elLocal2(char *str, char* t,int param,elemento_tabelal * lista_local,int linha, int coluna);
 int unusedAssign(nodeDefault *no,elemento_tabelag *elemento);
 int procuraUnused(nodeDefault *funcBody,elemento_tabelag *elemento);
+int comparaTipos2(nodeDefault * no1, nodeDefault *no2);
+char * auxiliarTipos(type c);

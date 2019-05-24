@@ -34,20 +34,20 @@
 }
 
 
-%token <string> OR
-%token <string> AND
-%token <string> LT
-%token <string> GT
-%token <string> EQ
-%token <string> NE
-%token <string> LE
-%token <string> GE
-%token <string> PLUS
-%token <string> MINUS
-%token <string> STAR
-%token <string> DIV
-%token <string> MOD
-%token <string> NOT
+%token <p> OR
+%token <p> AND
+%token <p> LT
+%token <p> GT
+%token <p> EQ
+%token <p> NE
+%token <p> LE
+%token <p> GE
+%token <p> PLUS
+%token <p> MINUS
+%token <p> STAR
+%token <p> DIV
+%token <p> MOD
+%token <p> NOT
 %token <string> INTLIT 
 %token <string> REALLIT
 %token <p> ID
@@ -526,26 +526,26 @@ AuxFuncInvocation: AuxFuncInvocation COMMA Expr {if($1!=NULL){$$=$1;adicionaIrma
     | /* empty */ {$$=NULL;}
     ;
 
-Expr: Expr OR Expr {$$=criaNoPai(Operadores,"Or");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+Expr: Expr OR Expr {$$=criaNoPai2(Operadores,"Or",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
     |   ID {$$=criaNoPai2(Terminal,juntaStrings("Id(",$1->string,")"),$1->coluna,$1->linha);}
     |   REALLIT {$$=criaNoPai(Terminal,juntaStrings("RealLit(",$1,")"));}
     |   INTLIT {$$=criaNoPai(Terminal,juntaStrings("IntLit(",$1,")"));}
-    |   Expr AND Expr {$$=criaNoPai(Operadores,"And");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr PLUS Expr  {$$=criaNoPai(Operadores,"Add");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr LT Expr {$$=criaNoPai(Operadores,"Lt");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr MINUS Expr {$$=criaNoPai(Operadores,"Sub");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr GT Expr {$$=criaNoPai(Operadores,"Gt");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr MOD Expr {$$=criaNoPai(Operadores,"Mod");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr DIV Expr {$$=criaNoPai(Operadores,"Div");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr GE Expr {$$=criaNoPai(Operadores,"Ge");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr STAR Expr {$$=criaNoPai(Operadores,"Mul");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr EQ Expr {$$=criaNoPai(Operadores,"Eq");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr NE Expr {$$=criaNoPai(Operadores,"Ne");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
-    |   Expr LE Expr {$$=criaNoPai(Operadores,"Le");adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr AND Expr {$$=criaNoPai2(Operadores,"And",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr PLUS Expr  {$$=criaNoPai2(Operadores,"Add",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr LT Expr {$$=criaNoPai2(Operadores,"Lt",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr MINUS Expr {$$=criaNoPai2(Operadores,"Sub",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr GT Expr {$$=criaNoPai2(Operadores,"Gt",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr MOD Expr {$$=criaNoPai2(Operadores,"Mod",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr DIV Expr {$$=criaNoPai2(Operadores,"Div",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr GE Expr {$$=criaNoPai2(Operadores,"Ge",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr STAR Expr {$$=criaNoPai2(Operadores,"Mul",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr EQ Expr {$$=criaNoPai2(Operadores,"Eq",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr NE Expr {$$=criaNoPai2(Operadores,"Ne",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
+    |   Expr LE Expr {$$=criaNoPai2(Operadores,"Le",$2->coluna,$2->linha);adicionaFilho2($$,$1);adicionaIrmao2($$->filho,$3);}
     |   LPAR Expr RPAR {$$=$2;}
-    |   MINUS Expr %prec STAR {$$=criaNoPai(Operadores,"Minus");adicionaFilho2($$,$2);}
-    |   PLUS Expr %prec STAR {$$=criaNoPai(Operadores,"Plus");adicionaFilho2($$,$2);}
-    |   NOT Expr %prec STAR {$$=criaNoPai(Operadores,"Not");adicionaFilho2($$,$2);}
+    |   MINUS Expr %prec STAR {$$=criaNoPai2(Operadores,"Minus",$1->coluna,$1->linha);adicionaFilho2($$,$2);}
+    |   PLUS Expr %prec STAR {$$=criaNoPai2(Operadores,"Plus",$1->coluna,$1->linha);adicionaFilho2($$,$2);}
+    |   NOT Expr %prec STAR {$$=criaNoPai2(Operadores,"Not",$1->coluna,$1->linha);adicionaFilho2($$,$2);}
     |   FuncInvocation {$$=$1;}
     |   LPAR error RPAR {$$=NULL;}
     ;

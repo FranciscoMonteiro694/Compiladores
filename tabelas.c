@@ -34,29 +34,96 @@ noErro * inserirErro(noErro * inicio, char * string , int linha , int coluna){
 	}
 	actual=inicio;
 	seguinte=inicio->next;
+
+
 	if(novo->linha < actual->linha){
 		novo->next=actual;
 		return novo;
 	}
+	// Só tem 1 elemento
+	if(seguinte==NULL){
+		if(novo->linha > actual->linha){
+			actual->next=novo;
+			return inicio;
+		}
+		else{
+			if(novo->linha < actual->linha){
+				novo->next=actual;
+				return novo;
+			}
+			else{// Igual
+				if(novo->coluna > actual->coluna){
+				actual->next=novo;
+				return inicio;
+
+			}
+			else{
+				novo->next=actual;
+				return novo;
+			}
+			
+		}
+	}
+	}
 
 	while(seguinte!=NULL){
-		if((novo->linha > actual->linha && novo->linha < seguinte->linha) ||
-		 	(novo->linha == actual->linha && novo->linha == seguinte->linha && novo->coluna > actual->coluna && novo->coluna < seguinte->coluna )
-		 	)
-		{
-		actual->next=novo;
-		novo->next=seguinte;
-		return inicio;
+		if((novo->linha > actual->linha)){
+			actual->next=novo;
+			novo->next=seguinte;
+			return inicio;
+		}
+		// Se as linhas forem iguais
+		// Vamos ver as colunas
+		else{
+			if(novo->coluna > actual->coluna&&novo->linha == actual->linha){
+				actual->next=novo;
+				novo->next=seguinte;
+				return inicio;
+			}
 
 		}
 
 		actual=actual->next;
 		seguinte=seguinte->next;
 	}
+
 	actual->next=novo;
 	return inicio;
 
 }	
+// noErro * inserirErro(noErro * inicio, char * string , int linha , int coluna){
+// 	noErro * novo;
+// 	noErro * actual;
+// 	noErro * seguinte;
+// 	novo = criaErro(string,linha,coluna);
+// 	if(inicio==NULL){
+// 		return novo;
+// 	}
+// 	actual=inicio;
+// 	seguinte=inicio->next;
+// 	if(novo->linha < actual->linha){
+// 		novo->next=actual;
+// 		return novo;
+// 	}
+
+// 	while(seguinte!=NULL){
+// 		if((novo->linha > actual->linha && novo->linha < seguinte->linha) ||
+// 		 	(novo->linha == actual->linha && novo->linha == seguinte->linha && novo->coluna > actual->coluna && novo->coluna < seguinte->coluna )
+// 		 	)
+// 		{
+// 		actual->next=novo;
+// 		novo->next=seguinte;
+// 		return inicio;
+
+// 		}
+
+// 		actual=actual->next;
+// 		seguinte=seguinte->next;
+// 	}
+// 	actual->next=novo;
+// 	return inicio;
+
+// }	
 
 void imprimeListaErros(noErro * inicio){
 	//printf("Conteudo da lista de erros\n");
@@ -319,6 +386,9 @@ void imprime_tabelaGlobal()
 		case float32:
 			printf("\tfloat32");
 			break;
+		case undef:
+			printf("\tundef");
+			break;
 		}
 		printf("\n");//acho que é inutil XD
 	}
@@ -348,8 +418,35 @@ char * estupido(type c){
 		case float32:
 			return("float32,");
 			break;
+		case undef:
+			return("undef,");
+			break;
 		}
+
 	}
+
+char * auxiliarTipos(type c){
+	switch(c){
+		case none:
+			return("none");
+			break;
+		case integer:
+			return("int");
+			break;
+		case string:
+			return("string");
+			break;
+		case boolean:
+			return("bool");
+			break;
+		case float32:
+			return("float32");
+			break;
+		case undef:
+			return("undef");
+			break;
+		}
+}
 //funcao que com o ponteiro para a tabela local e o nome da funçao, imprime a tabela no formato respetivo
 void imprime_tabelaLocal(elemento_tabelal * lista_local,char* s){
 	char auxS [100] ;
@@ -383,6 +480,9 @@ void imprime_tabelaLocal(elemento_tabelal * lista_local,char* s){
 		case float32:
 			printf("\tfloat32");
 			break;
+		case undef:
+			printf("\tundef");
+			break;
 		}
 		if(aux->param==1){
 			printf("\tparam");
@@ -412,6 +512,9 @@ void imprimeTipos(elemento_tabelag *tabela){
 			break;
 		case float32:
 			printf("float32");
+			break;
+		case undef:
+			printf("undef");
 			break;
 		}
 		if(iterador->next!=NULL){// Para não imprimir virgula no ultimo
@@ -445,6 +548,9 @@ void imprimeTiposAST(noTipo *tipos, int flag){
 			break;
 		case float32:
 			printf("float32");
+			break;
+		case undef:
+			printf("undef");
 			break;
 		}
 		if(iterador->next!=NULL){// Para não imprimir virgula no ultimo
@@ -696,20 +802,39 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
     //printf("5 %s\n",no->string);
     if(strcmp(no->string,"Eq")==0){
     	if(verificaOctal(no->filho->irmao->string)==-1){
-    	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
-       // printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-   
-    if( procuraElemento(no->filho->string,elemento) == 1){
-        no->tipos=insertTipo2(no->tipos,boolean);
-    }
-    else{
-    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-        contadorErros++;
-    }    
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer && no->filho->tipos->tipo!=string && no->filho->tipos->tipo!=float32 && no->filho->tipos->tipo!=boolean){
+    			sprintf(cenas,"Operator == cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator == cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
+        
     }
     if(strcmp(no->string,"Or")==0){
     if( procuraElemento(no->filho->string,elemento) == 1){
@@ -720,6 +845,18 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
 		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
         //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
+    }
+    if(comparaTipos2(no->filho,no->filho->irmao)==1){
+       if(no->filho->tipos->tipo!=boolean){
+    			sprintf(cenas,"Operator || cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    	}
+    }
+    else{
+    			sprintf(cenas,"Operator || cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
     }
     }
     if(strcmp(no->string,"And")==0){
@@ -732,190 +869,383 @@ int recursiva(nodeDefault *no,elemento_tabelag * elemento){
         //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
     }
-       
-    }
-    if(strcmp(no->string,"Ne")==0){
-if(verificaOctal(no->filho->irmao->string)==-1){
-		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
-        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }    
-    if( procuraElemento(no->filho->string,elemento) == 1){
-        no->tipos=insertTipo2(no->tipos,boolean);
+    if(comparaTipos2(no->filho,no->filho->irmao)==1){
+       if(no->filho->tipos->tipo!=boolean){
+    			sprintf(cenas,"Operator && cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    	}
     }
     else{
-    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-        contadorErros++;
+    		sprintf(cenas,"Operator && cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
     }
+
         
     }
+        if(strcmp(no->string,"Ne")==0){
+    	if(verificaOctal(no->filho->irmao->string)==-1){
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer && no->filho->tipos->tipo!=string && no->filho->tipos->tipo!=float32 && no->filho->tipos->tipo!=boolean){
+    			sprintf(cenas,"Operator != cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator != cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
+    }
     if(strcmp(no->string,"Lt")==0){
-if(verificaOctal(no->filho->irmao->string)==-1){
-		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
-       // printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-     	//printf("LT percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(no->filho->string,elemento) == 1){
-        no->tipos=insertTipo2(no->tipos,boolean);
-    }
-    else{
-    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-        contadorErros++;
-    }
-       
+		if(verificaOctal(no->filho->irmao->string)==-1){
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer && no->filho->tipos->tipo!=string && no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator < cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator < cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
     }
     if(strcmp(no->string,"Gt")==0){
-if(verificaOctal(no->filho->irmao->string)==-1){
-		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+		if(verificaOctal(no->filho->irmao->string)==-1){
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-    	//printf("GT percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(no->filho->string,elemento) == 1){
-        no->tipos=insertTipo2(no->tipos,boolean);
-    }
-    else{
-    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-        contadorErros++;
-    }
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer && no->filho->tipos->tipo!=string && no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator > cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+				//printf("erro 	%s\n",estupido(no->tipos->tipo));
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator > cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
+   
         
     }
     if(strcmp(no->string,"Le")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-    	//printf("LE percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(no->filho->string,elemento) == 1){
-        no->tipos=insertTipo2(no->tipos,boolean);
-    }
-    else{
-    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-        contadorErros++;
-    }
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer && no->filho->tipos->tipo!=string && no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator <= cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator <= cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
         
     }
     if(strcmp(no->string,"Ge")==0){
     	if(verificaOctal(no->filho->irmao->string)==-1){
     		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-    	//printf("GE percorrer filho ja com o tipo e depois meter o tipo\n");
-    if( procuraElemento(no->filho->string,elemento) == 1){
-        no->tipos=insertTipo2(no->tipos,boolean);
-    }
-    else{
-    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-        //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-        contadorErros++;
-    }
-        //percorrer filho ja com o tipo e depois meter o tipo
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer && no->filho->tipos->tipo!=string && no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator >= cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator >= cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
         
     }
     if(strcmp(no->string,"Add")==0){
+    	//printf("%s %s",estupido(no->filho->tipos->tipo),estupido(no->filho->irmao->tipos->tipo));
     	if(verificaOctal(no->filho->irmao->string)==-1){
     		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer&&no->filho->tipos->tipo!=string&&no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator + cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator + cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
+    	
     	//printf("ADD percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(no->filho->string,elemento) == 1){
-            no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
-        //percorrer filho ja com o tipo e depois meter o tipo
-        }
-        else{
-        	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-			erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-            contadorErros++;
-        }
     }
     if(strcmp(no->string,"Sub")==0){
-if(verificaOctal(no->filho->irmao->string)==-1){
-	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+	if(verificaOctal(no->filho->irmao->string)==-1){
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-     	//printf("SUB percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(no->filho->string,elemento) == 1){
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
-    }
-        //percorrer filho ja com o tipo e depois meter o tipo
-    else{
-    	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-            contadorErros++;
-    }
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer&&no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator - cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator - cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
        
     }
     if(strcmp(no->string,"Mul")==0){
 		if(verificaOctal(no->filho->irmao->string)==-1){
-			sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
 			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-    	//printf("MUL percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(no->filho->string,elemento) == 1){
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
-}
-        //percorrer filho ja com o tipo e depois meter o tipo
-else{
-	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-            contadorErros++;
-        }
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer&&no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator * cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator * cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
+       
         
     }
     if(strcmp(no->string,"Div")==0){
 if(verificaOctal(no->filho->irmao->string)==-1){
-		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+    		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-    	//printf("DIV percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(no->filho->string,elemento) == 1){
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
-        //percorrer filho ja com o tipo e depois meter o tipo
-}
-else{	
-		sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-            //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-            contadorErros++;
-        }
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer&&no->filho->tipos->tipo!=float32){
+    			sprintf(cenas,"Operator / cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator / cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
+       
         
     }
     if(strcmp(no->string,"Mod")==0){
     	if(verificaOctal(no->filho->irmao->string)==-1){
     		sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
-    }
-    	//printf("MOD percorrer filho ja com o tipo e depois meter o tipo\n");
-        if( procuraElemento(no->filho->string,elemento) == 1){
-    no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
-}
-        //percorrer filho ja com o tipo e depois meter o tipo
-        else{
-        	sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
-		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
-           // printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
-            contadorErros++;
-        }
+    	}
+    	if(comparaTipos2(no->filho,no->filho->irmao)==1){
+    		if(no->filho->tipos->tipo!=integer){
+    			sprintf(cenas,"Operator %% cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    		}
+    		else{
+    			//os tipo tao bem
+    			if( procuraElemento(no->filho->string,elemento) == 1){
+            		no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
+        			//percorrer filho ja com o tipo e depois meter o tipo
+        		}
+        		else{
+        			sprintf(cenas,"Cannot find symbol %s\n",tiraId(no->filho->string));
+					erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
+					no->tipos=insertTipo2(no->tipos,undef);
+            		//printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
+            		contadorErros++;
+        		}
+    		}
+    		
+    	}
+    	else{
+    		sprintf(cenas,"Operator %% cannot be applied to type %s, %s\n",auxiliarTipos(no->filho->tipos->tipo),auxiliarTipos(no->filho->irmao->tipos->tipo));
+			erros=inserirErro(erros,cenas,no->linha,no->coluna);
+			no->tipos=insertTipo2(no->tipos,undef);
+
+    	}
+       
     }
     if(strcmp(no->string,"Not")==0){
     	//printf("NOT percorrer filho ja com o tipo e depois meter o tipo\n");
@@ -929,6 +1259,13 @@ else{
             //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
+        if(comparaTipos2(no->filho,no->filho->irmao)==1){
+       if(no->filho->tipos->tipo!=boolean){
+    			sprintf(cenas,"Operator ! cannot be applied to type %s\n",auxiliarTipos(no->filho->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    	}
+    }
     }
     if(strcmp(no->string,"Minus")==0){
     	if(verificaOctal(no->filho->string)==-1){
@@ -946,7 +1283,13 @@ else{
             //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
             contadorErros++;
         }
-
+        if(comparaTipos2(no->filho,no->filho->irmao)==1){
+       if(no->filho->tipos->tipo!=boolean){
+    			sprintf(cenas,"Operator - cannot be applied to type %s\n",auxiliarTipos(no->filho->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    	}
+    }
         //percorrer filho ja com o tipo e depois meter o tipo
      
     }
@@ -966,6 +1309,13 @@ else{
 		erros=inserirErro(erros,cenas,no->filho->linha,no->filho->coluna);
         //printf("Line %d, column %d: Cannot find symbol %s\n",no->filho->linha,no->filho->coluna,tiraId(no->filho->string));
         contadorErros++;
+    }
+    if(comparaTipos2(no->filho,no->filho->irmao)==1){
+       if(no->filho->tipos->tipo!=boolean){
+    			sprintf(cenas,"Operator + cannot be applied to type %s\n",auxiliarTipos(no->filho->tipos->tipo));
+				erros=inserirErro(erros,cenas,no->linha,no->coluna);
+				no->tipos=insertTipo2(no->tipos,undef);
+    	}
     }
     }
     if(strcmp(no->string,"Assign")==0){
@@ -1014,6 +1364,12 @@ else{
 //A flag apenas indica se o nó anterio,ou melhor dizendo pai,for um no do tipo call que nesto caso sera tratado de maneira diferente
 //elemento é um pinteiro para o elemento da tabela global que tamos a analisar
 
+int comparaTipos2(nodeDefault * no1, nodeDefault *no2){
+	if(no1->tipos->tipo==no2->tipos->tipo){
+		return 1;
+	}
+	return -1;
+}
 
 int procuraUnused(nodeDefault *funcBody,elemento_tabelag *elemento){
 	nodeDefault *iterador;
@@ -1482,6 +1838,8 @@ char * converteLLVM(type c){
 			break;
 		case float32:
 			return("double");
+		case undef:
+			return("undef");
 			break;
 		}
 	
