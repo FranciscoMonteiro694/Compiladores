@@ -157,6 +157,53 @@ elemento_tabelal *insert_elLocal(char *str, char* t,int param,elemento_tabelal *
 	}
 	newSymbol->param=param;//atribuir o param,que quando a 0 quer dizer que nao é um parametro de uma fuçao/tabela local
 	newSymbol->next=NULL;
+	newSymbol->linha=-1;
+	newSymbol->coluna=-1;
+	if(lista_local)	//Se table ja tem elementos
+	{	//Procura cauda da lista e verifica se simbolo ja existe
+		for(aux=lista_local; aux; previous=aux, aux=aux->next)//a condiçao de paragem é o aux ser null
+			if(strcmp(aux->name, str)==0)
+				return NULL;//ja existe um igual(identificador) erro<--------------------------------------
+		previous->next=newSymbol;	//adiciona ao final da lista
+	}
+	else//a lista encontra-se vazia
+		lista_local=newSymbol;	
+	//retorna um ponteiro para o inicio da lista	
+	return lista_local;
+}
+
+elemento_tabelal *insert_elLocal2(char *str, char* t,int param,elemento_tabelal * lista_local,int linha, int coluna){
+	elemento_tabelal *newSymbol=(elemento_tabelal*) malloc(sizeof(elemento_tabelal));//alocaçao do elemento da lista local
+	elemento_tabelal *aux;
+	elemento_tabelal *previous;
+	
+	strcpy(newSymbol->name, str);//inserir o id no novo elemento da lista local
+	if(strcmp(t,"Int")==0){//atribuiçao do tipo ao elemento a inserir na lista
+		newSymbol->tipo=integer;
+	}
+	else if(strcmp(t,"Bool")==0){
+		newSymbol->tipo=boolean;
+	}
+	else if(strcmp(t,"Float32")==0)
+	{	
+		newSymbol->tipo=float32;
+	}
+	else if(strcmp(t,"String")==0){
+		newSymbol->tipo=string;
+	}
+	else if(strcmp(t,"none")==0){
+		newSymbol->tipo=none;
+	}
+	if (strcmp(str,"return")!=0 && param==0){
+		newSymbol->used=0;
+	}
+	else{
+		newSymbol->used=2;// so para nao estoirar quando se for ver os erros
+	}
+	newSymbol->param=param;//atribuir o param,que quando a 0 quer dizer que nao é um parametro de uma fuçao/tabela local
+	newSymbol->next=NULL;
+	newSymbol->linha=linha;
+	newSymbol->coluna=coluna;
 	if(lista_local)	//Se table ja tem elementos
 	{	//Procura cauda da lista e verifica se simbolo ja existe
 		for(aux=lista_local; aux; previous=aux, aux=aux->next)//a condiçao de paragem é o aux ser null
@@ -318,6 +365,7 @@ void imprime_tabelaLocal(elemento_tabelal * lista_local,char* s){
 	auxS[strlen(auxS)-1]='\0';
 	printf("===== Function %s(%s) Symbol Table =====\n",s,auxS);//---------------------------->adicionar nome da funcao etc
 	for(aux=lista_local; aux; aux=aux->next){
+		//printf("Flag used %d ",aux->used);
 		printf("%s\t",aux->name);
 		switch(aux->tipo){
 		case none:
@@ -555,9 +603,9 @@ void criaLocal(nodeDefault *no,elemento_tabelag * elemento){
 					contadorErros++;
 
 				}
-					else{
+				else{
 				
-				elemento->local=insert_elLocal(nomeFunc,iterador2->filho->string,0,elemento->local);
+					elemento->local=insert_elLocal2(nomeFunc,iterador2->filho->string,0,elemento->local,iterador2->filho->irmao->linha,iterador2->filho->irmao->coluna);
 				}
 
 				//elemento->local=insert_elLocal(nomeFunc,iterador2->filho->string,0,elemento->local);
@@ -606,6 +654,7 @@ int criaTabelas(nodeDefault *raiz){
         aux=percorreTabelaGlobal3((iterador->filho->filho->string));
         if(aux!=NULL){
         		criaLocal(iterador,aux);
+        		//procuraUnused(iterador->filho->irmao,aux);//passa o FuncBody
 
         }
         }
@@ -813,9 +862,9 @@ if(verificaOctal(no->filho->irmao->string)==-1){
        
     }
     if(strcmp(no->string,"Mul")==0){
-if(verificaOctal(no->filho->irmao->string)==-1){
-	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
-		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
+		if(verificaOctal(no->filho->irmao->string)==-1){
+			sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
+			erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
         //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
     	//printf("MUL percorrer filho ja com o tipo e depois meter o tipo\n");
@@ -920,14 +969,12 @@ else{
     }
     }
     if(strcmp(no->string,"Assign")==0){
-	//makeUsed(tiraId(no->filho->string),elemento);
-	// printf("ASSIGN percorrer filho ja com o tipo e depois meter o tipo\n");
-        //Verificação do octal
+    	// printf("ASSIGN percorrer filho ja com o tipo e depois meter o tipo\n");
     if(verificaOctal(no->filho->irmao->string)==-1){
     	sprintf(cenas,"Invalid octal constant: %s\n",tiraId(no->filho->irmao->string));
 		erros=inserirErro(erros,cenas,no->filho->irmao->linha,no->filho->irmao->coluna);
-        //printf("Line %d, column %d: Invalid octal constant: %s\n",no->filho->irmao->linha,no->filho->irmao->coluna,tiraId(no->filho->irmao->string));
     }
+
     if( procuraElemento(no->filho->string,elemento) == 1){
         no->tipos=insertTipo2(no->tipos,no->filho->tipos->tipo);
         //percorrer filho ja com o tipo e depois meter o tipo
@@ -941,8 +988,7 @@ else{
     }
     //rever---------------------------------------------------------------
     if(strcmp(no->string,"Call")==0){
-	no->filho->tipos=percorreIrmaos(no->filho);
-
+		no->filho->tipos=percorreIrmaos(no->filho);
 	//printf("CALL percorrer filho ja com o tipo e depois meter o tipo\n");
     if(procuraFuncaoGlobal(no->filho->string,no->filho->tipos)==0){
     // 	//Ver se a funcao é chamada com argumentos
@@ -969,6 +1015,61 @@ else{
 //elemento é um pinteiro para o elemento da tabela global que tamos a analisar
 
 
+int procuraUnused(nodeDefault *funcBody,elemento_tabelag *elemento){
+	nodeDefault *iterador;
+	iterador=funcBody;
+	if(iterador==NULL){
+		return 0;
+	}
+	if(strcmp(iterador->string,"Assign")==0 ) {
+		unusedAssign(iterador->filho->irmao,elemento);
+	}
+	// if (strcmp(iterador->string,"Call")==0 ) {
+	// 	unusedCall(iterador->filho->irmao,elemento);
+	// }
+	iterador=iterador->filho;
+	while(iterador!=NULL){
+		procuraUnused(iterador,elemento);
+		iterador=iterador->irmao;
+	}
+	return 0;
+}
+
+int unusedAssign(nodeDefault *no,elemento_tabelag *elemento){
+	nodeDefault *iterador;
+	iterador=no;
+	if(iterador==NULL){
+		return 0;
+	}
+	if(strncmp("Id",iterador->string,strlen("Id"))==0){
+		makeUsed(tiraId(iterador->string),elemento);
+	}
+	iterador=iterador->filho;
+	while(iterador!=NULL){
+		unusedAssign(iterador,elemento);
+		iterador=iterador->irmao;
+	}
+	return 0;
+}
+
+
+// int unusedCall(nodeDefault *no,elemento_tabelag *elemento){
+// 	nodeDefault *iterador;
+// 	iterador=no;
+// 	if(iterador==NULL){
+// 		return 0;
+// 	}
+// 	if(strncmp("Id",iterador->string,strlen("Id"))==0){
+// 		makeUsed(tiraId(iterador->string),elemento);
+// 	}
+// 	iterador=iterador->filho;
+// 	while(iterador!=NULL){
+// 		unusedCall
+// 		(iterador,elemento);
+// 		iterador=iterador->irmao;
+// 	}
+// 	return 0;
+// }
 noTipo* percorreIrmaos(nodeDefault *no){
     nodeDefault *iterador;
     iterador = no->irmao;
@@ -1161,13 +1262,14 @@ int imprimeASTanotada(nodeDefault *raiz,int flag,int depth){
     return 0;
 
 }
+// Chamada no Assign, recebe o nó Assign e verifica se aparece o simbolo em causa do lado direito do =
+// Se aparecer, chamar a makeUsed
+
 
 
 void makeUsed(char *nomeVariavel,elemento_tabelag * elemento){
-	//printf("teste\n");
 	elemento_tabelal *aux;
 	aux=elemento->local;
-	//printf("teste\n");
 	while(aux!=NULL){
 		// Se encontrou
 		if(strcmp(nomeVariavel,aux->name)==0){
@@ -1308,8 +1410,8 @@ int comparaTipos(noTipo *tipos1,noTipo *tipos2){
 	return 0;
 	}
 }
-
-void imprimeDeclaredNotUsed(){
+// Função que vai percorrer as tabelas locais e pôr os erros na lista de erros 
+void DeclaredNotUsed(){
     elemento_tabelag *aux;
     elemento_tabelal *aux2;
     aux=tg;
@@ -1317,7 +1419,10 @@ void imprimeDeclaredNotUsed(){
         aux2=aux->local;
         while(aux2!=NULL){
             if(strcmp(aux2->name,"return")!=0 && aux2->used==0 && aux2->param!=1){
-                printf("Variavel declarada mas não usada %s \n",aux2->name);
+                sprintf(cenas,"Symbol %s declared but never used\n",aux2->name);
+				erros=inserirErro(erros,cenas,aux2->linha ,aux2->coluna);
+
+
             }
             aux2=aux2->next;
 
@@ -1325,6 +1430,7 @@ void imprimeDeclaredNotUsed(){
         aux=aux->next;
     }
 }
+
 
 
 //----------------------------------------Meta4-------------------------------

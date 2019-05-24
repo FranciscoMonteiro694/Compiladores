@@ -45,6 +45,8 @@ typedef struct _tl{
     type tipo;  /* Tipo de retorno da função ou tipo da variável */
     struct _tl *next;
     int used;
+    int linha; // Para usar no erro var never used
+    int coluna; // Para usar no erro var never used
 }elemento_tabelal;
 //fazer funçoes para inseir na tabela local etc e depois associar a global
 
@@ -118,4 +120,8 @@ int percorreTabelaGlobal4(char* str);
 noErro * criaErro(char *string, int linha,int coluna);
 noErro * inserirErro(noErro * inicio, char * string , int linha , int coluna);
 void imprimeListaErros(noErro * inicio);
-
+void DeclaredNotUsed();
+void getLinhaColuna(int *linhaColuna,char *nomeFunc,char *nomeVariavel, nodeDefault *raiz);
+elemento_tabelal *insert_elLocal2(char *str, char* t,int param,elemento_tabelal * lista_local,int linha, int coluna);
+int unusedAssign(nodeDefault *no,elemento_tabelag *elemento);
+int procuraUnused(nodeDefault *funcBody,elemento_tabelag *elemento);

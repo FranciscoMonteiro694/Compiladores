@@ -129,20 +129,22 @@ Program: PACKAGE ID SEMICOLON Declarations {
     }
         
     }
+
     criaTabelas($$);
-    imprimeListaErros(erros);
     //anota
     if(flagSemantica==1){
         
-        if(contadorErros==0){
+        if(erros==NULL){
             imprime_tabelaGlobal();
             imprimeASTanotada($$,0,0);
         }
 
+
     //createFile();
 
     }
-    
+    //DeclaredNotUsed();
+    imprimeListaErros(erros);
 }
     ;
 
@@ -633,7 +635,7 @@ int imprimeTralha(nodeDefault *raiz,int depth){
         printf("..");
     }
     printf("%s\n",raiz->string);
-
+    //printf("%s %d %d\n",raiz->string,raiz->linha,raiz->coluna);
     if(raiz->filho!=NULL){
     imprimeTralha(raiz->filho,depth+1);
         iterador=raiz->filho->irmao;
