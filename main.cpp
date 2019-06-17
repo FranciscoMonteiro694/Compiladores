@@ -3,15 +3,14 @@
 //  Pratica2
 //
 //  Created by Francisco Monteiro on 03/03/2019.
-//  Copyright Â© 2019 Francisco Monteiro. All rights reserved.
-//
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-
+//  Copyright ? 2019 Francisco Monteiro. All rights reserved.
+#include <windows.h>
+#include "stdlib.h"
+#include "math.h"
+#include "stdio.h"
+#include <GL\glut.h>
+#include "RgbImage.h"
+#include "materiais.h"
 //  main.cpp
 //  Pratica2
 
@@ -72,7 +71,7 @@ int is_8_pressed = 0;
 int is_9_pressed = 0;
 int is_0_pressed = 0;
 
-
+GLfloat Teto[4] ={ 0.0, 100, 0.0, 1.0}; 
 
 //=========================================================== FACES DA MESA
 GLboolean   frenteVisivel=1;
@@ -80,6 +79,8 @@ static GLuint     cima[] = {8,11, 10,  9};
 static GLuint     esquerda[] = {0,1,2,3};
 static GLuint     direita[] = {7,6,5,4};
 
+GLfloat focoCorDif[4] ={ 0.9, 0.9, 0.9, 1.0}; 
+GLfloat focoCorEsp[4] ={ 1.0, 1.0, 1.0, 1.0}; 
 
 //------------------------------------------------------------ Iluminacao Ambiente
 GLint   dia=0;
@@ -87,8 +88,8 @@ GLfloat intensidade=0.0;
 GLfloat luzGlobalCorAmb[4]={intensidade,intensidade,intensidade,1.0};   //
 
 
-//â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦ Lanterna (local) - FOCO
-GLint   ligaLuz=1;
+//…………………………………………………………………………………………………………………………………………… Lanterna (local) - FOCO
+GLint   ligaLuz=0;
 GLfloat rFoco=1.1, aFoco=aVisao;
 GLfloat incH =0.0, incV=0.0;
 GLfloat incMaxH =0.5, incMaxV=0.35;
@@ -97,17 +98,12 @@ GLfloat focoPfin[]= { obsP[0]-rFoco*cos(aFoco), obsP[1], obsP[2]-rFoco*sin(aFoco
 GLfloat focoDir[] = { focoPfin[0]-focoPini[0], 0, focoPfin[2]-focoPini[2]};
 GLfloat focoExp   = 10.0;
 GLfloat focoCut   = 60.0;
-
-GLfloat focoCorDif[4] ={ 0.9, 0.9, 0.9, 1.0};
-GLfloat focoCorEsp[4] ={ 1.0, 1.0, 1.0, 1.0};
-
-
 GLfloat localPos[4]   = {20, 50, 20, 1.0};
 GLfloat localCorAmb[4]= { 1.0, 1.0, 1.0, 1.0};
 GLfloat localCorDif[4]= { 1.0, 1.0, 1.0, 1.0};
 GLfloat localCorEsp[4]= { 1.0, 1.0, 1.0, 1.0};
 
-GLfloat tam=2.0; //estâ€žo com largura de 800
+GLfloat tam=2.0; //est„o com largura de 800
 static GLfloat vertices[]={
     -40.000000, -0.000000, 15.000000, 40.000000, -0.000000, 15.000000, 40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 15.000000, 40.000000, 0.000000, 15.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000};
 
@@ -120,20 +116,22 @@ static GLfloat cores[]={
 void initTexturas();
 void initLights();
 void worker();
+void initMaterials(int material);
 //================================================================================
 //=========================================================================== INIT
 //================================================================================
 //=========================================================================== INIT
 void inicializa(void)
 {
-    glClearColor(BLACK);        //Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Apagar
-    glEnable(GL_DEPTH_TEST);    //Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Profundidade
-    glShadeModel(GL_SMOOTH);    //Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Interpolacao de cores
+    glClearColor(BLACK);        //ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖApagar
+    glEnable(GL_DEPTH_TEST);    //ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖProfundidade
+    glEnable(GL_NORMALIZE);   
+    glShadeModel(GL_SMOOTH);    //ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖInterpolacao de cores
     
-    //glEnable(GL_CULL_FACE);        //Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Faces visiveis
-    //glCullFace(GL_BACK);        //Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Mostrar so as da frente
+    //glEnable(GL_CULL_FACE);        //ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖFaces visiveis
+    //glCullFace(GL_BACK);        //ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖMostrar so as da frente
     
-    glVertexPointer(3, GL_FLOAT, 0, vertices); //Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Vertex arrays
+    glVertexPointer(3, GL_FLOAT, 0, vertices); //Vertex arrays
     glEnableClientState(GL_VERTEX_ARRAY);
     glNormalPointer(GL_FLOAT, 0, normais);
     glEnableClientState(GL_NORMAL_ARRAY);
@@ -142,14 +140,14 @@ void inicializa(void)
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     initTexturas();
     glEnable(GL_LIGHTING); //Ativar esta linha deixa tudo a preto
-    //glEnable(GL_LIGHT0);
     initLights();
+    initMaterials(1);
     
 }
 
 //========================================================= ILUMINACAO
 void initLights(void){
-    //â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦â€¦ Ambiente
+    //…………………………………………………………………………………………………………………………………………… Ambiente
     
     //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzGlobalCorAmb);
     
@@ -157,10 +155,183 @@ void initLights(void){
     glLightfv(GL_LIGHT0, GL_AMBIENT,       localCorAmb );
     glLightfv(GL_LIGHT0, GL_DIFFUSE,       localCorDif );
     glLightfv(GL_LIGHT0, GL_SPECULAR,      localCorEsp );
+    //--------------------------------------------------------Pontual
+    glLightfv(GL_LIGHT2, GL_POSITION,Teto);
+	//	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION,focoDir );
+	//glLightf (GL_LIGHT1, GL_SPOT_EXPONENT ,focoExp);
+  //  glLightf (GL_LIGHT1, GL_SPOT_CUTOFF,   focoCut);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE,       focoCorDif );   
+	glLightfv(GL_LIGHT2, GL_SPECULAR,      focoCorEsp  );
+	glDisable(GL_LIGHT0);
+	if (ligaLuz){
+		printf("wow\n");
+			
+		glEnable(GL_LIGHT2);
+		 
+		
+	}
+       
+    else{
+    		printf("wow1\n");
+    			glDisable(GL_LIGHT2);
+    }
+        
 
 
     
 }
+
+
+void initMaterials(int material) {
+	
+	switch (material){
+	case 0: //……………………………………………………………………………………………esmerald
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  esmeraldAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  esmeraldDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, esmeraldSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,esmeraldCoef);
+		break;
+	case 1: //……………………………………………………………………………………………jade
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  jadeAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  jadeDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, jadeSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,jadeCoef);
+		break;
+	case 2: //……………………………………………………………………………………………obsidian
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  obsidianAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  obsidianDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, obsidianSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,obsidianCoef);
+		break;
+	case 3: //……………………………………………………………………………………………pearl
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  pearlAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  pearlDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, pearlSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,pearlCoef);
+		break;
+	case 4: //……………………………………………………………………………………………ruby
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  rubyAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  rubyDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, rubySpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,rubyCoef);
+		break;
+	case 5: //……………………………………………………………………………………………turquoise
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  turquoiseAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  turquoiseDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, turquoiseSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,turquoiseCoef);
+		break;
+	case 6: //……………………………………………………………………………………………brass
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  brassAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  brassDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, brassSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,brassCoef);
+		break;
+	case 7: //……………………………………………………………………………………………bronze
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  bronzeAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  bronzeDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, bronzeSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,bronzeCoef);
+		break;
+	case 8: //……………………………………………………………………………………………chrome
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  chromeAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  chromeDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, chromeSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,chromeCoef);
+		break;
+	case 9: //……………………………………………………………………………………………copper
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  copperAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  copperDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, copperSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,copperCoef);
+		break;
+	case 10: //……………………………………………………………………………………………gold
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  goldAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  goldDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, goldSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,goldCoef);
+		break;
+	case 11: //……………………………………………………………………………………………silver
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  silverAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  silverDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, silverSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,silverCoef);
+		break;
+	case 12: //……………………………………………………………………………………………blackPlastic
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  blackPlasticAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  blackPlasticDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, blackPlasticSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,blackPlasticCoef);
+		break;
+	case 13: //……………………………………………………………………………………………cyankPlastic
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  cyanPlasticAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  cyanPlasticDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, cyanPlasticSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,cyanPlasticCoef);
+		break;
+	case 14: //……………………………………………………………………………………………greenPlastic
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  greenPlasticAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  greenPlasticDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, greenPlasticSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,greenPlasticCoef);
+		break;
+	case 15: //……………………………………………………………………………………………redPlastic
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  redPlasticAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  redPlasticDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, redPlasticSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,redPlasticCoef);
+		break;
+	case 16: //……………………………………………………………………………………………yellowPlastic
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  whitePlasticAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  whitePlasticDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, whitePlasticSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,whitePlasticCoef);
+		break;
+	case 17: //……………………………………………………………………………………………yellowPlastic
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  yellowPlasticAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  yellowPlasticDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, yellowPlasticSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,yellowPlasticCoef);
+		break;
+	case 18: //……………………………………………………………………………………………blackRubber
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  blackRubberAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  blackRubberDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, blackRubberSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,blackRubberCoef);
+		break;
+	case 19: //……………………………………………………………………………………………cyanRubber
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  cyanRubberAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  cyanRubberDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, cyanRubberSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,cyanRubberCoef);
+		break;
+	case 20: //……………………………………………………………………………………………greenRubber
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  greenRubberAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  greenRubberDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, greenRubberSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,greenRubberCoef);
+		break;
+	case 21: //……………………………………………………………………………………………redRubber
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  redRubberAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  redRubberDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, redRubberSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,redRubberCoef);
+		break;
+	case 22: //……………………………………………………………………………………………redRubber
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  whiteRubberAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  whiteRubberDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, whiteRubberSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,whiteRubberCoef);
+		break;
+	case 23: //……………………………………………………………………………………………redRubber
+		glMaterialfv(GL_FRONT,GL_AMBIENT,  yellowRubberAmb  );
+		glMaterialfv(GL_FRONT,GL_DIFFUSE,  yellowRubberDif );
+		glMaterialfv(GL_FRONT,GL_SPECULAR, yellowRubberSpec);
+		glMaterialf (GL_FRONT,GL_SHININESS,yellowRubberCoef);
+		break;
+	}		
+}
+
 
 
 
@@ -192,7 +363,9 @@ void drawBola()
     //------------------------- Bola
     //  glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glBindTexture(GL_TEXTURE_2D,texture[1]);
+    initMaterials(16);
     glPushMatrix();
     glRotatef (       90, -1, 0, 0);
     glTranslatef ( 2,4,2);
@@ -234,6 +407,10 @@ void drawCubo2(GLdouble x ,GLdouble y,GLdouble z,int i){
     glTranslatef(x,y,z);
     glScalef(comprimentoEscada, alturaEscada, larguraEscada);
     glBegin(GL_QUADS);
+    glNormal3i(0,
+ 	 0,
+ 	 1);
+
     glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, 1.0f, -1.0f);
     glTexCoord2f(1.0f,0.0f);  glVertex3f(-1.0f, 1.0f, -1.0f);
     glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, 1.0f,  1.0f);
@@ -364,7 +541,7 @@ void initTexturas()
     glGenTextures(1, &texture[0]);
     glBindTexture(GL_TEXTURE_2D, texture[0]);
     imag.LoadBmpFile("marmore.bmp");
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -381,7 +558,7 @@ void initTexturas()
     glGenTextures(1, &texture[1]);
     glBindTexture(GL_TEXTURE_2D, texture[1]);
     imag.LoadBmpFile("pano3.bmp");
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -394,7 +571,7 @@ void initTexturas()
     glGenTextures(1, &texture[2]);
     glBindTexture(GL_TEXTURE_2D, texture[2]);
     imag.LoadBmpFile("pls.bmp");
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -417,7 +594,8 @@ GLfloat norma(int x, int y, int z){
 
 void display(void){
     
-    // FunÃ§Ã£o para tratar da rotaÃ§Ã£o das teclas
+    // Função para tratar da rotação das teclas
+    printf("hhhhaaaa %d\n",ligaLuz);
     worker();
     
     //================================================================= APaga ecran/profundidade
@@ -440,17 +618,12 @@ void display(void){
     
     //-------------------------------------------------------------- observador
     gluLookAt(obsP[0], obsP[1], obsP[2], tx,ty,tz, 0, 1, 0);
-    
+    initLights();
     //gluLookAt(0, 0, -50, 0,0,50, 0, 1, 0);
-    //Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Ã–Objectos/modelos
+    //ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖObjectos/modelos
     drawEixos();
     drawScene();
-    if (ligaLuz)
-        glEnable(GL_LIGHT0);
-    else
-        glDisable(GL_LIGHT0);
     
-    initLights();
     
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Actualizacao
@@ -514,16 +687,6 @@ void keyboard(unsigned char key, int x, int y){
             is_0_pressed=1;
             glutPostRedisplay();
             break;
-        case 'f':
-        case 'F':
-            frenteVisivel=!frenteVisivel;
-            glutPostRedisplay();
-            break;
-        case 'A':
-        case 'a':
-            glutPostRedisplay();
-            break;
-            
         case 'S':
         case 's':
             Vx=tx-obsP[0];
@@ -536,16 +699,6 @@ void keyboard(unsigned char key, int x, int y){
             tx-=Vx/normaVetor*10;
             ty-=Vy/normaVetor*10;
             tz-=Vz/normaVetor*10;
-            glutPostRedisplay();
-            break;
-            
-        case 'e':
-        case 'E':
-            glutPostRedisplay();
-            break;
-            
-        case 'd':
-        case 'D':
             glutPostRedisplay();
             break;
         case 'w':
@@ -566,8 +719,16 @@ void keyboard(unsigned char key, int x, int y){
         case 'l':
         case 'L':
             printf("Carreguei no L\n");
-            ligaLuz=!ligaLuz;
+            //ligaLuz=!ligaLuz;
+            if(ligaLuz==0){
+            	ligaLuz=1;
+            }
+            else{
+            	ligaLuz=0;
+            }
             glutPostRedisplay();
+            /*glutPostRedisplay();
+            glutPostRedisplay();*/
             break;
         case 27:
             exit(0);
@@ -726,5 +887,4 @@ void worker(){
     
     
 }
-
 
