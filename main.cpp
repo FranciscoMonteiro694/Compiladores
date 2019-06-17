@@ -3,17 +3,15 @@
 //  Pratica2
 //
 //  Created by Francisco Monteiro on 03/03/2019.
-//  Copyright © 2019 Francisco Monteiro. All rights reserved.
-#include <windows.h>
+//  Copyright Â© 2019 Francisco Monteiro. All rights reserved.
 #include "stdlib.h"
+#include <stdio.h>
 #include "math.h"
 #include "stdio.h"
-#include <GL\glut.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <GLUT/glut.h>
 #include "RgbImage.h"
-//
-//  main.cpp
-//  Pratica2
-
 
 //--------------------------------- Definir cores
 #define BLUE     0.0, 0.0, 1.0, 1.0
@@ -24,6 +22,8 @@
 #define BLACK    0.0, 0.0, 0.0, 1.0
 #define LARANJA    0.7, 1,1, 1.0
 #define PI         3.14159
+#define frand()            ((float)rand()/RAND_MAX)
+#define MAX_PARTICULAS  2500
 
 //================================================================================
 //===========================================================Variaveis e constantes
@@ -46,6 +46,7 @@ GLdouble larguraTecla=30;
 GLdouble comprimentoTecla=2;
 GLdouble alturaTecla=1;
 static GLint pretas[]={1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0};
+static GLint rodar[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 GLdouble tx=0;
 GLdouble ty=0;
 GLdouble tz=0;
@@ -60,7 +61,30 @@ GLdouble Vx=0;
 GLdouble Vz=0;
 GLdouble Vy=0;
 GLUquadricObj*  bola = gluNewQuadric ( );
+int is_1_pressed = 0;
+int is_2_pressed = 0;
+int is_3_pressed = 0;
+int is_4_pressed = 0;
+int is_5_pressed = 0;
+int is_6_pressed = 0;
+int is_7_pressed = 0;
+int is_8_pressed = 0;
+int is_9_pressed = 0;
+int is_0_pressed = 0;
+typedef struct {
+    float   size;        // tamanho
+    float    life;        // vida
+    float    fade;        // fade
+    float    r, g, b;    // color
+    GLfloat x, y, z;    // posicao
+    GLfloat vx, vy, vz; // velocidade
+    GLfloat ax, ay, az; // aceleracao
+} Particle;
 
+Particle  particula1[MAX_PARTICULAS];
+GLint    milisec = 5000;
+
+GLfloat Teto[4] ={ 0.0, 100, 0.0, 1.0};
 
 //=========================================================== FACES DA MESA
 GLboolean   frenteVisivel=1;
@@ -68,41 +92,191 @@ static GLuint     cima[] = {8,11, 10,  9};
 static GLuint     esquerda[] = {0,1,2,3};
 static GLuint     direita[] = {7,6,5,4};
 
+GLfloat focoCorDif[4] ={ 0.9, 0.9, 0.9, 1.0};
+GLfloat focoCorEsp[4] ={ 1.0, 1.0, 1.0, 1.0};
 
-GLfloat tam=2.0; //estão com largura de 800
+//------------------------------------------------------------ Iluminacao Ambiente
+GLint   dia=0;
+GLfloat intensidade=0.0;
+GLfloat luzGlobalCorAmb[4]={intensidade,intensidade,intensidade,1.0};   //
+
+
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Lanterna (local) - FOCO
+GLint   ligaLuz=0;
+GLfloat rFoco=1.1, aFoco=aVisao;
+GLfloat incH =0.0, incV=0.0;
+GLfloat incMaxH =0.5, incMaxV=0.35;
+GLfloat focoPini[]= { obsP[0], obsP[1], obsP[2], 1.0 };
+GLfloat focoPfin[]= { obsP[0]-rFoco*cos(aFoco), obsP[1], obsP[2]-rFoco*sin(aFoco), 1.0};
+GLfloat focoDir[] = { focoPfin[0]-focoPini[0], 0, focoPfin[2]-focoPini[2]};
+GLfloat focoExp   = 10.0;
+GLfloat focoCut   = 60.0;
+GLfloat localPos[4]   = {20, 50, 20, 1.0};
+GLfloat localCorAmb[4]= { 1.0, 1.0, 1.0, 1.0};
+GLfloat localCorDif[4]= { 1.0, 1.0, 1.0, 1.0};
+GLfloat localCorEsp[4]= { 1.0, 1.0, 1.0, 1.0};
+
+GLfloat tam=2.0; //estï¿½o com largura de 800
 static GLfloat vertices[]={
--40.000000, -0.000000, 15.000000, 40.000000, -0.000000, 15.000000, 40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 15.000000, 40.000000, 0.000000, 15.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000};
+    -40.000000, -0.000000, 15.000000, 40.000000, -0.000000, 15.000000, 40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 0.000000, -40.000000, 0.000000, 15.000000, 40.000000, 0.000000, 15.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 15.000000, -40.000000, 16.000000, 30.000000, 40.000000, 16.000000, 30.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 30.000000, -40.000000, 32.000000, 45.000000, 40.000000, 32.000000, 45.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 45.000000, -40.000000, 48.000000, 60.000000, 40.000000, 48.000000, 60.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 60.000000, -40.000000, 64.000000, 75.000000, 40.000000, 64.000000, 75.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 75.000000, -40.000000, 80.000000, 90.000000, 40.000000, 80.000000, 90.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 90.000000, -40.000000, 96.000000, 105.000000, 40.000000, 96.000000, 105.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 105.000000, -40.000000, 112.000000, 120.000000, 40.000000, 112.000000, 120.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 120.000000, -40.000000, 128.000000, 135.000000, 40.000000, 128.000000, 135.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 135.000000, -40.000000, 144.000000, 150.000000, 40.000000, 144.000000, 150.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 150.000000, -40.000000, 160.000000, 165.000000, 40.000000, 160.000000, 165.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 180.000000, 40.000000, 176.000000, 165.000000, -40.000000, 176.000000, 165.000000};
 
 static GLfloat normais[] = {
-0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, };
+    0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, };
 //------------------------------------------------------------ Cores
 static GLfloat cores[]={
-0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, };
+    0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, };
 
 void initTexturas();
+void initLights();
+void worker();
+
 //================================================================================
 //=========================================================================== INIT
 //================================================================================
 //=========================================================================== INIT
+
+//==========================================================
+void idle(void)
+{
+    
+    glutPostRedisplay();
+    
+}
+
+void iniParticulas(Particle *particula)
+{
+    GLfloat v, theta, phi;
+    int i;
+    GLfloat px, py, pz;
+    GLfloat ps;
+    
+    px = -20.0;
+    py = 200.0;
+    pz = -200.0;
+    ps = 4.5;
+    
+    
+    
+    for(i=0; i<MAX_PARTICULAS; i++)  {
+        
+        //---------------------------------
+        v     = 1*frand()+0.02;
+        theta = 2.0*frand()*M_PI;   // [0..2pi]
+        phi   = frand()*M_PI;        // [0.. pi]
+        
+        particula[i].size = ps ;        // tamanh de cada particula
+        particula[i].x      = 4*frand()-2;    // [-200 200]
+        particula[i].y      = 5*frand();    // [-200 200]
+        particula[i].z      = 80*frand()-40;    // [-200 200]
+        
+        particula[i].vx = 0;  // esferico
+        particula[i].vy = 0.2;
+        particula[i].vz = 0;
+        particula[i].ax = 0.0f;
+        particula[i].ay = 0.0f;
+        particula[i].az = 0.0;
+        
+        particula[i].r = 0.0f;
+        particula[i].g = 1.0f;
+        particula[i].b = 1.0f;
+        particula[i].life = 1.0f;
+        particula[i].fade = 0.010f;    // Em 100=1/0.01 iteracoes desaparece
+    }
+}
+void Timer(int value)
+{
+    iniParticulas(particula1);
+    
+    glutPostRedisplay();
+    glutTimerFunc(milisec ,Timer, 1);   //.. Espera msecDelay milisegundos
+}
+
+void showParticulas(Particle *particula, int sistema) {
+    int i;
+    int numero;
+    
+    numero=(int) (frand()*10.0);
+    
+    for (i=0; i<MAX_PARTICULAS; i++)
+    {
+        
+        glColor4f(particula[i].r,particula[i].g,particula[i].b,particula[i].life);
+        glBegin(GL_QUADS);
+        glTexCoord2d(0,0); glVertex3f(particula[i].x -particula[i].size, particula[i].y -particula[i].size, particula[i].z);
+        glTexCoord2d(1,0); glVertex3f(particula[i].x +particula[i].size, particula[i].y -particula[i].size, particula[i].z);
+        glTexCoord2d(1,1); glVertex3f(particula[i].x +particula[i].size, particula[i].y +particula[i].size, particula[i].z);
+        glTexCoord2d(0,1); glVertex3f(particula[i].x -particula[i].size, particula[i].y +particula[i].size, particula[i].z);
+        glEnd();
+        particula[i].x += particula[i].vx;
+        particula[i].y += particula[i].vy;
+        particula[i].z += particula[i].vz;
+        particula[i].vx += particula[i].ax;
+        particula[i].vy += particula[i].ay;
+        particula[i].vz += particula[i].az;
+        particula[i].life -= particula[i].fade;
+    }
+    
+}
 void inicializa(void)
 {
-    glClearColor(BLACK);        //………………………………………………………………………………Apagar
-    glEnable(GL_DEPTH_TEST);    //………………………………………………………………………………Profundidade
-    glShadeModel(GL_SMOOTH);    //………………………………………………………………………………Interpolacao de cores
+    glClearColor(BLACK);        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Apagar
+    glEnable(GL_DEPTH_TEST);    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Profundidade
+    glEnable(GL_NORMALIZE);
+    //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable( GL_BLEND );
     
-    //glEnable(GL_CULL_FACE);        //………………………………………………………………………………Faces visiveis
-    //glCullFace(GL_BACK);        //………………………………………………………………………………Mostrar so as da frente
+    glShadeModel(GL_SMOOTH);    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Interpolacao de cores
     
-    glVertexPointer(3, GL_FLOAT, 0, vertices); //………………………………………Vertex arrays
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glNormalPointer(GL_FLOAT, 0, normais);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glColorPointer(3, GL_FLOAT, 0, cores);
-    glEnableClientState(GL_COLOR_ARRAY);
-     initTexturas();
+    //glEnable(GL_CULL_FACE);        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Faces visiveis
+    //glCullFace(GL_BACK);        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Mostrar so as da frente
+    
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    initTexturas();
+    //glEnable(GL_LIGHTING); //Ativar esta linha deixa tudo a preto
+    initLights();
+    iniParticulas(particula1);
+    
+}
+
+//========================================================= ILUMINACAO
+void initLights(void){
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ambiente
+    
+    //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzGlobalCorAmb);
+    
+    glLightfv(GL_LIGHT0, GL_POSITION,      localPos );
+    glLightfv(GL_LIGHT0, GL_AMBIENT,       localCorAmb );
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,       localCorDif );
+    glLightfv(GL_LIGHT0, GL_SPECULAR,      localCorEsp );
+    //--------------------------------------------------------Pontual
+    glLightfv(GL_LIGHT2, GL_POSITION,Teto);
+    //    glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION,focoDir );
+    //glLightf (GL_LIGHT1, GL_SPOT_EXPONENT ,focoExp);
+    //  glLightf (GL_LIGHT1, GL_SPOT_CUTOFF,   focoCut);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE,       focoCorDif );
+    glLightfv(GL_LIGHT2, GL_SPECULAR,      focoCorEsp  );
+    glDisable(GL_LIGHT0);
+    if (ligaLuz){
+        printf("wow\n");
+        
+        glEnable(GL_LIGHT2);
+        
+        
+    }
+    
+    else{
+        printf("wow1\n");
+        glDisable(GL_LIGHT2);
+    }
+    
+    
     
     
 }
+
+
+
 
 
 
@@ -132,9 +306,10 @@ void drawEixos()
 void drawBola()
 {
     //------------------------- Bola
-  //  glEnable(GL_TEXTURE_2D);
-   glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,texture[1]);
+    //  glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glBindTexture(GL_TEXTURE_2D,texture[1]);
     glPushMatrix();
     glRotatef (       90, -1, 0, 0);
     glTranslatef ( 2,4,2);
@@ -143,7 +318,7 @@ void drawBola()
     gluQuadricTexture   ( bola, GL_TRUE    );
     gluSphere ( bola, 350, 150, 150);
     glPopMatrix();
-   glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
     
 }
 void drawChao(){
@@ -162,89 +337,117 @@ void drawChao(){
     glPopMatrix();
     //glDisable(GL_TEXTURE_2D);
 }
-void drawCubo2(GLdouble x ,GLdouble y,GLdouble z){
-//	glColor4f(YELLOW);glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,texture[0]);
-	glEnable(GL_TEXTURE_2D);
-	glPushMatrix();
-	glTranslatef(x,y,z);
+void drawCubo2(GLdouble x ,GLdouble y,GLdouble z,int i){
+    
+    //    glColor4f(YELLOW);glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,texture[0]);
+    glEnable(GL_TEXTURE_2D);
+    glPushMatrix();
+    if(rodar[i]==1){
+        
+        glRotatef (       10, -1, 0, 0);
+        //rodar[i]=0; // Com esta linha comentada, ele continua rodado
+    }
+    glTranslatef(x,y,z);
     glScalef(comprimentoEscada, alturaEscada, larguraEscada);
     glBegin(GL_QUADS);
+    
+    // y=1
+    glNormal3f(0,1,0);
     glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, 1.0f, -1.0f);
     glTexCoord2f(1.0f,0.0f);  glVertex3f(-1.0f, 1.0f, -1.0f);
     glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, 1.0f,  1.0f);
     glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f, 1.0f,  1.0f);
+    
+    //y=-1
+    glNormal3f(0,-1,0);
     glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
     glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
     glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
     glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
-    
+    // z=1
+    glNormal3f(0,0,1);
     glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f,  1.0f, 1.0f);
     glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f,  1.0f, 1.0f);
     glTexCoord2f(1.0f,1.0f);  glVertex3f(-1.0f, -1.0f, 1.0f);
     glTexCoord2f(0.0f,1.0f);glVertex3f( 1.0f, -1.0f, 1.0f);
     
     // Back face (z = -1.0f)
+    glNormal3f(0,0,-1);
     glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
     glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
     glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
     glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
     
     // Left face (x = -1.0f)
+    glNormal3f(-1,0,0);
     glTexCoord2f(0.0f,0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
     glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
     glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
     glTexCoord2f(0.0f,1.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
     
     // Right face (x = 1.0f)
-     glTexCoord2f(0.0f,0.0f); glVertex3f(1.0f,  1.0f, -1.0f);
-     glTexCoord2f(1.0f,0.0f);glVertex3f(1.0f,  1.0f,  1.0f);
-     glTexCoord2f(1.0f,1.0f);glVertex3f(1.0f, -1.0f,  1.0f);
-     glTexCoord2f(0.0f,1.0f);glVertex3f(1.0f, -1.0f, -1.0f);
-     glDisable(GL_TEXTURE_2D);
-     glEnd();  // End of drawing color-cube
-     glPopMatrix();
-      glDisable(GL_TEXTURE_2D);
+    glNormal3f(1,0,0);
+    glTexCoord2f(0.0f,0.0f); glVertex3f(1.0f,  1.0f, -1.0f);
+    glTexCoord2f(1.0f,0.0f);glVertex3f(1.0f,  1.0f,  1.0f);
+    glTexCoord2f(1.0f,1.0f);glVertex3f(1.0f, -1.0f,  1.0f);
+    glTexCoord2f(0.0f,1.0f);glVertex3f(1.0f, -1.0f, -1.0f);
+    
+    glDisable(GL_TEXTURE_2D);
+    glEnd();  // End of drawing color-cube
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
 
-void drawCubo(GLdouble x ,GLdouble y,GLdouble z){
-		glColor4f(BLACK);
-		glBindTexture(GL_TEXTURE_2D,texture[2]);
-			glColor4f(BLACK);
-	glEnable(GL_TEXTURE_2D);
-	glPushMatrix();
-		glColor4f(BLACK);
-	glTranslatef(x,y,z);
+void drawCubo(GLdouble x ,GLdouble y,GLdouble z,int i){
+    glColor4f(BLACK);
+    glBindTexture(GL_TEXTURE_2D,texture[2]);
+    glColor4f(BLACK);
+    glEnable(GL_TEXTURE_2D);
+    glPushMatrix();
+    if(rodar[i]==1){
+        glRotatef (       10, -1, 0, 0);
+        //rodar[i]=0; // Com esta linha comentada, ele continua rodado
+    }
+    glColor4f(BLACK);
+    glTranslatef(x,y,z);
     glScalef(comprimentoTecla, alturaTecla, larguraTecla);
     glBegin(GL_QUADS);
+    
+    glNormal3f(0,1,0);
     glTexCoord2f(0.0f,0.0f); glVertex3f( 1.0f, 1.0f, -1.0f);
     glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
     glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0f, 1.0f,  1.0f);
     glTexCoord2f(0.0f,1.0f); glVertex3f( 1.0f, 1.0f,  1.0f);
     
+    glNormal3f(0,-1,0);
     glVertex3f( 1.0f, -1.0f,  1.0f);
     glVertex3f(-1.0f, -1.0f,  1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
     glVertex3f( 1.0f, -1.0f, -1.0f);
     
+    glNormal3f(0,0,1);
     glVertex3f( 1.0f,  1.0f, 1.0f);
     glVertex3f(-1.0f,  1.0f, 1.0f);
     glVertex3f(-1.0f, -1.0f, 1.0f);
     glVertex3f( 1.0f, -1.0f, 1.0f);
     
     // Back face (z = -1.0f)
+    glNormal3f(0,0,-1);
     glVertex3f( 1.0f, -1.0f, -1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
     glVertex3f(-1.0f,  1.0f, -1.0f);
     glVertex3f( 1.0f,  1.0f, -1.0f);
     
     // Left face (x = -1.0f)
+    glNormal3f(-1,0,0);
     glVertex3f(-1.0f,  1.0f,  1.0f);
     glVertex3f(-1.0f,  1.0f, -1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
     glVertex3f(-1.0f, -1.0f,  1.0f);
     
     // Right face (x = 1.0f)
+    glNormal3f(1,0,0);
     glVertex3f(1.0f,  1.0f, -1.0f);
     glVertex3f(1.0f,  1.0f,  1.0f);
     glVertex3f(1.0f, -1.0f,  1.0f);
@@ -255,106 +458,86 @@ void drawCubo(GLdouble x ,GLdouble y,GLdouble z){
 }
 void drawScene(){
     int i,auxx,auxy,auxz,aux,auy,auz;
-    //levar double checkkkk <----------------------------------------------------------------------------------------------------------
-    //glColorPointer(3, GL_FLOAT, 0, cor);     podia ser modificada a cor !
-    /*for(i=0;i<=23;i++){
-        glPushMatrix();
-        esquerda[0]=4*i;
-        esquerda[1]=4*i+1;
-        esquerda[2]=4*i+2;
-        esquerda[3]=4*i+3;
-       if((i/SEGUIDAS)%INTERVALO==0){
-       
-        auxy=vertices[(4*i)*3+1]+alturaTecla;
-        auxx=vertices[(4*i)*3]+larguraEscada/2-((larguraEscada/2)-larguraTecla);
-        auxz=vertices[(4*i)*3+2]-comprimentoEscada/2;
-        glPushMatrix();
-        printf("teste...%d %d %d\n",auxx,auxy,auxz);
-        drawCubo(auxx,auxy,auxz);
-   glPopMatrix();
-}
-    
-	
-        glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, esquerda);auxz+larguraTecla/2-5
-        glPopMatrix();
-    }*/
     auxx=0;
     auxy=0;
     auxz=0;
     for(i=0;i<10;i++){
-    	glColor4f(cores[i],cores[i+1],cores[i+2],0);
-    	drawCubo2(auxx,auxy,auxz);
-    	if(pretas[i]==1){
-    		drawCubo(auxx+comprimentoEscada-comprimentoTecla,auxy+alturaEscada+alturaTecla,auxz+(larguraEscada-larguraTecla));
-    	}
+        glColor4f(cores[i],cores[i+1],cores[i+2],1);
         
-    	auxx+=comprimentoEscada*2;
-    	auxy+= alturaEscada*2;
-    	
-       auy=auxy+alturaTecla;
+        
+        drawCubo2(auxx,auxy,auxz,i);//Desenha normais
+        if(pretas[i]==1){
+            // Desenha pretas
+            drawCubo(auxx+comprimentoEscada-comprimentoTecla,auxy+alturaEscada+alturaTecla,auxz+(larguraEscada-larguraTecla),i);
+        }
+        
+        auxx+=comprimentoEscada*2;
+        auxy+= alturaEscada*2;
+        
+        auy=auxy+alturaTecla;
         aux=auxx+larguraEscada/2-((larguraEscada/2)-larguraTecla);
         auz=auxz-comprimentoEscada/2;
         
-    	//auxz+=comprimentoEscada;
-}
+        //auxz+=comprimentoEscada;
+    }
     glColor4f(LARANJA);
     drawBola();
-   // drawChao();
-
+    // drawChao();
     
     
-    //==================================== PAralelipipedo Amarelo
+    
+    
     
     
     
 }
 
 void initTexturas()
-{   
-	//----------------------------------------- Chao
-		
-	glGenTextures(1, &texture[0]);
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	imag.LoadBmpFile("marmore.bmp");
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);  
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, 
-		imag.GetNumCols(),
-		imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
-		imag.ImageData());  		   
-		
-	//
-	glGenTextures(1, &texture[1]);
-	glBindTexture(GL_TEXTURE_2D, texture[1]);
-	imag.LoadBmpFile("pano3.bmp");
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, 
-		imag.GetNumCols(),
-		imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
-		imag.ImageData());
-		
- 		glGenTextures(1, &texture[2]);
-	glBindTexture(GL_TEXTURE_2D, texture[2]);
-	imag.LoadBmpFile("pls.bmp");
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, 
-		imag.GetNumCols(),
-		imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
-		imag.ImageData()); 
+{
+    //----------------------------------------- Chao
+    
+    glGenTextures(1, &texture[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    imag.LoadBmpFile("marmore.bmp");
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+                 imag.GetNumCols(),
+                 imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 imag.ImageData());
+    
+    //
+    glGenTextures(1, &texture[1]);
+    glBindTexture(GL_TEXTURE_2D, texture[1]);
+    imag.LoadBmpFile("pano3.bmp");
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+                 imag.GetNumCols(),
+                 imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 imag.ImageData());
+    
+    glGenTextures(1, &texture[2]);
+    glBindTexture(GL_TEXTURE_2D, texture[2]);
+    imag.LoadBmpFile("pls.bmp");
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+                 imag.GetNumCols(),
+                 imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 imag.ImageData());
 }
 
 
@@ -369,11 +552,15 @@ GLfloat norma(int x, int y, int z){
 
 void display(void){
     
+    // Funï¿½ï¿½o para tratar da rotaï¿½ï¿½o das teclas
+    printf("hhhhaaaa %d\n",ligaLuz);
+    worker();
+    
     //================================================================= APaga ecran/profundidade
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-   
-
+    
+    
     //================================================================= NAO MOFIFICAR
     glViewport (0, 0, wScreen, hScreen);                                // ESQUECER PoR AGORA
     glMatrixMode(GL_PROJECTION);                                        // ESQUECER PoR AGORA
@@ -389,11 +576,14 @@ void display(void){
     
     //-------------------------------------------------------------- observador
     gluLookAt(obsP[0], obsP[1], obsP[2], tx,ty,tz, 0, 1, 0);
-    
+    initLights();
     //gluLookAt(0, 0, -50, 0,0,50, 0, 1, 0);
-    //…………………………………………………………………………………………………………………………………………………………Objectos/modelos
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Objectos/modelos
     drawEixos();
     drawScene();
+    showParticulas(particula1, 1);
+    
+    
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Actualizacao
     glutSwapBuffers();
@@ -405,16 +595,48 @@ void keyboard(unsigned char key, int x, int y){
     float normaVetor;
     
     switch (key) {
-        case 'f':
-        case 'F':
-            frenteVisivel=!frenteVisivel;
+        case '1':
+            is_1_pressed=1;
+            iniParticulas(particula1);
             glutPostRedisplay();
             break;
-        case 'A':
-        case 'a':
+        case '2':
+            is_2_pressed=1;
             glutPostRedisplay();
             break;
             
+        case '3':
+            is_3_pressed=1;
+            glutPostRedisplay();
+            break;
+        case '4':
+            is_4_pressed=1;
+            glutPostRedisplay();
+            break;
+        case '5':
+            is_5_pressed=1;
+            glutPostRedisplay();
+            break;
+        case '6':
+            is_6_pressed=1;
+            glutPostRedisplay();
+            break;
+        case '7':
+            is_7_pressed=1;
+            glutPostRedisplay();
+            break;
+        case '8':
+            is_8_pressed=1;
+            glutPostRedisplay();
+            break;
+        case '9':
+            is_9_pressed=1;
+            glutPostRedisplay();
+            break;
+        case '0':
+            is_0_pressed=1;
+            glutPostRedisplay();
+            break;
         case 'S':
         case 's':
             Vx=tx-obsP[0];
@@ -429,14 +651,9 @@ void keyboard(unsigned char key, int x, int y){
             tz-=Vz/normaVetor*10;
             glutPostRedisplay();
             break;
-            
-        case 'e':
-        case 'E':
-            glutPostRedisplay();
-            break;
-            
-        case 'd':
-        case 'D':
+        case 'O':
+        case 'o':
+            iniParticulas(particula1);
             glutPostRedisplay();
             break;
         case 'w':
@@ -454,12 +671,28 @@ void keyboard(unsigned char key, int x, int y){
             glutPostRedisplay();
             break;
             //--------------------------- Escape
+        case 'l':
+        case 'L':
+            printf("Carreguei no L\n");
+            //ligaLuz=!ligaLuz;
+            if(ligaLuz==0){
+                ligaLuz=1;
+            }
+            else{
+                ligaLuz=0;
+            }
+            glutPostRedisplay();
+            /*glutPostRedisplay();
+             glutPostRedisplay();*/
+            break;
         case 27:
             exit(0);
             break;
     }
     
 }
+
+
 
 
 
@@ -473,12 +706,6 @@ void teclasNotAscii(int key, int x, int y){
     if(key == GLUT_KEY_DOWN){
         ty-=rVisao*sin(incVisao);
     }
-    
-//    if (obsP[1]>yC)
-//        obsP[1]=yC;
-//    if (obsP[1]<-yC)
-//        obsP[1]=-yC;
-    
     if(key == GLUT_KEY_LEFT)
         aVisao = (aVisao - 0.3) ;
     if(key == GLUT_KEY_RIGHT)
@@ -491,6 +718,61 @@ void teclasNotAscii(int key, int x, int y){
     
     glutPostRedisplay();
     
+}
+void keyboard2(unsigned char key, int x, int y)
+{
+    switch( key ) {
+        case '1':
+            is_1_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '2':
+            is_2_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '3':
+            is_3_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '4':
+            is_4_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '5':
+            is_5_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '6':
+            is_6_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '7':
+            is_7_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '8':
+            is_8_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '9':
+            is_9_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+        case '0':
+            is_0_pressed = 0;
+            printf("Soltei o 1\n");
+            glutPostRedisplay();
+            break;
+    }
 }
 
 
@@ -509,11 +791,58 @@ int main(int argc, char** argv){
     glutSpecialFunc(teclasNotAscii);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+    glutKeyboardUpFunc(keyboard2);
+    glutIdleFunc(idle);
+    //glutTimerFunc(milisec , Timer, 1);
     
     glutMainLoop();
+    
     
     return 0;
 }
 
-
-
+void worker(){
+    if(is_1_pressed==1)
+        rodar[0]=1;
+    if(is_1_pressed==0)
+        rodar[0]=0;
+    if(is_2_pressed==1)
+        rodar[1]=1;
+    if(is_2_pressed==0)
+        rodar[1]=0;
+    if(is_3_pressed==1)
+        rodar[2]=1;
+    if(is_3_pressed==0)
+        rodar[2]=0;
+    if(is_4_pressed==1)
+        rodar[3]=1;
+    if(is_4_pressed==0)
+        rodar[3]=0;
+    if(is_5_pressed==1)
+        rodar[4]=1;
+    if(is_5_pressed==0)
+        rodar[4]=0;
+    if(is_6_pressed==1)
+        rodar[5]=1;
+    if(is_6_pressed==0)
+        rodar[5]=0;
+    if(is_7_pressed==1)
+        rodar[6]=1;
+    if(is_7_pressed==0)
+        rodar[6]=0;
+    if(is_8_pressed==1)
+        rodar[7]=1;
+    if(is_8_pressed==0)
+        rodar[7]=0;
+    if(is_9_pressed==1)
+        rodar[8]=1;
+    if(is_9_pressed==0)
+        rodar[8]=0;
+    if(is_0_pressed==1)
+        rodar[9]=1;
+    if(is_0_pressed==0)
+        rodar[9]=0;
+    
+    
+    
+}
